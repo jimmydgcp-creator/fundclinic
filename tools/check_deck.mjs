@@ -106,8 +106,17 @@ const hasBoth = /animation\s*:[^;"'}]*\bboth\b/.test(html);
 ok(!hasBoth || opacityReset, '无 animation…both, 或打印块已复位 opacity', hasBoth && !opacityReset ? '有 both 但打印块没有 opacity:1!important' : '');
 const hasTransparentText = /-webkit-text-fill-color\s*:\s*transparent/.test(html);
 ok(!hasTransparentText || gradReset, '无透明文字填充, 或打印块已回落为实色', hasTransparentText && !gradReset ? '有透明填充但打印块没回落' : '');
-ok(deckReleased, '打印块拆掉了"一次只显示一页"的容器(.deck 的 100vh/overflow:hidden)',
-  deckReleased ? '' : '不拆的话 --print-to-pdf 只能得到 1 页');
+/* "一次只显示一页"的锁定容器只有**新版 T6 演示稿**才有(.deck{height:100vh;overflow:hidden})。
+   模板版(server/deck.mjs)根本没有 .deck: 九张 .slide 顺序排下来, 打印块不需要解任何东西。
+   所以这条不能无条件要求 —— 否则模板版永远假失败(实测 005825 模板版: PDF 9 页 == 幻灯片 9 张, 打印完全正常)。
+   真正的兜底判据是 E 段的"PDF 页数 == 幻灯片数"; 这条只是提前把根因指出来。 */
+const deckLocked = /class="deck"/.test(html) && /\.deck\s*\{[^}]*height\s*:\s*100vh/.test(html);
+if (deckLocked) {
+  ok(deckReleased, '打印块拆掉了"一次只显示一页"的容器(.deck 的 100vh/overflow:hidden)',
+    deckReleased ? '' : '不拆的话 --print-to-pdf 只能得到 1 页');
+} else {
+  console.log('  SKIP  拆 .deck 容器 —— 这份演示稿没有 .deck 锁定容器(模板版按 .slide 顺序排版), 由"PDF 页数==幻灯片数"兜底');
+}
 
 /* A2 的这几条是**旧模板版**专有的(主题按钮 / localStorage 记忆 / 视图 CSS 分界标记)。
    新版 T6 演示稿靠 runtime.js 的 T 键换肤、没有按钮也没有那个标记 —— 硬套只会刷一屏假失败。
