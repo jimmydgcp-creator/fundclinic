@@ -48,9 +48,12 @@ if (PDFTOTEXT) {
   fs.unlinkSync(txtFile);
   pdfPages = txt.split('\f').filter(s => s.trim()).length;
   pdfChars = txt.replace(/\s/g, '').length;
-  const must = ['基金复诊台', '76.80%', '192.89%', '中期进度汇报', '现场演示', '014564', 'selftest'];
+  /* 关键内容清单必须跟着展示页走: 2026-10-10 删掉了「014564 联接基金报警」那张专页,
+     它独有的 192.89% / 373% 也随之消失 —— 不清掉的话这里会报"关键内容缺失"的假失败。
+     (014564 这个代码本身仍然在: 第 5 页那张 6 只基金表里它是被阻断的那一行, 卡点页也提到它。) */
+  const must = ['基金复诊台', '76.80%', '中期进度汇报', '现场演示', '014564', 'selftest', '请人打勾'];
   missing = must.filter(s => !txt.includes(s));
-  console.log('  页数 ' + pdfPages + '（应为 14）· 可见字 ' + pdfChars);
+  console.log('  页数 ' + pdfPages + '（应为 13 = 展示页张数）· 可见字 ' + pdfChars);
   console.log('  ' + (missing.length === 0 ? '✓' : '✗') + ' 关键内容齐全' + (missing.length ? ' 缺: ' + missing.join(', ') : ''));
 } else {
   console.log('  (没有 pdftotext, 跳过 PDF 文本自检)');
@@ -179,6 +182,12 @@ for (const [label, ok] of checks) console.log('  ' + (ok ? '✓' : '✗') + ' ' 
 console.log('  条目清单:');
 for (let i = 0; i < names.length; i++) console.log('      ' + names[i] + '   ' + sizes[i] + ' B');
 
-const allOk = checks.every(c => c[1]) && missing.length === 0 && (pdfPages === null || pdfPages === 14);
+/* PDF 页数必须等于**展示页张数**, 而这个数字从 index.html 里数出来 —— 不再写死 14:
+   2026-10-10 删掉一页(14→13)之后, 写死的期望值立刻变成一条假失败。 */
+const slideCount = (fs.readFileSync(path.join(SRC_DIR, 'index.html'), 'utf8').match(/<section[^>]*class="[^"]*\bslide\b/g) || []).length;
+const pageOk = pdfPages === null || pdfPages === slideCount;
+console.log('  展示页张数 ' + slideCount + (pdfPages === null ? '' : ' · PDF ' + pdfPages + ' 页'));
+
+const allOk = checks.every(c => c[1]) && missing.length === 0 && pageOk;
 console.log('\n' + (allOk ? '全部通过。可以直接上传 ' + path.basename(ZIP) : '有检查未通过, 先别上传。'));
 process.exit(allOk ? 0 : 1);

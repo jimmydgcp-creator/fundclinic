@@ -29,7 +29,10 @@ const themeCss = read(path.join(ROOT, 'skills/html-ppt/assets/themes/corporate-c
 const kitCss = read(path.join(ROOT, 'skills/deck-kit.css'));
 
 const shot = (f) => 'data:image/png;base64,' + fs.readFileSync(path.join(ROOT, 'tools/_smoke', f)).toString('base64');
-const SHOT_INPUT = shot('view_input.png');
+/* 第 3 页用**公网形态**的截图: 那页讲的就是"别人点开就能用"。
+   原来用的 view_input.png 是 file:// 离线渲染的, 图里带着"当前是离线模式 / 跨域会被拦"的提示,
+   放在讲公网的页面上自相矛盾(2026-10-10 换掉)。报告页那张仍然是本机渲染的, 内容一样。 */
+const SHOT_INPUT = shot('live_input.png');
 const SHOT_REPORT = shot('view_report.png');
 
 /* ------------------------------------------------------------------ 版面 CSS */
@@ -94,6 +97,12 @@ table.t th,table.t td{padding:6.5px 9px;text-align:left;border-bottom:1px solid 
 table.t thead th{font-size:11px;letter-spacing:.06em;color:var(--text-3);font-weight:700;
   border-bottom:1.5px solid var(--border-strong);white-space:nowrap}
 table.t tbody tr:last-child td{border-bottom:none}
+/* 内容多的页专用: 8 行"改了什么"表 + 脚注要一起挤进 720px。
+   不加这个类的话, 第 10 页的 .body 会比容器高 65px —— .deck 是 overflow:hidden,
+   底部就被剪掉, 视觉上就是"表格末行 / 脚注 / 左下角页眉"叠在一起(2026-10-10 用户报的就是这个)。 */
+table.t.sm{font-size:11.8px}
+table.t.sm th,table.t.sm td{padding:4px 8px;line-height:1.45}
+table.t.sm thead th{font-size:10.5px}
 table.t td.n,table.t th.n{text-align:right;white-space:nowrap}
 table.t tr.hl-bad td{background:color-mix(in srgb,var(--bad) 7%,transparent)}
 table.t tr.hl-good td{background:color-mix(in srgb,var(--good) 6%,transparent)}
@@ -228,22 +237,22 @@ S('', '定位 · 和场景确认一致', `
 S('tight', '进度说明 · 现在能不能跑起来', `
   <div class="hd">
     <div class="kicker">进度说明 ①</div>
-    <h2>能跑。双击一个文件，10 秒出全套交付物</h2>
-    <div class="sub">Windows 双击 <code>.bat</code>，macOS 双击 <code>.command</code>；另有<b>零依赖单文件版</b>兜底（不用 Node、不用网、不用 Key）</div>
+    <h2>能跑。双击一个文件，出全套交付物</h2>
+    <div class="sub">本机：Windows 双击 <code>.bat</code>、macOS 双击 <code>.command</code>；<b>公网：打开一条链接输 6 位代码就行</b>（不用装 Node、不用 VPN、不用填 Key）；另有<b>零依赖单文件版</b>兜底（不用 Node、不用网、不用 Key）</div>
   </div>
   <div class="body row">
     <div style="flex:0 0 372px;display:flex;flex-direction:column;gap:11px">
       <div class="steps">
-        <div class="step"><div class="num">1</div><div class="tx"><b>双击启动</b> → 浏览器自动打开本地页面</div></div>
-        <div class="step"><div class="num">2</div><div class="tx"><b>输入 6 位基金代码 + 自己的 API Key</b></div></div>
+        <div class="step"><div class="num">1</div><div class="tx"><b>双击启动</b>（或直接打开公网地址）→ 浏览器里就是完整页面</div></div>
+        <div class="step"><div class="num">2</div><div class="tx"><b>输入 6 位基金代码</b><span class="dim">（本机版再填自己的 Key；公网页的 Key 在服务端，访客不用填）</span></div></div>
         <div class="step"><div class="num">3</div><div class="tx"><b>探路（约 0.5 秒）</b>：只抓概况/历任经理/报告期网格，把 SOP §0 的<b>八格口径确认表</b>填好候选值摆出来</div></div>
-        <div class="step"><div class="num">4</div><div class="tx"><b>人确认口径</b> → 点「按此口径开跑」（约 10 秒）</div></div>
+        <div class="step"><div class="num">4</div><div class="tx"><b>人确认口径</b> → 点「按此口径开跑」<span class="dim">（预置样例约 10 秒；真去抓六类来源时约 6–7 分钟）</span></div></div>
       </div>
       <div class="c acc" style="padding:11px 14px">
         <p style="font-size:12.5px"><b>产出 9 件：</b>复盘报告 · 对外版 · 演示稿（模板版）· <b>演示稿（AI 深度版）</b> · 两个 PDF · 结论卡 · 错误检查记录 · 来源清单 · 底稿</p>
       </div>
       <div class="c soft" style="padding:10px 14px">
-        <p style="font-size:12px"><b>回归测试：</b><span class="ok">selftest 76/76</span> · <span class="ok">smoke_page 37/37</span> · <span class="ok">server_http 13/13</span></p>
+        <p style="font-size:12px"><b>回归测试：</b><span class="ok">selftest 76/76</span> · <span class="ok">smoke_page 41/41</span> · <span class="ok">审计页两形态 25/25</span> · <span class="ok">公网验收全绿</span></p>
       </div>
     </div>
     <div class="shot" style="flex:1;height:400px;position:relative">
@@ -273,7 +282,7 @@ S('tight', '进度说明 · 成果长什么样', `
         <b>每个判断带推翻条件：</b>"若下一期出现以下任一情况，本判断降级"。</p>
       </div>
       <div class="c acc-g" style="padding:12px 15px">
-        <p style="font-size:12.5px"><b>报告 11 节固定骨架</b>（SOP §5.3）：先说结论 → 口径与证据边界 → 总成绩也看代价 → 集中度与骨架 → 轮动主线 → 方法论拆解 → 案例审计 → 最新一期 → 跟踪与证伪 → 附录。</p>
+        <p style="font-size:12.5px"><b>报告固定章节骨架（SOP §5.3，10–11 节）</b>：先说结论 → 口径与证据边界 → 总成绩也看代价 → 集中度与骨架 → 轮动主线 → 方法论拆解 → 案例审计 → 最新一期 → 跟踪与证伪 → 附录。</p>
       </div>
     </div>
   </div>
@@ -442,64 +451,30 @@ S('tight', '进度说明 · 工具抓出了我们自己的错', `
   </div>
 `);
 
-/* ------------------------------------------------------- 09 014564 报警 */
-S('tight', '进度说明 · 没见过的数据形态也会报警', `
-  <div class="hd">
-    <div class="kicker">进度说明 ⑤ · 本周新发现</div>
-    <h2>换一只"联接基金"，它自己报了错并拒绝出结论</h2>
-    <div class="sub">014564 天弘创新药精选50ETF联接A · 贺雨轩 · 2023Q2–2026Q2 · 13 个报告期</div>
-  </div>
-  <div class="body row">
-    <div style="flex:0 0 396px;display:flex;flex-direction:column;gap:11px">
-      <div class="kpi">
-        <div class="k"><div class="n b" style="font-size:26px">192.89%</div><div class="l">前十合计（2023Q2）</div><div class="s">逻辑上不可能 &gt; 100%</div></div>
-        <div class="k"><div class="n b" style="font-size:26px">373%</div><div class="l">前十合计（2024Q3）</div><div class="s">12 期全部超过 100%</div></div>
-      </div>
-      <div class="c acc-b" style="padding:12px 15px">
-        <p style="font-size:12.5px"><b>现象：</b>第三方持仓权重<b>串列</b>。2023Q2 排名第 1 的康宁杰瑞写 1.89%、排名第 2 的药明康德写 <b>60%</b>；单股最高出现 <b>99%</b>。</p>
-      </div>
-      <div class="c soft" style="padding:12px 15px">
-        <p style="font-size:12.5px"><b>现状：</b>已确认是第三方接口在这只基金上的数据串列 / 量纲问题，<b>尚未定位到具体哪一列</b>，暂不纳入正式交付。</p>
-      </div>
-    </div>
-    <div style="flex:1;display:flex;flex-direction:column;gap:10px">
-      <div class="q"><div class="who">18 条质检 · A1 单股权重 ≤ 10%（双十约束） → FAIL</div>
-        「发现 <b>96 条</b>超过 10.5% 的记录，幅度过大，权重口径很可能不是"占净值比"（也可能是数据串列）。」</div>
-      <div class="q"><div class="who">18 条质检 · B2 前十合计 ≤ 100% → FAIL</div>
-        「有 <b>12 期</b>前十合计超过 100%，<b>逻辑上不可能</b>（权重为占净值比）。」</div>
-      <div class="q"><div class="who">官方 PDF 逐行对账（独立通道） → 13/13 期不一致</div>
-        「药明康德(603259)：官方 0.6% vs 第三方 60%（差 59.40pp）」… 13 期全部报出同量级偏差</div>
-      <div class="c acc-b" style="padding:12px 15px">
-        <p style="font-size:13.5px;color:var(--text-1)"><b>最终裁决：fail —— 有 2 项必须处理（阻断）。</b>报告仍然生成，但被明确标记为阻断、不得对外交付。</p>
-      </div>
-    </div>
-  </div>
-`);
-
 /* ------------------------------------------------------- 10 改了什么 */
 S('tight', '和场景确认比，改了什么', `
-  <div class="hd">
+  <div class="hd" style="margin-bottom:14px">
     <div class="kicker">和场景确认比，改了什么，为什么</div>
-    <h2>方向没变，把三件事做实了</h2>
-    <div class="sub">场景确认（9/22 提交）定的是"报告或材料自动生成的网页项目"；之后的修改都在往同一个方向拧：<b>从"一个能出报告的网页"→"别人不用装任何东西就能用、而且自己会发现自己算错的东西"。</b></div>
+    <h2>方向没变：把"别人不用装任何东西就能用"做实了</h2>
+    <div class="sub" style="margin-top:5px">场景确认（9/22）定的是"报告或材料自动生成的网页项目"；八条改动都在往同一个方向拧：<b>从"一个能出报告的网页"→"别人点开就能用、而且自己会发现自己算错的东西"。</b></div>
   </div>
   <div class="body">
-    <table class="t">
-      <thead><tr><th style="width:34px">#</th><th style="width:290px">改了什么</th><th>为什么（都是跑出来的理由，不是偏好）</th></tr></thead>
+    <table class="t sm">
+      <thead><tr><th style="width:26px">#</th><th style="width:232px">改了什么</th><th>为什么（都是跑出来的理由，不是偏好）</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td><b>AI 模块：可选 → 必选</b></td><td><b>主题归类没有公开接口可替代</b>——天天基金、巨潮都不给"主题"字段。缺了它，"主题坚守型 / 主题漂移型"两条形态规则直接跳过：实测 519191 缺主题只能判成"逐步分散型"，补上才判出"主题坚守型"。</td></tr>
-        <tr><td>2</td><td><b>加"探路 → 口径确认表 → 开跑"两阶段</b></td><td>SOP §0 原话是「<b>任何一格留空不许开跑</b>」。原版靠 AI 口头问，现在把候选值摆出来让人点。现实价值在<b>共管期</b>：005827 现任经理 2026-05-23 才接手（仅 1 期），引擎<b>建议</b>改用张坤那一任（30 期），但最终由人拍板，不再偷偷替你换。</td></tr>
-        <tr><td>3</td><td><b>演示稿：1 份 → 2 份，新增 AI 深度版</b></td><td>第一版版式写死、只把数字填进槽位，9 页长得一样、一眼是报表。现在大模型<b>先分镜、再逐页单独成文</b>（页数由内容决定，每页标题是一句主张）。<b>保底</b>：大模型失败时深度版跳过、模板版照常产出。</td></tr>
-        <tr><td>4</td><td><b>交付形态：发压缩包 → 发一个文件</b></td><td>组员在 macOS 上双击 <code>.bat</code> 打不开（<code>.bat</code> 是 Windows 专用）。现在三件套：Windows <code>.bat/.cmd</code>、macOS <code>.command</code>（LF 换行 + 无 BOM + 可执行位 755，且<b>启动时自己补 PATH</b>——Finder 双击的程序不读 <code>~/.zshrc</code>）、零依赖单文件 HTML。</td></tr>
-        <tr><td>5</td><td><b>报告与演示稿改成"能直接发给别人"</b></td><td>原版引用网络字体和外部资源，发到别人电脑上就散架。现在单文件 HTML（全内联、断网可看）、字体换本机字体栈、删掉会在 PDF 里渲染成空白的渐变字，另出 PDF 可直接发微信。</td></tr>
-        <tr><td>6</td><td><b>收益口径与区间起点都改了</b></td><td>累计净值是加法量、做比值无意义（改分红再投指数，偏差 15.94pp → 1.07pp）；起点取"期末"会漏掉第一个季度（519191 从 76.77% 虚增到 85.97%，改"期初"后回到 76.80%，逐季对账 22/22 期）。</td></tr>
-        <tr class="hl-good"><td>7</td><td><b>新增：从"本地点开"改成"公网链接人人可点"</b> <span class="b b-ok">已上线</span></td><td>平台说明写着「至少要能在本地运行，<b>部署到公网加分</b>」。原计划 10/20 前上线，<b>实际 10/10 就上线了</b>：<code>https://fundclinic.onrender.com</code>（Render 免费档 · Docker 构建）。访客只输 6 位基金代码，<b>不用装 Node、不用 VPN</b>；大模型 Key 由<b>服务端</b>持有。另加了三道用量闸门（每台 3 次/小时、8 次/天；全站 40 次/天）兜住花费。</td></tr>
-        <tr class="hl-good"><td>8</td><td><b>把"请人打勾"从页面上拿掉</b> <span class="b b-ok">10/10</span></td><td>质检页原来有：12 处抽检每条的"核完"勾选框、门禁 3 三查三个勾（不勾满不让导出）、一整套"复制提示词 / 粘贴大模型返回的 JSON"的人工中转，公网页面上还有一整块"填 API Key"。问题不在麻烦，在于<b>打勾不产生任何证据</b> —— 它不改数据、不改报告，只把导出按钮从灰变亮，证明的是"有人点过鼠标"，而访客也不是这次复盘的负责人。改成：18 条规则 + 12 处回原文抽检清单实际结算，结果直接显示；Key 表单在服务端持有 Key 时整块收掉。只有在<b>没有服务端</b>的离线单文件版里才保留人工中转 —— 那条路上 AI 真的跑不了。</td></tr>
+        <tr><td>1</td><td><b>AI 模块：可选 → 必选</b></td><td>"主题"没有公开接口可替代（天天基金、巨潮都不给这个字段）。缺了它，「主题坚守型 / 主题漂移型」两条形态规则直接跳过 —— 519191 实测只能判成"逐步分散型"，补上才判出"主题坚守型"。</td></tr>
+        <tr><td>2</td><td><b>加「探路 → 口径确认表 → 开跑」两阶段</b></td><td>SOP §0 原话是「<b>任何一格留空不许开跑</b>」。价值在<b>共管期</b>：005827 现任经理 2026-05-23 才接手（仅 1 期），引擎<b>建议</b>改用张坤那一任（30 期），但最终由人拍板，不偷偷替你换。</td></tr>
+        <tr><td>3</td><td><b>演示稿 1 份 → 2 份（新增 AI 深度版）</b></td><td>第一版 9 页长得一样、一眼是报表。现在大模型<b>先分镜、再逐页单独成文</b>（页数与标题由内容决定）。<b>保底</b>：深度版失败时跳过，模板版照常产出。</td></tr>
+        <tr><td>4</td><td><b>交付形态：发压缩包 → 发一个文件</b></td><td>组员在 macOS 上双击 <code>.bat</code> 打不开。现在三件套：Windows <code>.bat/.cmd</code>、macOS <code>.command</code>（LF 换行 + 无 BOM + 可执行位 755，启动时自己补 PATH）、零依赖单文件 HTML。</td></tr>
+        <tr><td>5</td><td><b>报告与演示稿改成"能直接发给别人"</b></td><td>原版引用网络字体与外部资源，发到别人电脑上就散架。现在单文件 HTML（全内联、断网可看）、字体换本机字体栈、删掉会在 PDF 里渲染成空白的渐变字，另出 PDF 可直接发微信。</td></tr>
+        <tr><td>6</td><td><b>收益口径与区间起点都改了</b></td><td>累计净值是<b>加法</b>量、做比值无意义（改分红再投指数：偏差 15.94pp → 1.07pp）；起点取"期末"会漏掉第一个季度（519191 从 76.77% 虚增到 85.97%，改"期初"后回到 76.80%，逐季对账 22/22 期）。</td></tr>
+        <tr class="hl-good"><td>7</td><td><b>新增：公网链接人人可点</b> <span class="b b-ok">10/10 已上线</span></td><td>平台说明写着「至少要能在本地运行，<b>部署到公网加分</b>」，原计划 10/20，<b>实际 10/10 就上线了</b>：<code>https://fundclinic.onrender.com</code>（Render 免费档 · Docker）。访客只输 6 位代码，<b>不用装 Node、不用 VPN、不用填 Key</b>（Key 由服务端持有）。另加三道用量闸门（每台 3 次/小时、8 次/天；全站 40 次/天）兜住花费。</td></tr>
+        <tr class="hl-good"><td>8</td><td><b>把"请人打勾"从页面上拿掉</b> <span class="b b-ok">10/10</span></td><td>质检页原来有 12 处抽检的"核完"勾选框、门禁三查三个勾（不勾满不让导出）、一整套人工中转工具箱，公网页上还有一整块"填 API Key"。问题不在麻烦，在于<b>打勾不产生任何证据</b> —— 它不改数据、不改报告，只把导出按钮从灰变亮。改成 18 条规则 + 12 处回原文抽检清单<b>实际结算、结果直接显示</b>。</td></tr>
       </tbody>
     </table>
   </div>
-  <div class="c soft" style="margin-top:12px;padding:10px 16px">
-    <p style="font-size:12.5px"><b>没改的（也说一下）：</b>项目名、类型单选、四类目标用户、"脚本算数 / 大模型写字 / 人把关"的分工、三道人机门禁 —— 门禁本身一条没删（人该定的口径、该拍的判断方向都留着），改的只是它的形态：从"请你打勾"改成"机器结算 + 结果直接显示"（见第 8 条）。</p>
+  <div class="c soft" style="margin-top:10px;padding:9px 14px">
+    <p style="font-size:12px"><b>没改的：</b>项目名、类型单选、四类目标用户、「脚本算数 / 大模型写字 / 人把关」的分工、三道人机门禁 —— 门禁<b>一条没删</b>（人该定的口径、该拍的判断方向都还在），改的只是形态：从"请你打勾"改成"机器结算 + 结果直接显示"（第 8 条）。</p>
   </div>
 `);
 
@@ -517,9 +492,9 @@ S('tight', '主要问题 · 卡在哪里，需要什么帮助', `
       <b>需要帮助：</b>① 课堂对"部署到公网"是否另有要求 ② <b>全站每天 40 次这个额度定多少合适</b>（真钱，想听老师意见）。</p>
     </div>
     <div class="c acc" style="padding:14px 16px">
-      <h4>2 · 大模型 Key 是每人自备的</h4>
-      <p>AI 模块必选，一次完整跑一只基金要调很多次大模型（最长单步 87 秒），成本按量计。<br>
-      <b>需要帮助：</b>课堂现场演示用谁的 Key、是否允许把 Key 填在教师机浏览器里（我们的设计：Key 不落盘、不进日志、不出现在 URL）。<br>
+      <h4>2 · 大模型 Key 与花费（形态已从"每人自备"改成"站方出"）</h4>
+      <p>AI 模块必需，一次完整跑一只基金要调多轮大模型（单次约 5.4 万 token）。为满足"发条链接谁都能用"，<b>Key 已放到服务端环境变量</b>，访客不用填；代价是花费完全由我们承担，所以加了三道闸门。<br>
+      <b>需要帮助：</b><b>全站每天 40 次这个额度定多少合适</b>（是真钱，想听老师意见）；另外课堂现场演示若要用公网站，希望提前确认是否允许用我们的 Key 公开跑。<br>
       <b>备选：</b>离线单文件版兜底（不用 Key、不用网）。</p>
     </div>
     <div class="c acc" style="padding:14px 16px">
@@ -531,7 +506,7 @@ S('tight', '主要问题 · 卡在哪里，需要什么帮助', `
       <h4>4 · 方法本身有一条边界，想请教怎么补</h4>
       <p>公募季报<b>只披露前十大</b>，且是<b>期末快照</b>——期间怎么买卖看不见。这决定了我们只能做"期末结构 + 前后两期对比"，做不了"真实换手"。我们在每份报告里都写明了这条边界。<br>
       <b>需要帮助：</b>有没有公开渠道能拿到季报之外更像"过程"的证据？或者公认的做法来处理"期末快照"这个局限？<br>
-      <span class="dim">另：中期是全员上台、每组 5 分钟，也想请老师给个节奏建议——我们暂定「痛点 30 秒 → 现场演示 2 分钟 → AI 模块 1 分钟 → 结果与下一步 1.5 分钟」。</span></p>
+      <span class="dim">另：中期是全员上台、每组 5 分钟，也想请老师给个节奏建议——我们暂定「定位 30 秒 → 现在真的能跑 85 秒 → AI 怎么防错 85 秒 → 改动与卡点 70 秒 → 收尾 10 秒」，<b>以展示页为主，公网站只插 20 秒</b>（输入代码那一跑要 6–7 分钟，课堂上等不起）。</span></p>
     </div>
   </div>
 `);
@@ -557,8 +532,8 @@ S('tight', '接下来做什么、预计什么时候做完', `
         <div class="box"><div class="d">10/25 – 11/05</div><div class="t">横向对比 + 边界页</div>
         <div class="x">用结论卡做对比页（按形态标签筛选）；补合规与边界页；修 014564 的数据源问题<br><span class="b b-blue">目标：5–8 只基金可比</span></div></div></div>
       <div class="st"><div class="ln"><span style="width:0"></span></div><div class="dot" style="background:var(--good)"></div>
-        <div class="box" style="border-color:var(--good)"><div class="d" style="color:var(--good)">11/06 – 11/10</div><div class="t">终展排练与提交</div>
-        <div class="x">15 分钟（12 讲 + 3 问答），全员上台分工</div></div></div>
+        <div class="box" style="border-color:var(--good)"><div class="d" style="color:var(--good)">11/10 前提交 · 11/11 第 9 次课</div><div class="t">终展 <span class="b b-ok">每组 10 分钟</span></div>
+        <div class="x">11/10 23:59 前提交终展材料（含<b>演示视频或截图</b>、<b>组内分工表</b>）；11/11 第 9 次课每组 10 分钟、含问答与换场，全员上台</div></div></div>
     </div>
     <div class="c soft" style="margin-top:20px;padding:12px 16px">
       <p style="font-size:13px"><b>一句话：</b>功能主线已经跑通；剩下的是「<b>让别人也能用</b>」和「<b>多覆盖几种基金形态</b>」。<b>交付物不是 PPT，是一个别人点开就能用的网页。</b></p>
