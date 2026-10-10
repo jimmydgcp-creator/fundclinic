@@ -12,10 +12,30 @@
  *   node tools/test_deployed.mjs https://xxx.onrender.com --run 519191     # 真跑一只(花 token, 默认不跑)
  *   node tools/test_deployed.mjs http://127.0.0.1:8787                     # 本机也能用, 方便先自测脚本
  */
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
 const args = process.argv.slice(2);
 const BASE = (args.find(a => /^https?:\/\//.test(a)) || '').replace(/\/$/, '');
 const runIdx = args.indexOf('--run');
 const RUN_CODE = runIdx >= 0 ? (args[runIdx + 1] || '') : '';
+
+/* 渲染检查用的无头浏览器。找不到就 SKIP —— 这台机器上没有, 不等于线上有问题。 */
+const EDGE = [
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'
+].find(p => fs.existsSync(p));
+function edgeDom(url) {
+  try {
+    return execFileSync(EDGE, [
+      '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
+      '--user-data-dir=' + path.join(os.tmpdir(), 'fc-deployed-dom'),
+      '--virtual-time-budget=15000', '--window-size=1440,1400', '--dump-dom', url
+    ], { encoding: 'utf8', maxBuffer: 200 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+  } catch (e) { return ''; }
+}
 
 if (!BASE) { console.error('用法: node tools/test_deployed.mjs <https://公网地址> [--run 519191]'); process.exit(2); }
 
@@ -107,9 +127,40 @@ async function j(url, opt) {
     soft(r.status !== 429, '当前额度过得去(不是一上来就 429)', r.status === 429 ? '额度已经用完了' : '');
   } catch (e) { ok(false, '闸门探测请求异常', e.message); }
 
-  /* ---------------- 5. 真跑一只(可选, 花 token) ---------------- */
+  /* ---------------- 5. 公网页面的"长相"(渲染后才知道, 光看接口看不出来) ---------------- */
+  sec('5. 公网页面的长相 —— 访客到底看到什么');
+  /* 为什么必须真渲染: "站方出 Key" 这件事在接口层只有一个 hasKey=true,
+     而访客关心的是**页面上还有没有填 Key 的地方**、质检页还在不在要人打勾。
+     这两样只有把页面跑起来量 DOM 才知道 —— 接口全绿但页面上摆着一整块 Key 表单, 是发生过的。 */
+  if (!EDGE) {
+    console.log('  SKIP  本机没找到 Edge/Chrome, 跳过渲染检查(fetch 检查已覆盖接口层)');
+  } else if (!(h && h.body && h.body.llm && h.body.llm.hasKey)) {
+    console.log('  SKIP  服务端没有 Key, 不在"站方出 Key"形态上');
+  } else {
+    const dom = edgeDom(BASE + '/#audit');
+    const text = dom.replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<style[\s\S]*?<\/style>/g, ' ')
+      .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    const flat = text.replace(/\s+/g, '');
+    const tag = id => (new RegExp('<[a-z]+[^>]*id="' + id + '"[^>]*>').exec(dom) || [''])[0];
+    if (!dom) {
+      ok(false, '公网首页渲染失败(拿不到 DOM)', '');
+    } else {
+      ok(/hidden/.test(tag('ai-block')), '访客看不到"填 API Key"的表单(整块 hidden)', tag('ai-block').slice(0, 70));
+      ok(!/hidden/.test(tag('server-key-note')), '"AI 模块由本站服务端提供"的说明已展开');
+      ok(flat.includes('AI模块由本站服务端提供') && flat.includes('不用申请'), '写明了"由本站服务端提供, 不用申请 Key"');
+      ok(flat.includes('填6位基金代码后即可点') || flat.includes('探路约1秒'), '提示语只要求填基金代码');
+      ok(text.includes('本次核查结果'), '质检页显示"本次核查结果"(直接给结论, 不要人打勾)');
+      ok(!text.includes('核完'), '质检页没有"核完"勾选框');
+      ok(!text.includes('手动中转'), '公网形态没有人工中转工具箱');
+      ok(!text.includes('直连大模型执行'), '公网形态没有"直连大模型执行"');
+      ok(!text.includes('确认判断方向'), '报告页没有"确认判断方向"按钮');
+      ok(text.includes('AI 由服务端调用, 你不需要做任何操作'), 'AI 段写明由服务端调用');
+    }
+  }
+
+  /* ---------------- 6. 真跑一只(可选, 花 token) ---------------- */
   if (RUN_CODE) {
-    sec('5. 真跑一只: ' + RUN_CODE + '(花 token, 用了 --run 才跑)');
+    sec('6. 真跑一只: ' + RUN_CODE + '(花 token, 用了 --run 才跑)');
     const t1 = Date.now();
     try {
       const r = await fetch(BASE + '/api/run', {
@@ -162,7 +213,7 @@ async function j(url, opt) {
       }
     } catch (e) { ok(false, '真跑异常', e.message); }
   } else {
-    sec('5. 真跑一只');
+    sec('6. 真跑一只');
     console.log('  SKIP  没给 --run <代码>; 要跑就加参数(会消耗 token 与一次额度)');
   }
 
