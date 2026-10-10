@@ -1721,7 +1721,7 @@ window.FC = window.FC || {};
     S.push({
       id: 'conc', title: '四、持仓集中度与骨架',
       html:
-        bar('前十合计权重', m.conc.series.map(function (x) { return { label: x.period, value: x.value }; }), 100) +
+        bar('前十合计权重', m.conc.series.map(function (x) { return { label: x.period, value: x.value }; })) +
         '<table class="tbl"><tbody>' +
         row('前十合计(均值)', num(fx(m.conc.avg), '%', 'fact', '季度汇总') + ' · 区间 ' + fx(m.conc.min) + '–' + fx(m.conc.max) + '%') +
         row('趋势', esc(m.conc.trend) + (m.conc.slope !== null ? '(斜率 ' + fx(m.conc.slope, 2) + 'pp/期)' : '')) +
@@ -1916,27 +1916,41 @@ window.FC = window.FC || {};
   function methodCard(title, body) { return '<div class="mcard"><h4>' + esc(title) + '</h4><p>' + body + '</p></div>'; }
 
   /** 带纵坐标轴 + 悬停显示的柱状图(纯 CSS, 不依赖脚本, 离线与打印都可用)。
-   *  为什么要加轴: 只有相对高度看不出"到底是多少", 用户明确提出过这一点。 */
-  function bar(title, series, max) {
+   *  为什么要加轴: 只有相对高度看不出"到底是多少", 用户明确提出过这一点。
+   *
+   *  定标规则(2026-10-10 用户要求改的): **最高的柱子占画布高度的 80%**, 且纵轴随数据走。
+   *  改之前的毛病: 调用方传了 max=100 把纵轴顶死, 而实际数据上限只有 86% 左右 ——
+   *  于是纵轴最上面那一段永远用不到, 最高柱只到 ~65%, 整张图像"没长起来"。 */
+  function bar(title, series) {
     var vals = series.map(function (s) { return s.value; }).filter(function (v) { return typeof v === 'number'; });
     if (!vals.length) return '<p class="note">' + esc(title) + ': 无可用数据。</p>';
-    var hi = (typeof max === 'number') ? max : Math.max.apply(null, vals);
+    /* 柱高只看**数据**的上下限。原来还有个 max 参数(调用方传 100 = "权重不可能超过 100%"),
+       结果纵轴被顶死、数据上限那一段永远用不到, 最高柱只到 65% —— 已去掉,
+       纵轴现在完全跟着数据走(用户要求: 图的比例要随数据比例变)。 */
     var lo = Math.min.apply(null, vals);
+    var hi = Math.max.apply(null, vals);
     if (hi === lo) { hi += 1; lo -= 1; }
-    var pad = (hi - lo) * 0.08; hi += pad; lo -= pad;
-    var span = hi - lo;
+    var range = hi - lo;
+    /* 让最高柱正好 80%, 同时给最矮的柱子留一条可见的余量:
+         纵轴跨度 = 1.325 × range, 纵轴底 = lo − 0.06 × range
+         → 最高柱 (1 + 0.06) / 1.325 = 80.0%
+         → 最矮柱 0.06 / 1.325      = 4.5%(210px 画布里约 9px, 看得见)
+       柱高与纵轴刻度**共用同一组 axisLo/axisSpan**, 否则柱子和刻度会对不上。 */
+    var axisSpan = range * 1.325;
+    var axisLo = lo - range * 0.06;
+    var axisHi = axisLo + axisSpan;
     var ticks = 4, axis = [];
-    for (var t = ticks; t >= 0; t--) axis.push(lo + span * t / ticks);
+    for (var t = ticks; t >= 0; t--) axis.push(axisLo + axisSpan * t / ticks);
     var grid = axis.slice(1).map(function (v, i) {
       return '<div class="cgrid" style="bottom:' + ((i + 1) / ticks * 100) + '%"></div>';
     }).join('');
     var bars = series.map(function (s) {
       var v = typeof s.value === 'number' ? s.value : 0;
-      var h = Math.max(0.6, (v - lo) / span * 100);
+      var h = Math.max(0.6, (v - axisLo) / axisSpan * 100);
       return '<div class="cbar' + (v < 0 ? ' cbar-neg' : '') + '" style="height:' + h.toFixed(1) + '%" title="' + esc(s.label) + ' ' + fx(v) + '%">' +
         '<span class="cbv">' + fx(v) + '%</span></div>';
     }).join('');
-    return '<div class="chart"><div class="chart-h"><span>' + esc(title) + '</span><span class="chart-scale">' + fx(lo, 1) + '% – ' + fx(hi, 1) + '%</span></div>' +
+    return '<div class="chart"><div class="chart-h"><span>' + esc(title) + '</span><span class="chart-scale">' + fx(axisLo, 1) + '% – ' + fx(axisHi, 1) + '%</span></div>' +
       '<div class="chart-plot"><div class="cyaxis">' + axis.map(function (v) { return '<span>' + fx(v, 1) + '%</span>'; }).join('') + '</div>' +
       '<div class="cplot">' + grid + bars + '</div></div>' +
       '<div class="cxaxis">' + series.map(function (s) { return '<span>' + String(s.label).replace(/^20/, '') + '</span>'; }).join('') + '</div></div>';

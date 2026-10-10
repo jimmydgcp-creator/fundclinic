@@ -112,6 +112,32 @@ window.addEventListener('load', function () {
       抽检行数: (auditTxt.match(/打开季报|需自行检索/g) || []).length
     };
 
+    /* 柱状图定标实测: 最高柱应占画布高度的 80%。
+       为什么不靠"算一遍公式就信": 柱高是百分比, 真正决定观感的是它落在多高的画布里 ——
+       .cplot 的高度、有没有 padding/border 吃掉一截, 只有量出来才知道。
+       2026-10-10 用户要求"最高柱占整个图高度的 80%", 这条断言就是它的验收标准。
+       注意: 报告视图默认是 display:none, 隐藏容器里 getBoundingClientRect 全是 0 —— 必须先显示出来
+       (第一版没做, 量到"画布 0px"直接假失败)。这一步放在所有其他测量之后, 不影响前面的结论。 */
+    var rv = document.getElementById('view-report');
+    if (rv && !rv.classList.contains('active')) {
+      var cur = document.querySelector('.view.active');
+      if (cur) cur.classList.remove('active');
+      rv.style.animation = 'none';
+      rv.classList.add('active');
+    }
+    var cplot = document.querySelector('.cplot');
+    var bars = [].slice.call(document.querySelectorAll('.cbar'));
+    if (cplot && bars.length) {
+      var plotH = cplot.getBoundingClientRect().height;
+      var hs = bars.map(function (b) { return b.getBoundingClientRect().height; });
+      out.chartScale = {
+        画布高: Math.round(plotH),
+        最高柱高: Math.round(Math.max.apply(null, hs)),
+        最低柱高: Math.round(Math.min.apply(null, hs)),
+        最高柱占比: plotH ? +(Math.max.apply(null, hs) / plotH * 100).toFixed(1) : 0
+      };
+    }
+
     var pre = document.createElement('pre');
     pre.id = 'AUDIT_RESULT';
     pre.textContent = JSON.stringify(out, null, 1);
@@ -170,6 +196,15 @@ ok(c['toc-link'] === c['report-section'], '目录条数与章节数一致', Stri
 ok(c.rule >= 15, '质检规则 >=15 条', String(c.rule));
 ok(c['badge-pass'] >= 10, '通过徽章 >=10', String(c['badge-pass']));
 ok(c.cbar + c.bar >= 20, '集中度柱状图柱数 >=20', `cbar=${c.cbar} bar=${c.bar}`);
+/* 最高柱占画布 80%(±2pp) —— 太少显得没长起来, 太多顶到框线上 */
+if (res.chartScale) {
+  const cs = res.chartScale;
+  ok(Math.abs(cs.最高柱占比 - 80) <= 2, '柱状图最高柱占画布高度的 80%(±2pp)',
+    `画布 ${cs.画布高}px · 最高柱 ${cs.最高柱高}px = ${cs.最高柱占比}% · 最低柱 ${cs.最低柱高}px`);
+  ok(cs.最低柱高 >= 4, '最低柱仍看得见(不会被压成一条线)', cs.最低柱高 + 'px');
+} else {
+  ok(false, '页面上没量到柱状图', '找不到 .cplot / .cbar');
+}
 ok(c['ev-infer'] >= 3, '合理推断标注 >=3 处', String(c['ev-infer']));
 ok(c['ai-task'] === 5, '5 张 AI 任务卡(T1 主题归类 / T2 判断起草 / T3 用词清洗 / T4 结论提炼 / T5 深度报告)', String(c['ai-task']));
 ok(c.tbl >= 8, '表格 >=8 个', String(c.tbl));
