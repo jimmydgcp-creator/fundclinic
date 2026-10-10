@@ -419,10 +419,7 @@ window.FC = window.FC || {};
           '<label class="field"><span>模型名</span><input type="text" id="llm-model" value="' + esc(defaultLLM.model) + '"></label>' +
           '</div>' +
           '<label class="field"><span>API Key(只存在本页内存, 不写进任何文件)</span><input type="password" id="llm-key" value="' + esc(state.llmCfg.apiKey) + '"></label>'
-        : '<p class="note">AI 由服务端调用, 你不需要做任何操作; 下面是每一步的输入 / 输出契约与校验规则。' +
-          /* 原来这里还挂着一张"运行记录"表和导出按钮(见上面那段注释的删除理由)。
-             真跑过之后每一步的调用与校验结果在「① 输入与口径」页的"本次执行步骤(运行记录)"里。 */
-          '本次每一步的调用与校验结果, 见「① 输入与口径」页底部的<strong>本次执行步骤(运行记录)</strong>。</p>') +
+        : '<p class="note">AI 由服务端调用, 你不需要做任何操作; 下面是每一步的输入 / 输出契约与校验规则。</p>') +
       aiTasks +
       '</div>';
     markDrawn('audit');
