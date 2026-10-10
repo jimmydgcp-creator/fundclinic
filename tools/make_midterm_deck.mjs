@@ -642,3 +642,69 @@ console.log('  自检      base64 图 ' + ((DOC.match(/data:image\/png;base64/g)
 console.log('  自检      危险动画 ' + ((DOC.match(/animation[^;]*\bboth\b/g) || []).length) + ' 处（应为 0）');
 console.log('  自检      渐变字   ' + ((DOC.match(/-webkit-text-fill-color:\s*transparent/g) || []).length) + ' 处（应为 0）');
 
+/* ============================================================ 备用版(零脚本)
+ * 正式版靠一段 JS 做"一次只显示一页 + 自动缩放"。万一教师机禁用了脚本、或者那段 JS 出错,
+ * 正式版的表现是**一片空白** —— 13 页全叠在同一个坐标上, 只有封面和最后一张可见。
+ * 所以再出一份**零脚本**的: 把舞台/翻页那套布局整条拆掉, 13 页竖直排下来,
+ * 打开就能滚、Ctrl+P 就能打印, 不依赖任何素材、网络和脚本。
+ * 两份放在同一个文件夹里: 主文件打不开时, 双击备用版即可。
+ */
+const FALLBACK_CSS = `
+/* ---- 备用版覆盖: 拆掉 .stage 的缩放定位与 .slide 的绝对定位/透明 ---- */
+html,body{height:auto !important;overflow:auto !important;background:#eef1f5 !important}
+.stage{position:static !important;left:auto !important;top:auto !important;width:auto !important;height:auto !important;
+  transform:none !important;padding:18px 0 26px}
+.deck{width:auto !important;height:auto !important;overflow:visible !important;box-shadow:none !important;
+  background:transparent !important;display:flex;flex-direction:column;align-items:center;gap:18px}
+.slide{position:relative !important;inset:auto !important;opacity:1 !important;pointer-events:auto !important;
+  transform:none !important;box-shadow:0 10px 28px rgba(11,32,56,.18);border-radius:6px}
+.pbar,.help{display:none !important}
+/* 教师机常见 1366×768: 自动缩小, 省得横向滚动 */
+@media (max-width:1340px){.deck{zoom:.88}}
+@media (max-width:1200px){.deck{zoom:.80}}
+@media (max-width:1040px){.deck{zoom:.68}}
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{background:#fff !important}
+  .stage{padding:0}
+  .deck{gap:0;zoom:1}
+  .slide{box-shadow:none;border-radius:0;break-after:page;page-break-after:always}
+  .slide:last-child{break-after:auto;page-break-after:auto}
+}`;
+
+const FALLBACK = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>基金复诊台 · 中期进度汇报(备用版 · 零脚本)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+${baseCss}
+${themeCss}
+${kitCss}
+${slideCss}
+${FALLBACK_CSS}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="deck" id="deck">
+${html}
+  </div>
+</div>
+</body>
+</html>`;
+
+const fbFile = path.join(OUTDIR, '备用_无需脚本版.html');
+fs.writeFileSync(fbFile, FALLBACK, 'utf8');
+console.log('写出 ' + fbFile);
+const fbSlides = (FALLBACK.match(/<section[^>]*class="[^"]*\bslide\b/g) || []).length;
+const fbExt = [
+  ...(FALLBACK.match(/<(?:link|script|img)[^>]*(?:href|src)="(?!data:)[^"]*"/g) || []),
+  ...(FALLBACK.match(/url\((?!['"]?data:)[^)]*\)/g) || [])
+];
+console.log('  自检      幻灯片 ' + fbSlides + ' 张' + (fbSlides === total ? '（与正式版一致）' : ' ← 与正式版不一致（' + total + '）'));
+console.log('  自检      含 <script>: ' + /<script/i.test(FALLBACK) + '（必须为 false）');
+console.log('  自检      外链**资源**引用 ' + fbExt.length + ' 处（应为 0）');
+console.log('  自检      base64 图 ' + ((FALLBACK.match(/data:image\/png;base64/g) || []).length) + ' 张');
+

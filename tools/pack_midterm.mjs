@@ -26,6 +26,8 @@ const EDGE = [
 ].find(p => fs.existsSync(p));
 if (!EDGE) { console.error('未找到 Edge/Chrome'); process.exit(1); }
 if (!fs.existsSync(INDEX)) { console.error('先跑 make_midterm_deck.mjs'); process.exit(1); }
+/* 展示页张数从 index.html 里数出来, 全流程共用 —— 别再写死 14/13, 那是上一版踩过的坑。 */
+const slideCount = (fs.readFileSync(INDEX, 'utf8').match(/<section[^>]*class="[^"]*\bslide\b/g) || []).length;
 
 /* ---------------------------------------------------------------- ① PDF */
 console.log('=== ① 导出 PDF 备份 ===');
@@ -59,9 +61,54 @@ if (PDFTOTEXT) {
   console.log('  (没有 pdftotext, 跳过 PDF 文本自检)');
 }
 
+/* ------------------------------------------------- ①之二 备用版(零脚本)实测 */
+/* 备用版的意义是"正式版打不开时还能讲", 所以必须真的量一次:
+   13 页是不是**都可见**(不是 opacity:0 / display:none)、是不是**竖直排开**(不是全叠在同一坐标)。
+   只数文件里有没有 13 个 <section> 是不够的 —— 正式版里也有 13 个, 禁用脚本时它照样白屏。 */
+const FB = path.join(SRC_DIR, '备用_无需脚本版.html');
+let fbText = null, fbInfo = null;
+if (fs.existsSync(FB)) {
+  fbText = fs.readFileSync(FB, 'utf8');
+  const probe = '<div id="__fb" style="display:none"></div><script>(function(){' +
+    'var ss=[].slice.call(document.querySelectorAll(".slide"));' +
+    'var hs=ss.map(function(s){return Math.round(s.getBoundingClientRect().height)});' +
+    'var ts=ss.map(function(s){return Math.round(s.getBoundingClientRect().top)});' +
+    'var vis=ss.filter(function(s){var c=getComputedStyle(s);return c.opacity!=="0"&&c.display!=="none"&&c.visibility!=="hidden"}).length;' +
+    'document.getElementById("__fb").textContent=JSON.stringify({n:ss.length,vis:vis,minH:Math.min.apply(null,hs),' +
+    'stacked:Math.round(ts[ts.length-1]-ts[0]),docH:document.documentElement.scrollHeight});' +
+    '})();<\/script>';
+  const tmp = path.join(SRC_DIR, '.fallback_probe.html');
+  fs.writeFileSync(tmp, fbText.replace('</body>', probe + '</body>'), 'utf8');
+  try {
+    const dom = execFileSync(EDGE, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars',
+      '--window-size=1440,900', '--virtual-time-budget=6000', '--dump-dom',
+      'file:///' + tmp.replace(/\\/g, '/')], { encoding: 'utf8', maxBuffer: 1 << 28 });
+    const m = /<div id="__fb"[^>]*>([\s\S]*?)<\/div>/.exec(dom);
+    fbInfo = m ? JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')) : null;
+  } catch (e) { fbInfo = null; }
+  try { fs.unlinkSync(tmp); } catch (e) {}
+}
+const fbChecks = [];
+if (!fbText) {
+  fbChecks.push(['备用版存在 00_交作业\\中期汇报_展示页\\备用_无需脚本版.html', false]);
+} else {
+  fbChecks.push(['备用版存在', true]);
+  fbChecks.push(['备用版不含 <script>(零脚本才叫兜底)', !/<script/i.test(fbText)]);
+  fbChecks.push(['备用版无外链资源', !/<(?:link|script|img)[^>]*(?:href|src)="(?!data:)[^"]*"/.test(fbText)]);
+  if (!fbInfo) {
+    fbChecks.push(['备用版能渲染(探针返回)', false]);
+  } else {
+    fbChecks.push(['备用版 13 页都在 DOM 里', fbInfo.n === slideCount]);
+    fbChecks.push(['备用版每一页都可见(不是 opacity:0 那种白屏)', fbInfo.vis === fbInfo.n]);
+    fbChecks.push(['备用版每页都有真实高度(没被压扁)', fbInfo.minH >= 690]);
+    fbChecks.push(['备用版是竖直排开的(不是全叠在同一个坐标)', fbInfo.stacked >= (fbInfo.n - 1) * 700]);
+    fbChecks.push(['备用版整页够长(能滚/能打印)', fbInfo.docH >= fbInfo.n * 700]);
+  }
+}
+
 /* ---------------------------------------------------------------- ② ZIP */
 console.log('\n=== ② 打成上传用 zip ===');
-const SKIP = new Set(['_校验截图', '_pdf_text.txt', '.verify_probe.html']);
+const SKIP = new Set(['_校验截图', '_pdf_text.txt', '.verify_probe.html', '.fallback_probe.html']);
 const files = [];
 (function walk(dir, rel) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -114,20 +161,27 @@ const README = `基金复诊台 FundClinic · 小组作业 II · 中期进度汇
 
 怎么打开
 --------
-双击 index.html（推荐 Chrome / Edge / Safari，任意现代浏览器）。
+★ 优先双击 index.html（推荐 Chrome / Edge / Safari，任意现代浏览器）。
     ← →        翻页
     F          全屏
     P          打印 / 导出 PDF
-封面页码在右下角；也可以点屏幕左半边/右半边翻页。
+  封面页码在右下角；也可以点屏幕左半边/右半边翻页。
+
+※ **如果 index.html 打不开、或者打开是一片空白**（个别电脑会禁用脚本 / 或者浏览器太老），
+   双击同目录的 **备用_无需脚本版.html** —— 同一个内容的兜底版本：
+   它不含任何脚本，13 页竖直排下来，打开就能滚、按 Ctrl+P 就能打印，
+   同样不依赖网络和任何素材。两份的页码是一样的，讲稿照用。
 
 说明
 ----
 · index.html 是**单文件**：主题、样式、运行时、两张界面截图全部内联，
   拷到任何一台电脑上双击就能开，**断网也能开**，不需要装任何东西。
+· 备用_无需脚本版.html 同样是单文件、同样内联，只是把"翻页"去掉改成"往下滚"，
+  为的就是那一句"万一打不开时还能讲"。
 · 页面按 1280×720 设计，打开后会自动缩放到窗口大小；接投影仪按 F 全屏即可。
 · 讲稿_5分钟.md 是配套的口播稿（含每页时长）。
 · 同目录下的「中期汇报_展示页.pdf」是同一份内容的 PDF 备份，
-  万一教师机的浏览器有问题，用 PDF 也能讲完。
+  万一教师机的浏览器有问题，用 PDF 也能讲完。**一共三层兜底：index.html → 备用版 → PDF。**
 
 注意
 ----
@@ -182,12 +236,14 @@ for (const [label, ok] of checks) console.log('  ' + (ok ? '✓' : '✗') + ' ' 
 console.log('  条目清单:');
 for (let i = 0; i < names.length; i++) console.log('      ' + names[i] + '   ' + sizes[i] + ' B');
 
-/* PDF 页数必须等于**展示页张数**, 而这个数字从 index.html 里数出来 —— 不再写死 14:
-   2026-10-10 删掉一页(14→13)之后, 写死的期望值立刻变成一条假失败。 */
-const slideCount = (fs.readFileSync(path.join(SRC_DIR, 'index.html'), 'utf8').match(/<section[^>]*class="[^"]*\bslide\b/g) || []).length;
+/* PDF 页数必须等于**展示页张数**, 而这个数字上面已经从 index.html 数出来了。 */
 const pageOk = pdfPages === null || pdfPages === slideCount;
 console.log('  展示页张数 ' + slideCount + (pdfPages === null ? '' : ' · PDF ' + pdfPages + ' 页'));
 
-const allOk = checks.every(c => c[1]) && missing.length === 0 && pageOk;
+console.log('\n=== ①之二 备用版(零脚本)自检 ===');
+for (const [label, good] of fbChecks) console.log('  ' + (good ? '✓' : '✗') + ' ' + label);
+if (fbInfo) console.log('     实测: ' + fbInfo.n + ' 页 · 可见 ' + fbInfo.vis + ' 页 · 最矮 ' + fbInfo.minH + 'px · 首末间距 ' + fbInfo.stacked + 'px · 文档高 ' + fbInfo.docH + 'px');
+
+const allOk = checks.every(c => c[1]) && missing.length === 0 && pageOk && fbChecks.every(c => c[1]);
 console.log('\n' + (allOk ? '全部通过。可以直接上传 ' + path.basename(ZIP) : '有检查未通过, 先别上传。'));
 process.exit(allOk ? 0 : 1);
