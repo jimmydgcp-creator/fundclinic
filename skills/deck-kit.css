@@ -1,0 +1,37 @@
+/* deck-kit — 版面组件(从用户已认可的 519191 回溯复盘 PPT 中抽取)
+ * 这是演示稿的"设计语言": T6 生成时把它内联进单文件, 大模型只允许使用这里定义的类。
+ * 抽取来源: 02_现有成果/基金复盘库/outputs/519191_2020Q4-2026Q2/黄海_万家新利519191_回溯复盘_PPT/index.html
+ */
+/* ---- deck-local additions (built on theme tokens) ---- */
+.h2c{font-family:var(--font-display);font-size:40px;line-height:1.16;font-weight:700;letter-spacing:-.02em;margin:2px 0 6px;color:var(--accent)}
+.lede-s{font-size:18px;line-height:1.65;color:var(--text-2)}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.stat .n{font-size:42px;font-weight:800;line-height:1.08;letter-spacing:-.02em;color:var(--accent);font-variant-numeric:tabular-nums}
+.stat .l{font-size:13.5px;font-weight:600;margin-top:4px}
+.stat .s{font-size:12px;color:var(--text-3);margin-top:2px;line-height:1.5}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl thead th{font-size:12px;letter-spacing:.08em;color:var(--text-3);font-weight:600;border-bottom:1px solid var(--border-strong)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td.num,.tbl th.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.up{color:var(--good)}.dn{color:var(--bad)}.wt{color:var(--warn)}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;line-height:1.5}
+.tag-ok{background:color-mix(in srgb,var(--good) 12%,transparent);color:var(--good)}
+.tag-bad{background:color-mix(in srgb,var(--bad) 10%,transparent);color:var(--bad)}
+.tag-blue{background:color-mix(in srgb,var(--accent-2) 10%,transparent);color:var(--accent-2)}
+.tag-gray{background:var(--surface-2);color:var(--text-2);border:1px solid var(--border)}
+.kb{display:inline-block;padding:1px 9px;border:1px solid var(--border-strong);border-radius:5px;font-size:12px;color:var(--text-2);background:var(--surface)}
+.rule{width:56px;height:3px;background:var(--accent-2);border-radius:2px;margin:10px 0 14px}
+.concl{background:var(--surface-2);border-left:4px solid var(--accent-2);border-radius:var(--radius-sm);padding:20px 24px;font-size:19.5px;line-height:1.8;color:var(--text-1)}
+.concl b{color:var(--accent)}
+.hl{background:linear-gradient(transparent 58%,color-mix(in srgb,var(--warn) 22%,transparent) 58%);padding:0 2px}
+.pnum{font-variant-numeric:tabular-nums}
+.phase{display:flex;flex-direction:column;gap:8px}
+.phasetag{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--accent-2)}
+.rowb{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;font-size:14px;color:var(--text-2)}
+.dot{width:7px;height:7px;border-radius:50%;flex:none}
+.sec-note{font-size:12.5px;color:var(--text-3);line-height:1.6}
+.sec-note b{color:var(--text-2)}
+.case .cl{font-size:12px;font-weight:700;letter-spacing:.05em;margin-bottom:6px}
+.case p{margin:0 0 7px;font-size:15px;line-height:1.55}
+.case .lab{font-weight:700;color:var(--accent)}

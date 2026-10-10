@@ -1,0 +1,29 @@
+# Render 蓝图 —— 一键部署「基金复诊台」到公网
+#
+# 用法(详细步骤见 00_交作业\部署到公网_怎么做.md):
+#   1. 把这个目录推到一个 GitHub 仓库(public 或 private 都行)
+#   2. 打开 https://dashboard.render.com → New → Blueprint → 选那个仓库
+#   3. Render 读到本文件, 自动建服务; 建完给你一个 https://xxxx.onrender.com 的地址
+#
+# 默认走 Docker(见 Dockerfile) —— 因为要装 poppler-utils 给官方 PDF 对账用。
+# 免费档会在一段时间没人访问后休眠, 下次访问冷启动约 30 秒, 之后正常。
+
+services:
+  - type: web
+    name: fundclinic
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: FUNDCLINIC_CLOUD
+        value: "1"
+      - key: NODE_ENV
+        value: production
+      # 不要把 API Key 写进仓库。两种做法二选一:
+      #   ① 不设这个变量 —— 让每个访问者在页面上填自己的 Key(推荐, 也符合"用用户自己的 API")
+      #   ② 想在课堂上免填: 在这个面板里加 FUNDCLINIC_LLM_KEY, 勾 Sync=false
+      # - key: FUNDCLINIC_LLM_KEY
+      #   sync: false

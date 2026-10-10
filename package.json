@@ -1,0 +1,17 @@
+{
+  "name": "fundclinic",
+  "version": "2.1.0",
+  "private": true,
+  "description": "基金复诊台 FundClinic — 输入 6 位基金代码，按 SOP §2 六类公开来源采集，官方季报 PDF 逐行对账，输出可核验的持仓回溯复盘报告与演示稿。",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "selftest": "node tools/selftest.mjs",
+    "smoke": "node tools/smoke_page.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

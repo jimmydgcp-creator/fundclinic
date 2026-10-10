@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>基金复诊台 FundClinic · 基金持仓回溯复盘</title>
+<meta name="description" content="输入一只公募基金的代码，按 SOP 六类公开来源自动采集，官方季报 PDF 逐行对账，输出一份每个数字都能回查的持仓回溯复盘报告与一份能直接发给别人的演示稿。">
+<meta name="theme-color" content="#1b2a3a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b2a3a'/%3E%3Cpath d='M9 21V11M13.7 21V15M18.3 21V9.5M23 21v-6.5' stroke='%23a8763e' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="app/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">基金复诊台<span>FundClinic</span></div>
+  <nav class="tabs" aria-label="主导航">
+    <button class="tab active" data-view="input">① 输入与口径</button>
+    <button class="tab" data-view="report">② 复盘报告</button>
+    <button class="tab" data-view="ledger">③ 数据底稿</button>
+    <button class="tab" data-view="audit">④ 质检与 AI 记录</button>
+    <button class="tab" data-view="about">⑤ 这个网页做什么</button>
+  </nav>
+  <div class="topstatus" id="topstatus">就绪</div>
+</header>
+
+<main>
+
+  <!-- ================================================== ① 输入 -->
+  <section class="view active" id="view-input">
+
+    <!-- 首屏: 先讲清"这是什么、输入什么、出什么", 再给唯一一个主行动 -->
+    <div class="hero">
+      <div>
+        <p class="hero-eyebrow">基金持仓回溯复盘 · Fund Manager Review</p>
+        <h1>输入一个基金代码,<br>出一份<em>每个数字都能追到出处</em>的复盘。</h1>
+        <p>
+          按 SOP 六类公开来源自动采集, 把官方季报 PDF 与第三方逐行对账, 再算绩效、拆持仓动作、校验经理言行。
+          抓取、计算、对账全部由脚本完成, 大模型只做语言类的判断与成文 —— 且每一份输出都必须过校验才允许进报告。
+        </p>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-hero-start">开始复盘</button>
+          <button class="btn" id="btn-hero-how">它到底怎么做的</button>
+        </div>
+      </div>
+      <aside class="hero-side">
+        <div class="hero-fact"><b>6 类</b><span>公开来源(官方定期报告 PDF 为最高权威)</span></div>
+        <div class="hero-fact"><b>逐行</b><span>官方 PDF × 第三方持仓对账, 按股票代码比对</span></div>
+        <div class="hero-fact"><b>3 道</b><span>人机门禁: 口径确认 · 判断方向 · 终审三查</span></div>
+        <div class="hero-fact"><b>0 外链</b><span>演示稿单文件内联, 发给别人断网也能看</span></div>
+      </aside>
+    </div>
+
+    <!-- 在线模式: 输入代码 -> 自动爬取 -> 出报告与演示稿 -->
+    <div class="panel hidden" id="online-panel">
+      <h3>在线模式 · 输入基金代码 + API Key, 自动爬取并生成报告与演示稿</h3>
+      <p class="panel-sub" id="online-hint"></p>
+
+      <div class="grid3">
+        <label class="field"><span>① 基金代码(6 位)</span><input type="text" id="online-code" placeholder="如 519191 / 005827" maxlength="6" inputmode="numeric" autocomplete="off"></label>
+        <label class="field"><span>抓取年数</span>
+          <select id="online-years">
+            <option value="5">最近 5 年</option>
+            <option value="8">最近 8 年</option>
+            <option value="10" selected>最近 10 年</option>
+            <option value="15">最近 15 年</option>
+          </select>
+        </label>
+        <div class="field">
+          <span>② API Key 状态</span>
+          <div class="kb-status" id="ai-status">请填写并测试 API Key</div>
+        </div>
+      </div>
+
+      <div class="gate" id="ai-block">
+        <h4>② API Key(必填)· 在 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">platform.deepseek.com</a> 申请</h4>
+        <!-- 只在公网模式(服务端持有 Key + 启用额度)下由 online.js 显示: 告诉访客今天还剩几次、为什么会被拦。
+             本机模式整块 hidden, 页面和以前一模一样。 -->
+        <p class="panel-sub hidden" id="quota-note"></p>
+        <div class="grid3">
+          <label class="field"><span>API Base(OpenAI 兼容)</span><input type="text" id="ai-base" value="https://api.deepseek.com"></label>
+          <label class="field"><span>模型名</span><input type="text" id="ai-model" value="deepseek-v4-flash"></label>
+          <label class="field"><span>API Key</span><input type="password" id="ai-key" placeholder="sk-..." autocomplete="off"></label>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-sm" id="btn-ai-ping">测试 Key 连通性</button>
+          <label style="display:flex;gap:8px;align-items:center;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="ai-remember"> 记住(存在本机浏览器, 下次不用重填)
+          </label>
+        </div>
+        <p class="note" style="margin-top:12px">
+          为什么必填: <strong>主题归类</strong>这一步没有公开接口可替代(天天基金不提供"主题"字段),
+          缺了它, 形态库里的「主题坚守型 / 主题漂移型」两条规则会直接跳过, 结论明显变弱。
+          大模型只做语言类的事(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗), 抓取、计算、对账、质检全部由脚本完成 ——
+          <strong>而且大模型的输出必须过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒)才允许进报告, 不通过一律拦截</strong>。
+          Key 只在你本机内存里用一次, 不落盘、不进日志、不出现在 URL 里。
+        </p>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:4px">
+        <button class="btn btn-primary" id="btn-online-probe" disabled>③ 开始复盘(先探路 → 填口径 → 再开跑)</button>
+        <span class="hint" id="probe-hint">填好基金代码与 API Key 后可点</span>
+      </div>
+
+      <!-- 第二阶段: 开跑前的口径确认表(SOP §0 八格, 人主做) -->
+      <div class="gate hidden" id="gate1-table">
+        <h4>④ 开跑前口径确认表(人主做 · 任何一格留空不许开跑)</h4>
+        <p class="note" style="margin-top:0" id="probe-summary"></p>
+        <table class="tbl tbl-compact gate1-tbl"><tbody id="gate1-body"></tbody></table>
+        <div class="btn-row" style="margin-top:14px">
+          <button class="btn btn-primary" id="btn-online-run" disabled>按此口径开跑</button>
+          <button class="btn btn-sm" id="btn-probe-again">重新探路</button>
+          <span class="hint" id="gate1-status"></span>
+        </div>
+      </div>
+
+      <!-- 步骤进度: 让"现在跑到哪一步了"可见, 而不是只滚日志。
+           这 7 步是**量出来的**, 不是拍的: tools/capture_progress.mjs 录了一次完整跑动,
+           33 条进度消息归并成 7 个阶段。原来我写了 8 步, "绩效与轮动"那一步
+           在实际流水线里**永远不亮**(它是规则引擎内部算的, 不单独发进度) —— 用户会以为卡住了。
+           另外从录到的耗时看: 官方对账约 4.5s、导出 PDF 约 3s, 是两条长尾, 其余都在 1s 内。 -->
+      <div class="steps hidden" id="run-steps">
+        <div class="step" data-step="probe"><div class="step-name">探路</div><div class="step-note">元数据 / 报告期网格</div></div>
+        <div class="step" data-step="crawl"><div class="step-name">六类来源采集</div><div class="step-note">官方 PDF 为最高权威</div></div>
+        <div class="step" data-step="parse"><div class="step-name">落盘清洗</div><div class="step-note">SOP 清洗三规则</div></div>
+        <div class="step" data-step="official"><div class="step-name">官方逐行对账</div><div class="step-note">最慢的一步, 约 4~5 秒</div></div>
+        <div class="step" data-step="engine"><div class="step-name">规则引擎</div><div class="step-note">形态库 / 结论卡 / 质检 18 条</div></div>
+        <div class="step" data-step="ai"><div class="step-name">大模型</div><div class="step-note">归类 / 判断 / 深度报告 / 演示稿</div></div>
+        <div class="step" data-step="done"><div class="step-name">导出交付物</div><div class="step-note">演示稿 · PDF</div></div>
+      </div>
+
+      <div id="online-log" class="runlog"></div>
+      <div class="panel hidden" id="online-history" style="margin-top:18px"></div>
+      <div id="online-result"></div>
+    </div>
+
+    <!-- 离线兜底: 没有 Node / 不想填 Key 时, 用内置样例看完整效果 -->
+    <div class="panel" id="offline-panel">
+      <h3>没装 Node.js, 或不想填 Key?用内置样例看完整效果</h3>
+      <p class="panel-sub">
+        下面两只基金的底稿已逐行与官方季报对过账(519191: 220 行权重全一致, 差 ≤0.11pp)。
+        点一下即可跑完整条流水线 —— <strong>抓取与计算完全一样</strong>, 只是数据是预置的, 且没有大模型写的那部分深度内容。
+      </p>
+
+      <!-- 门禁 1: 只对"手动指定的数据"生效, 所以放在这里, 而不是飘在页面中间 -->
+      <div class="gate" id="gate1">
+        <h4>门禁 1 · 口径确认(人主做, 三项全勾选才允许开跑)</h4>
+        <label><input type="checkbox" id="g1-a"> <span><strong>数据合规</strong>: 我确认本次输入的数据来自公开渠道(公募基金定期报告 / 天天基金 F10 等), <strong>不含任何机构或实习单位的内部数据</strong>。</span></label>
+        <label><input type="checkbox" id="g1-b"> <span><strong>口径边界</strong>: 我确认本次只看<strong>前十大持仓</strong>(季报口径), 且季报持仓是<strong>期末快照</strong>, 期间买卖不可见。</span></label>
+        <label><input type="checkbox" id="g1-c"> <span><strong>结论边界</strong>: 我确认<strong>未提供净值序列时不做任何绩效结论</strong>; 全部输出为回溯复盘, 不构成投资建议。</span></label>
+      </div>
+
+      <div id="builtin-list"></div>
+      <p class="note">另有一条路: 打开 <code>基金复诊台_单文件版.html</code> —— 不联网、不装任何东西、不需要 Key, 内置同样两只样例。</p>
+    </div>
+
+    <div class="panel">
+      <h3>它做什么</h3>
+      <p class="panel-sub">
+        给〔基民 / 基金公司初步评价考核 / FOF 初步评价〕用, 把〔一只公募基金的代码 + 复盘区间〕变成〔一份可核验的"十大持仓回溯复盘报告"网页 + 一份能直接发给别人的演示稿:
+        结构看清动作、绩效看清代价, 每个数字可指回公开季报原文, 并标出证据级别与推翻条件〕。<br>
+        <strong>全部计算都在本地完成; 离线模式下不联网、不上传任何数据。</strong>
+      </p>
+      <div class="grid3">
+        <div class="metric"><div class="metric-l">输入</div><div class="metric-v" style="font-size:14px">基金代码</div></div>
+        <div class="metric"><div class="metric-l">AI 模块</div><div class="metric-v" style="font-size:14px">规则引擎 + 大模型(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗)</div></div>
+        <div class="metric"><div class="metric-l">输出</div><div class="metric-v" style="font-size:14px">11 节复盘报告 + 结论卡 + 错误检查记录 + 来源清单 + 演示稿(HTML/PDF)</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================== ② 报告 -->
+  <section class="view" id="view-report">
+    <div id="report-empty">
+      <div class="empty">
+        <div class="empty-art"><svg viewBox="0 0 24 24"><path d="M4 4h11l5 5v11H4z"/><path d="M15 4v5h5"/><path d="M8 13h8M8 16h5"/></svg></div>
+        <h3>还没有跑过任何基金</h3>
+        <p>复盘报告会出现在这里: 11 节固定骨架, 先说结论, 每个数字带证据级别与推翻条件。</p>
+        <div class="empty-actions">
+          <button class="btn btn-primary" data-goto="input">去输入基金代码</button>
+        </div>
+        <div class="empty-hint">没装 Node.js? 到 <a href="#offline-panel" data-goto="input">用内置样例</a> 也能看到完整报告</div>
+      </div>
+    </div>
+    <div class="report-layout hidden" id="report-layout">
+      <aside class="toc" id="report-toc"></aside>
+      <div id="report-body"></div>
+    </div>
+  </section>
+
+  <!-- ================================================== ③ 底稿 -->
+  <section class="view" id="view-ledger">
+    <div id="ledger-empty">
+      <div class="empty">
+        <div class="empty-art"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M3 14h6"/></svg></div>
+        <h3>底稿还没生成</h3>
+        <p>这里会放逐期前十大、集中度曲线、规模曲线与推算价 —— 报告里每个数字都能在这里找到出处。</p>
+        <div class="empty-actions">
+          <button class="btn btn-primary" data-goto="input">去输入基金代码</button>
+        </div>
+      </div>
+    </div>
+    <div id="ledger-body"></div>
+  </section>
+
+  <!-- ================================================== ④ 质检 -->
+  <section class="view" id="view-audit">
+    <div id="audit-empty">
+      <div class="empty">
+        <div class="empty-art"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>还没有可质检的内容</h3>
+        <p>跑完之后这里会有 18 条质检规则的三态结果、12 处人工抽检清单(每条写明怎么核), 以及大模型每一步调用的原始记录。</p>
+        <div class="empty-actions">
+          <button class="btn btn-primary" data-goto="input">去输入基金代码</button>
+        </div>
+      </div>
+    </div>
+    <div id="audit-body"></div>
+  </section>
+
+  <!-- ================================================== ⑤ 这个网页做什么 -->
+  <section class="view" id="view-about">
+    <div class="panel">
+      <h3>一句话</h3>
+      <p class="panel-sub" style="font-size:15px">
+        把〔一只公募基金的代码 + 复盘区间〕变成〔一份可核验的持仓回溯复盘报告 + 一份能直接发给别人的演示稿〕:
+        持仓动作看得清、收益代价看得见、每个数字都能指回公开季报原文。
+      </p>
+      <div class="grid3">
+        <div class="metric"><div class="metric-l">给谁用</div><div class="metric-v" style="font-size:14px">基民 · 基金公司初步评价考核 · FOF 初步评价</div></div>
+        <div class="metric"><div class="metric-l">替代什么</div><div class="metric-v" style="font-size:14px">手工翻 20+ 期季报 PDF、逐季录 Excel、再手写报告</div></div>
+        <div class="metric"><div class="metric-l">省在哪</div><div class="metric-v" style="font-size:14px">约 70% 时间花在找数 / 录数 / 核数, 这部分全自动</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>它到底做了什么(四步)</h3>
+      <table class="tbl">
+        <thead><tr><th style="width:16%">步骤</th><th style="width:30%">输入 → 输出</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><th>① 采集</th><td>基金代码 → 结构化底稿</td><td>六类公开来源: 官方定期报告 PDF(最高权威)、历史前十大、资产配置、规模变动、净值序列、基金经理履历。每一类都记下 URL 与抓取时间。</td></tr>
+          <tr><th>② 对账</th><td>官方 PDF × 第三方接口 → 差异清单</td><td>把官方季报里的前十大持仓表逐行抽出来, 与第三方数据<strong>逐行比对</strong>(按股票代码 / 名称 / 权重 ±0.011pp)。对不上的以官方为准并记录差异。实测 519191: 220 行全部一致, 权重最大差 0pp。</td></tr>
+          <tr><th>③ 计算</th><td>底稿 → 指标 / 形态 / 结论卡</td><td>集中度、留存与换手、主题演进、个股持有期、披露口径推算价、分红再投区间收益与最大回撤。全部是确定性计算, 同一输入结果逐位相同。</td></tr>
+          <tr><th>④ 成文</th><td>证据包 → 报告 / 演示稿 / 质检记录</td><td>规则引擎出版本化报告; 大模型在<strong>同一份证据包</strong>上写深度分析。全文每个数字都要能回查, 编造即退回。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h3>AI 在哪里, 不AI在哪里</h3>
+      <div class="grid2">
+        <div class="card-risk">
+          <h4>交给脚本(确定性、可复现)</h4>
+          <ul>
+            <li>抓取、解析、结构化、对账</li>
+            <li>所有指标计算与统计</li>
+            <li>质检规则与数字回查</li>
+            <li>结论卡的骨架与可证伪条件</li>
+          </ul>
+        </div>
+        <div class="card-good">
+          <h4>交给大模型(语言类, 输出必须过校验)</h4>
+          <ul>
+            <li>主题归类(公开接口不提供"主题"字段)</li>
+            <li>核心判断起草(数字全部要回查指标包)</li>
+            <li>深度报告成文(按固定章节骨架)</li>
+            <li>演示稿编排(读完整报告 → 分镜 → 逐页成文)</li>
+            <li>对外用词清洗(数字守恒: 一个都不许改)</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">大模型输出<strong>不通过校验就一律拦截</strong>, 而且拦截后不是报错结束 —— 规则引擎的结论照用, 报告照出, 只在质检页明确标出"哪一步被拦了、为什么"。</p>
+    </div>
+
+    <div class="panel">
+      <h3>三道人机门禁(人不可让渡)</h3>
+      <table class="tbl">
+        <tbody>
+          <tr><th style="width:22%">门禁 1 · 口径确认</th><td>开跑前把八格口径摆出来由人确认: 复盘哪一任经理、哪个区间、数据截止日、业绩比较基准、收益口径、只看前十大、产出位置。<strong>任何一格留空不许开跑。</strong></td></tr>
+          <tr><th>门禁 2 · 判断方向</th><td>形态标签由引擎给出候选, 但必须由人确认或改判, 改判要写理由并写进结论卡。</td></tr>
+          <tr><th>门禁 3 · 终审三查</th><td>数字查(抽检回原文核对)、结论查(每条结论能找到证据行)、合规查(无收益承诺、有免责声明)。三项打勾才允许标记"可交付"。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h3>它明确做不到什么</h3>
+      <ul class="reason-list">
+        <li><strong>只看前十大</strong> —— 公募季报只保证披露前十, 其余持仓不可得; 完整组合的行业暴露与风险敞口看不见。</li>
+        <li><strong>季报是期末快照</strong> —— 期间的买卖时点与成交价都不可知; 所以"新进前十大"不等于"本季度刚买入", "退出前十大"不等于"清仓"。</li>
+        <li><strong>推算价不是成交价</strong> —— 期末公允价值 ÷ 期末持股数, 未复权、不含分红, 只能横向比较, 不能当收益。</li>
+        <li><strong>不含任何前瞻</strong> —— 全文只讲已发生的事与可验证推断, 不给收益预期、不做投资建议、不评价基金经理个人。</li>
+        <li><strong>需要公开数据</strong> —— 不使用任何机构或实习单位内部数据。</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  基金复诊台 FundClinic · 数据仅来自公开渠道(公募基金定期报告 / 天天基金 F10) · 只看前十大持仓, 季报为期末快照 ·
+  全部输出为回溯复盘, 不构成投资建议, 不评价基金经理个人。
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="data/funds.data.js"></script>
+<script src="app/engine.js"></script>
+<script src="app/parse.js"></script>
+<script src="app/checker.js"></script>
+<script src="app/ai.js"></script>
+<script src="app/steps.js"></script>
+<script src="app/ui.js"></script>
+<script src="app/online.js"></script>
+</body>
+</html>

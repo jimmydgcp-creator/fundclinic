@@ -1,0 +1,8 @@
+{
+  "_说明": "把本文件复制为 llm.local.json 并填入你的 Key, 服务端启动时会自动读取。这样页面上不用再填, Key 也不会出现在任何聊天记录里。",
+  "_申请地址": "https://platform.deepseek.com",
+  "_其他兼容服务": "任何 OpenAI 兼容接口都行: 改 baseUrl 与 model 即可(通义/智谱/Kimi/OpenAI 等)",
+  "baseUrl": "https://api.deepseek.com",
+  "model": "deepseek-v4-flash",
+  "apiKey": "在这里填 sk- 开头的 Key"
+}

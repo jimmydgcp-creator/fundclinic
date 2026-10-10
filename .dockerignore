@@ -1,0 +1,19 @@
+# Docker 构建上下文里不要的东西。
+# 不加这个的话 `docker build .` 会把 _runs/(几十 MB 的历史产出)和 _dist/(分发副本)全塞进上下文,
+# 构建慢、镜像大, 而且等于把"过程产物"发上了公网。
+
+_runs/
+_dist/
+/* tools/ 整个不进镜像。理由: 运行时(server.mjs / server/*.mjs / app/*.js)对它**只有注释里的引用**,
+   一行都不执行(2026-10-10 逐文件确认过); 而 server.mjs 本来就把 /tools 路径挡成 403。
+   少拷这 90 多个文件 = 镜像更小、构建更快(免费档很在意), 也少一处"万一路径穿越漏了"的面。 */
+tools/
+*.log
+llm.local.json
+*.local.json
+.DS_Store
+Thumbs.db
+node_modules/
+.git/
+.gitignore
+package-lock.json
