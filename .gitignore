@@ -17,6 +17,12 @@ tools/_*.md
 tools/_tmp_*.mjs
 *.log
 
+# 本机专用脚本: 依赖本机的 huashu-chrome 浏览器桥(读 ~/.huashu-chrome/bridge.json),
+# 换台机器就跑不了, 不属于产品的一部分 —— 不往公开仓库里放。
+tools/_browser.mjs
+tools/_p.json
+tools/_cmd.json
+
 # 系统/编辑器
 .DS_Store
 Thumbs.db

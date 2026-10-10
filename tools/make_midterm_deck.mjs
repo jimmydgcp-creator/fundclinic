@@ -219,7 +219,7 @@ S('', '定位 · 和场景确认一致', `
         <div class="s" style="font-size:13.5px;line-height:1.6;color:var(--text-1)">2026-09-22 已提交 · <b>8 问全填</b></div></div>
     </div>
     <div class="c soft" style="padding:13px 16px">
-      <p style="font-size:13px"><b>今天要讲三件事：</b>① 现在真的能跑（6 只基金实跑）② AI 模块怎么防错（实测拦下过大模型的错）③ 接下来 4 周做什么（公网部署 + 多形态覆盖）</p>
+      <p style="font-size:13px"><b>今天要讲三件事：</b>① 现在真的能跑（6 只基金实跑）② AI 模块怎么防错（实测拦下过大模型的错）③ <b>接下来 4 周做什么</b> —— 其中"公网部署"这一项 <b>10/10 已经上线了</b>，剩下的排期是多形态覆盖与成本闸门调优</p>
     </div>
   </div>
 `);
@@ -493,7 +493,7 @@ S('tight', '和场景确认比，改了什么', `
         <tr><td>4</td><td><b>交付形态：发压缩包 → 发一个文件</b></td><td>组员在 macOS 上双击 <code>.bat</code> 打不开（<code>.bat</code> 是 Windows 专用）。现在三件套：Windows <code>.bat/.cmd</code>、macOS <code>.command</code>（LF 换行 + 无 BOM + 可执行位 755，且<b>启动时自己补 PATH</b>——Finder 双击的程序不读 <code>~/.zshrc</code>）、零依赖单文件 HTML。</td></tr>
         <tr><td>5</td><td><b>报告与演示稿改成"能直接发给别人"</b></td><td>原版引用网络字体和外部资源，发到别人电脑上就散架。现在单文件 HTML（全内联、断网可看）、字体换本机字体栈、删掉会在 PDF 里渲染成空白的渐变字，另出 PDF 可直接发微信。</td></tr>
         <tr><td>6</td><td><b>收益口径与区间起点都改了</b></td><td>累计净值是加法量、做比值无意义（改分红再投指数，偏差 15.94pp → 1.07pp）；起点取"期末"会漏掉第一个季度（519191 从 76.77% 虚增到 85.97%，改"期初"后回到 76.80%，逐季对账 22/22 期）。</td></tr>
-        <tr class="hl-good"><td>7</td><td><b>新增：从"本地点开"改成"公网链接人人可点"</b> <span class="b b-blue">进行中</span></td><td>现在只有装了 Node 的人能跑，门槛全在环境上。平台说明写着「至少要能在本地运行，<b>部署到公网加分</b>」。<b>代码已改好</b>（支持云平台 <code>PORT</code>/<code>0.0.0.0</code>、含部署配置与 Dockerfile），<b>差一个实名账号</b>，计划 10/20 前上线。</td></tr>
+        <tr class="hl-good"><td>7</td><td><b>新增：从"本地点开"改成"公网链接人人可点"</b> <span class="b b-ok">已上线</span></td><td>平台说明写着「至少要能在本地运行，<b>部署到公网加分</b>」。原计划 10/20 前上线，<b>实际 10/10 就上线了</b>：<code>https://fundclinic.onrender.com</code>（Render 免费档 · Docker 构建）。访客只输 6 位基金代码，<b>不用装 Node、不用 VPN</b>；大模型 Key 由<b>服务端</b>持有。另加了三道用量闸门（每台 3 次/小时、8 次/天；全站 40 次/天）兜住花费。</td></tr>
       </tbody>
     </table>
   </div>
@@ -510,9 +510,10 @@ S('tight', '主要问题 · 卡在哪里，需要什么帮助', `
   </div>
   <div class="body" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:start">
     <div class="c acc" style="padding:14px 16px">
-      <h4>1 · 公网部署差一个"实名账号"（最硬的一道门）</h4>
-      <p>代码改好了，但 GitHub 与云平台账号是实名的，得组内定人注册。<br>
-      <b>需要帮助：</b>① 课堂对"部署到公网"是否另有要求（是否必须挂在指定服务器/域名）② 有没有推荐的免费额度平台，适合放一个会跑十几秒爬虫的 Node 服务。</p>
+      <h4>1 · 公网部署 —— 已解决，但冒出一个新问题 <span class="b b-ok">已上线</span></h4>
+      <p><b>10/10 已上线：</b><code>https://fundclinic.onrender.com</code>，并用我们自己的 Key <b>真实跑通两只基金</b>（519191 二十三期 453 秒、005825 九期 366 秒），报告 / 结论卡 / 质检 / 来源清单 / <b>AI 深度版演示稿</b>全部可下载。<br>
+      <b>新问题：</b>形态变成"服务端持有我们的 Key"之后，<b>Key 就是任何点开链接的人都能花的钱</b>。所以加了三道闸门（每台 3 次/小时、8 次/天；全站 40 次/天）。<b>实测单次约 0.3 元</b>，40 次/天约 12 元封顶。<br>
+      <b>需要帮助：</b>① 课堂对"部署到公网"是否另有要求 ② <b>全站每天 40 次这个额度定多少合适</b>（真钱，想听老师意见）。</p>
     </div>
     <div class="c acc" style="padding:14px 16px">
       <h4>2 · 大模型 Key 是每人自备的</h4>
@@ -546,8 +547,8 @@ S('tight', '接下来做什么、预计什么时候做完', `
         <div class="box"><div class="d">10/10 – 10/13</div><div class="t">中期材料定稿</div>
         <div class="x">5 分钟讲稿按「痛点 30s → 演示 2min → AI 1min → 下一步 1.5min」压缩；展示页打成 zip</div></div></div>
       <div class="st"><div class="ln"><span style="width:100%"></span></div><div class="dot"></div>
-        <div class="box"><div class="d">10/14 – 10/20</div><div class="t">部署到公网</div>
-        <div class="x">从"本地点开"变成"发条链接谁都能点开"。代码已改好，差账号<br><span class="b b-blue">验收：一条可公开访问的链接</span></div></div></div>
+        <div class="box"><div class="d">10/14 – 10/20 → <b>10/10 已提前完成</b></div><div class="t">部署到公网 <span class="b b-ok">已上线</span></div>
+        <div class="x">从"本地点开"变成"发条链接谁都能点开"，同学不用装 Node、不用 VPN<br><span class="b b-ok">验收：https://fundclinic.onrender.com 已可公开访问</span></div></div></div>
       <div class="st"><div class="ln"><span style="width:100%"></span></div><div class="dot"></div>
         <div class="box"><div class="d">10/14 – 10/24</div><div class="t">组员独立复跑</div>
         <div class="x">2 只全新基金，在自己电脑上从零跑（不复用任何预置结果），记录卡在哪、花多久<br><span class="b b-blue">这是中期最硬的一条证据</span></div></div></div>
@@ -651,7 +652,16 @@ fs.writeFileSync(outFile, DOC, 'utf8');
 console.log('写出 ' + outFile);
 console.log('  幻灯片    ' + total + ' 张');
 console.log('  文件大小  ' + (Buffer.byteLength(DOC) / 1024 / 1024).toFixed(2) + ' MB');
-console.log('  自检      外链引用 ' + ((DOC.match(/https?:\/\//g) || []).length) + ' 处（应为 0）');
+/* 只数**真正的资源引用**(<link href> / <script src> / <img src> / CSS url()), 不数正文里的网址。
+   踩过: 之前是 `DOC.match(/https?:\/\//g)`, 而我们刚把上线地址 https://fundclinic.onrender.com
+   写进正文当内容展示 —— 于是自检报"外链引用 3 处(应为 0)", 其实是假警报。
+   正文里出现网址是**要**的(就是给人看的), 会断网散架的是**资源**引用。 */
+const extRefs = [
+  ...(DOC.match(/<(?:link|script|img)[^>]*(?:href|src)="(?!data:)[^"]*"/g) || []),
+  ...(DOC.match(/url\((?!['"]?data:)[^)]*\)/g) || [])
+];
+console.log('  自检      外链**资源**引用 ' + extRefs.length + ' 处（应为 0）' + (extRefs.length ? ' → ' + extRefs.slice(0, 3).join(' | ') : ''));
+console.log('  自检      正文里的网址 ' + ((DOC.match(/https?:\/\//g) || []).length) + ' 处（内容展示，正常）');
 console.log('  自检      base64 图 ' + ((DOC.match(/data:image\/png;base64/g) || []).length) + ' 张');
 console.log('  自检      危险动画 ' + ((DOC.match(/animation[^;]*\bboth\b/g) || []).length) + ' 处（应为 0）');
 console.log('  自检      渐变字   ' + ((DOC.match(/-webkit-text-fill-color:\s*transparent/g) || []).length) + ' 处（应为 0）');

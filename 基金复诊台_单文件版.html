@@ -233,13 +233,17 @@ main { max-width: 1340px; margin: 0 auto; padding: 30px 28px 10px; }
   display: flex; flex-direction: column; gap: 16px;
 }
 @media (max-width: 1000px) { .hero-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 22px; } }
-.hero-fact { display: flex; align-items: baseline; gap: 12px; }
-.hero-fact b {
-  font-family: var(--num); font-variant-numeric: tabular-nums;
-  font-size: 26px; font-weight: 700; color: var(--navy); letter-spacing: -.02em;
-  flex: none; min-width: 84px;
+/* 首屏右侧那一栏。
+   2026-10-10 按用户要求改版: 原来是一组"大数字 + 小说明"的指标条(6 类 / 逐行 / 3 道 / 0 外链),
+   被判定太像模板 —— 四个数字排一列, 什么页面都能套。现在换成一段文字(边界与纪律),
+   和左栏互补: 左边讲"它怎么做的", 右边讲"它不许做什么"。 */
+.hero-note-title {
+  font-size: 15px; font-weight: 700; color: var(--navy);
+  margin: 0 0 12px; letter-spacing: .01em;
 }
-.hero-fact span { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; }
+.hero-note { display: flex; flex-direction: column; gap: 11px; font-size: 13px; line-height: 1.85; color: var(--ink-2); }
+.hero-note p { margin: 0; }
+.hero-note strong { color: var(--navy); font-weight: 600; }
 
 /* 运行上下文条: 跑完之后一直挂着, 随时知道"现在看的是哪只基金" */
 .ctxbar {
@@ -851,10 +855,13 @@ footer {
         </div>
       </div>
       <aside class="hero-side">
-        <div class="hero-fact"><b>6 类</b><span>公开来源(官方定期报告 PDF 为最高权威)</span></div>
-        <div class="hero-fact"><b>逐行</b><span>官方 PDF × 第三方持仓对账, 按股票代码比对</span></div>
-        <div class="hero-fact"><b>3 道</b><span>人机门禁: 口径确认 · 判断方向 · 终审三查</span></div>
-        <div class="hero-fact"><b>0 外链</b><span>演示稿单文件内联, 发给别人断网也能看</span></div>
+        <p class="hero-note-title">这份复盘的边界, 写在每个结论旁边</p>
+        <div class="hero-note">
+          <p>所有数字来自公开定期报告, 或由这些数字<strong>加减乘除</strong>得到; 找不到出处的会被校验拦下, 不进报告。</p>
+          <p>持仓只看前十大, 且是<strong>期末快照</strong> —— 所以"新进前十"不等于当季买入, "退出前十"不等于清仓或最高点卖出。</p>
+          <p>证据分三级: <strong>披露事实 / 合理推断 / 事后解读</strong>。第一级直接陈述, 第二级标注推断依据, 第三级只作历史复盘、不冒充当时信号。</p>
+          <p>不评价基金经理个人, 不推荐任何基金, <strong>不构成投资建议</strong>; 用词禁区(马后炮、抄底、逃顶一类)会被自动清洗。</p>
+        </div>
       </aside>
     </div>
 
@@ -881,6 +888,9 @@ footer {
 
       <div class="gate" id="ai-block">
         <h4>② API Key(必填)· 在 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">platform.deepseek.com</a> 申请</h4>
+        <!-- 只在公网模式(服务端持有 Key + 启用额度)下由 online.js 显示: 告诉访客今天还剩几次、为什么会被拦。
+             本机模式整块 hidden, 页面和以前一模一样。 -->
+        <p class="panel-sub hidden" id="quota-note"></p>
         <div class="grid3">
           <label class="field"><span>API Base(OpenAI 兼容)</span><input type="text" id="ai-base" value="https://api.deepseek.com"></label>
           <label class="field"><span>模型名</span><input type="text" id="ai-model" value="deepseek-v4-flash"></label>
@@ -1689,7 +1699,7 @@ window.FC = window.FC || {};
         '<li>报告中的推算价 = 期末公允价值 ÷ 期末持股数, <strong>未复权、不含分红</strong>, 不代表投资者实际收益。</li>' +
         '<li>全文为<strong>回溯复盘</strong>: 只陈述已发生的事实与可验证推断, 不含对未来收益的任何判断。</li>' +
         '<li>数据仅来自公开渠道, 不含任何机构内部数据; <strong>不构成投资建议, 不评价基金经理个人</strong>, 不推荐任何基金。</li>' +
-        '<li>证据级别按节适用: 第三/四/五/八/十一节以披露数字为准(披露事实); 第六/七/九/十节含引擎派生值(合理推断), 已在文内逐处标注。</li>' +
+        '<li>证据级别按节适用: <strong>先说结论 / 总成绩也看清代价 / 持仓集中度与骨架 / 持仓轮动主线 / 附录</strong>等节以披露数字为准(披露事实); <strong>方法论拆解 / 关键调仓案例审计 / 跟踪清单与证伪方式</strong>等节含引擎派生值(合理推断), 已在文内逐处标注。</li>' +
         '</ul></div>'
     });
 
@@ -1822,6 +1832,20 @@ window.FC = window.FC || {};
       s.html = wrapNumsAll(s.html, L[0], L[1]);
       s.evLevel = L[0];
       s.evSource = L[1];
+    });
+
+    /* 章节序号一律**按在数组里的顺序生成**, 不认上面每个 title 里手写的序号 —— 2026-10-10 修。
+       原因: 第九节「可复制的方法 × 不能被神化的部分」由大模型综述(T4)生成, 没有通过校验时
+       **整节不出现**(用户明确要求过: 不用套话填充)。手写序号不会跟着挪, 于是报告里就出现
+       「八、最新一期结构与变化」直接跳到「十、跟踪清单与证伪方式」, 看起来像缺了一节。
+       现在不管实际几节, 序号都从 一到 N 连续; title 里的中文序号只是源码里的可读写法, 会被这里覆盖。
+       s.name 保留"不带序号"的章节名, 给"对序号不敏感"的用途(报错信息、断言语义)。 */
+    var CN_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十',
+      '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十'];
+    S.forEach(function (s, i) {
+      var name = String(s.title || '').replace(/^\s*(?:第)?(?:[一二三四五六七八九十百零]{1,3}|\d{1,2})\s*[、.．,，:：]\s*/, '');
+      s.name = name;
+      s.title = (CN_NUM[i] || String(i + 1)) + '、' + name;
     });
 
     return { sections: S, meta: { generatedAt: new Date().toISOString(), range: ctx.range, quarterCount: m.n } };
@@ -2334,7 +2358,7 @@ window.FC = window.FC || {};
     var have = secs.map(function (s) { return s.id; });
     var miss = must.filter(function (x) { return have.indexOf(x) < 0; });
     out.push(miss.length ? R('C1', '输出层', '固定章节骨架完整(10 节必需)', 'fail', '缺 ' + miss.length + ' 节: ' + miss.join(', '), miss)
-      : R('C1', '输出层', '固定章节骨架完整(10 节必需)', 'pass', '10 节必需章节齐全, 顺序与标准流程一致; 第九节(可复制×不可神化)由大模型生成, 本次' + (have.indexOf('strength') >= 0 ? '已生成' : '未生成(整节不展示, 不用套话填充)') + '。'));
+      : R('C1', '输出层', '固定章节骨架完整(10 节必需)', 'pass', '10 节必需章节齐全, 顺序与标准流程一致; 「可复制的方法 × 不能被神化的部分」一节由大模型生成, 本次' + (have.indexOf('strength') >= 0 ? '已生成(共 ' + secs.length + ' 节)' : '未生成, 整节不展示、不用套话填充(共 ' + secs.length + ' 节)') + '。'));
 
     // C2 结论卡字段完整
     var missing = ['formTag', 'mainQuestion', 'claim', 'falsifier', 'evidenceLevel'].filter(function (k) { return !card[k]; });
@@ -3208,7 +3232,9 @@ window.FC = window.FC || {};
     FC.ai.clearLog();
     FC.ai.log({
       channel: '规则引擎(离线)', task: '全流程确定性计算', input: a.quarterCount + ' 期 × 前十大',
-      output: '指标 ' + Object.keys(a.metrics).length + ' 组 / 报告 11 节 / 结论卡 1 张',
+      /* 节数不写死: 第九章「可复制的方法 × 不能被神化的部分」由大模型综述生成, 没通过校验时整节不出现,
+         所以实际是 10 节或 11 节(2026-10-10: 报告编号已改成按顺序连续生成, 这里也跟着用真实节数)。 */
+      output: '指标 ' + Object.keys(a.metrics).length + ' 组 / 报告 ' + ((a.report && a.report.sections) ? a.report.sections.length : 10) + ' 节 / 结论卡 1 张',
       latencyMs: 0, valid: true, manual: '门禁 1 已确认'
     });
 
@@ -3926,6 +3952,20 @@ window.FC = window.FC || {};
         setAiStatus(null, '② 已从本机浏览器载入上次的 Key, 建议先测试连通性');
       }
 
+      /* 公网额度: 让访客在点"开始复盘"之前就知道今天还剩几次、为什么会被拦。
+         本机模式(未启用闸门)时这一段整块不显示, 页面看上去和以前一模一样。 */
+      if (h.quota && h.quota.enabled) {
+        var q = h.quota, L = q.limits;
+        var box = $('#quota-note');
+        if (box) {
+          box.classList.remove('hidden');
+          var tight = q.dayLeft <= 5;
+          box.innerHTML = '本站在线试用额度: 今天还剩 <b>' + q.dayLeft + '</b> 次(全站 ' + L.maxRunsDay + ' 次/天, 每台机器 '
+            + L.perIpHour + ' 次/小时) · 今天已跑 ' + q.dayRuns + ' 次'
+            + (tight ? '<br><span style="color:var(--warn)">额度快用完了 —— 想反复试的话, 建议自带 API Key, 或用离线样例模式。</span>' : '');
+        }
+      }
+
       var panel2 = $('#online-panel');
       panel2.classList.remove('hidden');
       /* 路径取末段: 不能只按 "\\" 切, macOS 用 "/" —— 否则 Mac 上会把整条路径显示出来。 */
@@ -4303,8 +4343,14 @@ window.FC = window.FC || {};
         body: JSON.stringify(body)
       });
       if (!res.ok) {
+        /* 公网模式下最常见的不 ok 是**额度用尽(429)**, 服务端已经写好了给人看的中文原因。
+           原来一律拼成 "服务返回 429: {json}", 访客看不懂、还会以为是自己操作错了。
+           先把 JSON 里的 error 抠出来, 抠不到才回落成原来的写法。 */
         var errTxt = await res.text();
-        throw new Error('服务返回 ' + res.status + ': ' + errTxt.slice(0, 300));
+        var nice = '';
+        try { nice = (JSON.parse(errTxt) || {}).error || ''; } catch (e) { /* 不是 JSON 就走下面的回落 */ }
+        if (!nice) nice = '服务返回 ' + res.status + ': ' + errTxt.slice(0, 300);
+        throw new Error(nice);
       }
       var reader = res.body.getReader();
       var dec = new TextDecoder('utf-8');

@@ -222,13 +222,17 @@ main { max-width: 1340px; margin: 0 auto; padding: 30px 28px 10px; }
   display: flex; flex-direction: column; gap: 16px;
 }
 @media (max-width: 1000px) { .hero-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 22px; } }
-.hero-fact { display: flex; align-items: baseline; gap: 12px; }
-.hero-fact b {
-  font-family: var(--num); font-variant-numeric: tabular-nums;
-  font-size: 26px; font-weight: 700; color: var(--navy); letter-spacing: -.02em;
-  flex: none; min-width: 84px;
+/* 首屏右侧那一栏。
+   2026-10-10 按用户要求改版: 原来是一组"大数字 + 小说明"的指标条(6 类 / 逐行 / 3 道 / 0 外链),
+   被判定太像模板 —— 四个数字排一列, 什么页面都能套。现在换成一段文字(边界与纪律),
+   和左栏互补: 左边讲"它怎么做的", 右边讲"它不许做什么"。 */
+.hero-note-title {
+  font-size: 15px; font-weight: 700; color: var(--navy);
+  margin: 0 0 12px; letter-spacing: .01em;
 }
-.hero-fact span { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; }
+.hero-note { display: flex; flex-direction: column; gap: 11px; font-size: 13px; line-height: 1.85; color: var(--ink-2); }
+.hero-note p { margin: 0; }
+.hero-note strong { color: var(--navy); font-weight: 600; }
 
 /* 运行上下文条: 跑完之后一直挂着, 随时知道"现在看的是哪只基金" */
 .ctxbar {
