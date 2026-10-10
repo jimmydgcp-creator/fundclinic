@@ -4580,17 +4580,34 @@ window.FC = window.FC || {};
             : '') + '</li>')
       : '<li>未执行</li>';
 
-    /* AI 三步的总体成败横幅: 必选模块出问题时必须在最显眼处说清楚 */
-    var aiOk = (s.aiLog || []).filter(function (x) { return x.ok; }).length;
-    var aiTotal = (s.aiLog || []).length;
+    /* AI 模块的总体成败横幅 —— 出问题时要在最显眼处说清楚, 而且要说对**是哪一类问题**:
+       ① 内容没过校验(编造数字 / 违禁词 / 覆盖率不足): 拦下来是设计行为, 报告照出;
+       ② 调用层面失败(Key 无效 / 余额不足 / 模型名写错): 那才是环境问题。
+       上一版不分青红皂白地写"最常见是 Key 无效/余额不足/模型名写错" —— 实测公网跑 519191 时
+       5 步里有 2 步是被**内容校验**拦下的(核心判断编了 4 个数字、深度报告命中违禁词"高点卖出"),
+       页面却提示去查 Key 余额, 把"拦截器正常工作"讲成了"环境出问题了"。 */
+    var aiAll = s.aiLog || [];
+    var aiOk = aiAll.filter(function (x) { return x.ok; }).length;
+    var aiTotal = aiAll.length;
+    var aiBad = aiAll.filter(function (x) { return !x.ok; });
+    var apiFail = aiBad.filter(function (x) { return !!x.error; });          // 有 error = 调用层面
+    var contentFail = aiBad.filter(function (x) { return !x.error; });       // 只有 issues = 内容没过校验
     var aiBanner = '';
     if (aiTotal) {
-      aiBanner = aiOk === aiTotal
-        ? '<div class="card ok" style="margin-bottom:12px"><strong>AI 模块:' + aiOk + '/' + aiTotal + ' 步通过校验并已并入报告</strong>' +
-          '<div class="note" style="margin:6px 0 0">主题归类 / 判断起草 / 用词清洗三步的输出都过了校验(数字回查 · 覆盖率 · 违禁词 · 数字守恒)。</div></div>'
-        : '<div class="card bad" style="margin-bottom:12px"><strong>AI 模块:只有 ' + aiOk + '/' + aiTotal + ' 步通过校验</strong>' +
-          '<div class="note" style="margin:6px 0 0">未通过的已被拦截(这是设计行为, 不是崩溃)。报告仍然产出, 但用的是规则引擎的结论 —— ' +
-          '请检查下面的失败原因(最常见是 Key 无效/余额不足/模型名写错)。</div></div>';
+      if (aiOk === aiTotal) {
+        aiBanner = '<div class="card ok" style="margin-bottom:12px"><strong>AI 模块: ' + aiOk + '/' + aiTotal + ' 步通过校验并已并入报告</strong>' +
+          '<div class="note" style="margin:6px 0 0">每一步的输出都过了校验(数字回查 · 覆盖率 · 违禁词 · 数字守恒)。</div></div>';
+      } else {
+        var why = (contentFail.length && !apiFail.length)
+          ? '这次拦的是<strong>模型写出来的内容</strong>(编造数字 / 违禁词 / 覆盖率不足)——<strong>不是接口问题</strong>, Key 和余额都正常。'
+          : (apiFail.length && !contentFail.length)
+            ? '这次是<strong>调用层面</strong>的问题(Key 无效 / 余额不足 / 模型名写错), 不是内容校验。'
+            : '两种原因都有: 既有内容没过校验, 也有调用层面的失败。';
+        aiBanner = '<div class="card bad" style="margin-bottom:12px"><strong>AI 模块: ' + aiOk + '/' + aiTotal + ' 步通过校验</strong>' +
+          '<div class="note" style="margin:6px 0 0">未通过的已被拦截(<strong>这是设计行为, 不是崩溃</strong>)—— 报告仍然产出, 用的是规则引擎的结论。' +
+          why + '被拦的步骤: ' + FC.esc(aiBad.map(function (x) { return x.task; }).join('、')) +
+          '; 每一步的原因见下方「AI 模块调用」与《错误检查记录》。</div></div>';
+      }
     }
 
     var rangeBasis = s.rangeInfo ? s.rangeInfo.basis : '';
@@ -4623,7 +4640,11 @@ window.FC = window.FC || {};
       (function () {
         var d = s.deckT6;
         if (!d) {
-          return '<p class="panel-sub">本次未生成。深度演示稿需要一个 API Key —— 大模型要读完报告、决定讲几页、每页主张什么, 再逐页排版。</p>' +
+          /* 公网形态下 Key 在服务端, "需要一个 API Key" 这句话是错的 —— 没产出只能是这一步失败/没跑,
+             原因在 AI 模块那张表里。本机自带 Key 的形态保持原话。 */
+          return '<p class="panel-sub">本次未生成。' + (online.serverKey
+            ? '深度演示稿要由大模型读完报告后逐页编排; 这次没有产出, 具体原因见上方「AI 模块」与《错误检查记录》。'
+            : '深度演示稿需要一个 API Key —— 大模型要读完报告、决定讲几页、每页主张什么, 再逐页排版。') + '</p>' +
             '<p class="note">下面那份「演示稿 (.html)」是<strong>规则引擎的模板版</strong>: 版式固定、只替换数字。它能用, 但一眼就是报表, 不适合拿去讲。</p>';
         }
         if (!d.ok) {
@@ -4650,7 +4671,11 @@ window.FC = window.FC || {};
       '</div>' +
 
       '<div class="panel"><h3>可下载的交付物</h3>' +
-      '<p class="panel-sub">演示稿都是<strong>单文件 HTML</strong>(不引用任何外部资源, 发一个文件给别人就能看), PDF 由服务端调无头浏览器导出, 每页正好一张幻灯片。</p>' +
+      '<p class="panel-sub">演示稿都是<strong>单文件 HTML</strong>(不引用任何外部资源, 发一个文件给别人就能看)' +
+      (s.pdf
+        ? ', PDF 由服务端调无头浏览器导出, 每页正好一张幻灯片。'
+        : '; 本站没有无头浏览器, 所以不提供 PDF 导出 —— 打开演示稿按 <code>P</code> 就能自己打印成 PDF, 每页正好一张幻灯片。') +
+      '</p>' +
       '<div class="btn-row">' +
       dl('report', '复盘报告 (.md)') +
       (s.deepReportGenerated && s.files.deep ? dl('deep', '深度复盘报告 (.md)') : '') +
