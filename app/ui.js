@@ -318,28 +318,15 @@ window.FC = window.FC || {};
       return card + '</div>';
     }).join('');
 
-    /* 运行记录两套来源: 在线模式用服务端真跑的那一份(每一步的校验结果), 离线用本地日志。 */
-    var serverAi = (state.server && state.server.aiLog) || [];
-    var logRows, logHead;
-    if (serverAi.length) {
-      logHead = '<tr><th>耗时</th><th>任务</th><th>校验结果</th><th>错误</th><th>命中的检查项</th></tr>';
-      logRows = serverAi.map(function (x) {
-        var issues = (x.issues || []).filter(function (i) { return i.level !== 'info'; })
-          .map(function (i) { return esc(i.msg); }).join('<br>');
-        return '<tr><td class="mono">' + (x.latencyMs || 0) + ' ms</td><td>' + esc(x.task) + '</td>' +
-          '<td>' + (x.ok ? '<span class="pos">通过并并入报告</span>' : '<span class="neg">未通过, 已拦截</span>') + '</td>' +
-          '<td>' + (x.error ? esc(x.error) : '—') + '</td><td style="font-size:12.5px">' + (issues || '—') + '</td></tr>';
-      }).join('');
-    } else {
-      logHead = '<tr><th>时间</th><th>通道</th><th>任务</th><th>输入摘要</th><th>输出摘要</th><th>耗时</th><th>校验</th><th>人工复核</th></tr>';
-      logRows = FC.ai.runLog.length ? FC.ai.runLog.map(function (e) {
-        return '<tr><td class="mono">' + e.at.slice(11, 19) + '</td><td>' + esc(e.channel || '—') + '</td><td>' + esc(e.task || '—') + '</td>' +
-          '<td>' + esc(String(e.input || '').slice(0, 42)) + '</td><td>' + esc(String(e.output || '').slice(0, 60)) + '</td>' +
-          '<td>' + (e.latencyMs !== undefined ? e.latencyMs + ' ms' : '—') + '</td>' +
-          '<td>' + (e.valid === undefined ? '—' : (e.valid ? '<span class="pos">通过</span>' : '<span class="neg">未通过</span>')) + '</td>' +
-          '<td>' + esc(e.manual || '—') + '</td></tr>';
-      }).join('') : '<tr><td colspan="8">本次未调用大模型(全部由离线规则引擎完成)。</td></tr>';
-    }
+    /* 2026-10-10 二次收敛: 这里本来还有一张「运行记录」表(时间/通道/任务/输入/输出/耗时/校验/人工复核)
+       + 一个"导出《AI 运行记录》MD"按钮。你看到的是它在公网页上的样子 —— 因为没有服务端跑过的结果,
+       表里只有一行占位符「本次未调用大模型(全部由离线规则引擎完成)」, 而那句话在公网形态下是**错的**
+       (大模型确实在跑, 只是在服务端), 表格头里的"人工复核"也早就不存在了。
+       与其在页面上留一张空的、还会说错话的表, 不如整块去掉:
+         · 服务端真跑之后, 每一步 AI 调用与校验结果在「① 输入与口径」页的
+           "本次执行步骤(运行记录)"里, 没有丢;
+         · 要留痕交付的话, 《AI 运行记录》MD 仍由引擎生成并随交付物落盘(见 tools/gen_artifacts.mjs)。
+       这一页现在只回答一件事: 每一步做什么、拿什么校验。 */
 
     /* ---- 四、本次核查结果: 由真实规则结算出来的行, 不是勾选框 ---- */
     function layerRules(layer) { return ck.rules.filter(function (r) { return r.layer === layer; }); }
@@ -424,7 +411,7 @@ window.FC = window.FC || {};
 
       '<div class="panel"><h3>四、AI 每一步做了什么, 拿什么校验</h3>' +
       '<p class="panel-sub">分工原则: 抓取/解析/量化/对账/质检交给脚本(确定性); 只有"语言类"任务交给大模型, 且输出必须过校验。' +
-      '<br>不通过就<b>拦截</b>, 但拦截不等于崩 —— 规则引擎的结论照用、报告照出, 只在下面记下"哪一步被拦了、为什么"。</p>' +
+      '<br>不通过就<b>拦截</b>, 但拦截不等于崩 —— 规则引擎的结论照用、报告照出, 只在质检明细里记下"哪一步被拦了、为什么"。</p>' +
       (interactive
         ? '<p class="note">当前没有服务端(直接打开的 HTML 文件), AI 这一步在这里跑不起来, 所以保留人工中转: 复制提示词 → 去大模型网页版跑 → 把 JSON 粘回来。校验逻辑与直连完全一样, 不通过照样不写进报告。</p>' +
           '<div class="grid2" style="margin-bottom:14px">' +
@@ -432,11 +419,11 @@ window.FC = window.FC || {};
           '<label class="field"><span>模型名</span><input type="text" id="llm-model" value="' + esc(defaultLLM.model) + '"></label>' +
           '</div>' +
           '<label class="field"><span>API Key(只存在本页内存, 不写进任何文件)</span><input type="password" id="llm-key" value="' + esc(state.llmCfg.apiKey) + '"></label>'
-        : '<p class="note">AI 由服务端调用, 你不需要做任何操作; 下面是每一步的输入 / 输出契约与校验规则, 以及本次真实的调用记录。</p>') +
+        : '<p class="note">AI 由服务端调用, 你不需要做任何操作; 下面是每一步的输入 / 输出契约与校验规则。' +
+          /* 原来这里还挂着一张"运行记录"表和导出按钮(见上面那段注释的删除理由)。
+             真跑过之后每一步的调用与校验结果在「① 输入与口径」页的"本次执行步骤(运行记录)"里。 */
+          '本次每一步的调用与校验结果, 见「① 输入与口径」页底部的<strong>本次执行步骤(运行记录)</strong>。</p>') +
       aiTasks +
-      '<h4 style="margin-top:18px">运行记录</h4>' +
-      '<table class="tbl tbl-compact"><thead>' + logHead + '</thead><tbody>' + logRows + '</tbody></table>' +
-      '<div class="btn-row" style="margin-top:12px"><button class="btn btn-sm" id="btn-export-log">导出《AI 运行记录》MD</button></div>' +
       '</div>';
     markDrawn('audit');
   }
@@ -493,30 +480,10 @@ window.FC = window.FC || {};
   }
   function r2(v) { return typeof v === 'number' && isFinite(v) ? Math.round(v * 100) / 100 : null; }
 
-  /** 导出《AI 运行记录》。
-   *  在线模式下 FC.ai.runLog 里只有前端记的那一条(真正的调用发生在服务端),
-   *  所以有 state.server.aiLog 时以它为准 —— 否则导出的是"一份只有一行的运行记录",
-   *  而页面上明明摆着服务端每一步的校验结果。 */
-  function aiLogToMarkdown() {
-    var s = state.server;
-    if (s && s.aiLog && s.aiLog.length) {
-      var L = ['# AI 模块运行记录(服务端调用 · 自动生成)', '',
-        '- 生成时间: ' + new Date().toISOString(),
-        '- 对象: ' + s.name + '(' + s.code + ') · ' + s.range + ' · ' + s.quarters + ' 期', '',
-        '| 任务 | 校验结果 | 耗时 | 错误 | 命中的检查项 |', '| --- | --- | --- | --- | --- |'];
-      s.aiLog.forEach(function (x) {
-        var issues = (x.issues || []).filter(function (i) { return i.level !== 'info'; })
-          .map(function (i) { return i.msg; }).join('; ');
-        L.push('| ' + x.task + ' | ' + (x.ok ? '通过并并入报告' : '未通过, 已拦截') + ' | ' + (x.latencyMs || 0) + ' ms | ' +
-          (x.error ? String(x.error).replace(/\|/g, '/') : '—') + ' | ' + (issues.replace(/\|/g, '/') || '—') + ' |');
-      });
-      L.push('', '## 说明', '',
-        '- 每一步输出都要过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒)才允许并入报告;',
-        '- 未通过的步骤被拦截, 报告照出(用规则引擎的结论), 原因按步记在上表。');
-      return L.join('\n');
-    }
-    return FC.ai.runLogToMarkdown(state.analysis);
-  }
+  /* 这里原来有个 aiLogToMarkdown(): 给质检页那个"导出《AI 运行记录》MD"按钮用。
+     按钮整块删掉之后(见 renderAudit 顶部注释), 它就没有调用者了 —— 留着只会是死代码。
+     需要《AI 运行记录》MD 的地方仍在: 离线交付物由 tools/gen_artifacts.mjs 生成,
+     服务端每一步的调用记录存在 _runs/<代码>/run.json 的 summary.aiLog 里。 */
 
   /* ============================================================ 事件绑定 */
   function bind() {
@@ -553,7 +520,6 @@ window.FC = window.FC || {};
 
       if (t.id === 'btn-export-check') { download('错误检查记录_' + state.analysis.fund.code + '.md', FC.checkToMarkdown(state.check, state.analysis), 'text/markdown'); return; }
       if (t.id === 'btn-copy-check') { copyText(FC.checkToMarkdown(state.check, state.analysis), '错误检查记录'); return; }
-      if (t.id === 'btn-export-log') { download('AI运行记录_' + state.analysis.fund.code + '.md', aiLogToMarkdown(), 'text/markdown'); return; }
       if (t.id === 'btn-export-report') { download('持仓回溯复盘_' + state.analysis.fund.code + '.md', reportToMarkdown(), 'text/markdown'); return; }
       if (t.id === 'btn-export-card') { download('结论卡_' + state.analysis.fund.code + '.json', cardToJSON(), 'application/json'); return; }
       if (t.id === 'btn-export-dataset') { download('数据底稿_' + state.analysis.fund.code + '.json', JSON.stringify(state.dataset, null, 1), 'application/json'); return; }
@@ -604,13 +570,16 @@ window.FC = window.FC || {};
   }
 
   function deliverNote(ck) {
+    /* "三份记录"里的运行记录不再由页面导出(那块表已删), 但它确实在:
+       服务端把每一步的调用与校验存在 _runs/<代码>/run.json 的 summary.aiLog 里,
+       离线交付物由 tools/gen_artifacts.mjs 生成《AI运行记录_*.md》。所以这里写清"在哪", 不含糊其辞。 */
     return ['# 交付说明 · 三份记录齐备', '',
       '本包由「基金复诊台 FundClinic」生成, 证明这次复盘是"可核验"的而不是"看起来像"。', '',
       '核查结果不由勾选框产生, 而是由 18 条质检规则 + 官方原文抽检清单实际结算:',
       '', '| 交付物 | 内容 | 本包数值 |', '| --- | --- | --- |',
       '| 复盘报告 | 固定章节骨架 + 逐数字证据分级 | ' + state.analysis.quarterCount + ' 期 / ' + state.analysis.report.sections.length + ' 节 |',
       '| 错误检查记录 | ' + ck.summary.total + ' 条规则(输入/计算/输出三层) + ' + ck.manualSample.length + ' 处回原文抽检清单 | 通过 ' + ck.summary.pass + ' · 提示 ' + ck.summary.warn + ' · 阻断 ' + ck.summary.fail + ' |',
-      '| 运行记录 | 规则引擎与大模型的每一次调用(输入/输出/耗时/校验) | ' + (state.server && state.server.aiLog ? state.server.aiLog.length : FC.ai.runLog.length) + ' 条 |',
+      '| 运行记录 | 规则引擎与大模型的每一次调用(输入/输出/耗时/校验) | ' + (state.server && state.server.aiLog ? state.server.aiLog.length : FC.ai.runLog.length) + ' 条 · 随结果落盘(_runs/<代码>/run.json 的 summary.aiLog) |',
       '', '## 边界声明', '',
       '- 数据全部来自公开季报与天天基金 F10, 不含任何机构内部数据;',
       '- 只看前十大持仓, 季报为期末快照, 期间买卖不可见;',
