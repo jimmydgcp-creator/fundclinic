@@ -22,8 +22,25 @@ services:
         value: "1"
       - key: NODE_ENV
         value: production
-      # 不要把 API Key 写进仓库。两种做法二选一:
-      #   ① 不设这个变量 —— 让每个访问者在页面上填自己的 Key(推荐, 也符合"用用户自己的 API")
-      #   ② 想在课堂上免填: 在这个面板里加 FUNDCLINIC_LLM_KEY, 勾 Sync=false
-      # - key: FUNDCLINIC_LLM_KEY
+
+      # ---- 用量闸门(2026-10-10 加) ----
+      # 本形态是"服务端持有你的 Key, 访客只输代码", 所以 Key 就是**任何点开链接的人都能花的钱**。
+      # 这三道闸在云端会自动启用(本地跑不受影响), 想改额度就改这里的数值后重新部署。
+      - key: FUNDCLINIC_MAX_RUNS_DAY      # 全站每天上限 —— 真正兜住账单的那一道
+        value: "40"
+      - key: FUNDCLINIC_MAX_PER_IP_HOUR   # 同一台机器每小时
+        value: "3"
+      - key: FUNDCLINIC_MAX_PER_IP_DAY    # 同一台机器每天
+        value: "8"
+
+      # ---- 你的 API Key ----
+      # ⚠️ 必须写在这个文件里(而不是只在面板上手填), 否则**每次重新部署都可能被蓝图覆盖掉**。
+      #    sync: false 的意思正是: "值不要从仓库同步, 我在面板里填" —— 填一次就长期有效。
+      #    仓库里永远不出现 Key 本身。
+      - key: FUNDCLINIC_LLM_KEY
+        sync: false
+      # 可选: 换模型/换服务商(any OpenAI 兼容接口)。不填就用内置默认(DeepSeek)。
+      # - key: FUNDCLINIC_LLM_MODEL
+      #   sync: false
+      # - key: FUNDCLINIC_LLM_BASE
       #   sync: false
