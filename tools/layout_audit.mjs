@@ -104,10 +104,17 @@ window.addEventListener('load', function () {
     out.counts['ev-fact'] = document.querySelectorAll('.ev-fact').length;
     out.counts['ev-infer'] = document.querySelectorAll('.ev-infer').length;
 
+    /* "请人打勾"的控件必须一个都不剩(2026-10-10 界面收敛):
+       勾选框不改数据也不改报告, 只把导出按钮从灰变亮 —— 证明的是有人点过鼠标, 不是有人核过数。
+       这条放在浏览器里数 DOM, 而不是 grep 源码 —— 源码删干净了但脚本又插回来, 只有数 DOM 才看得见。 */
+    out.counts['gate-checkbox'] = document.querySelectorAll('.chk-sample, #g3-num, #g3-concl, #g3-comp').length;
+    out.counts['gate2-controls'] = document.querySelectorAll('#gate2 input, #gate2 button').length;
+
     // 6) 审计页关键文案是否在场
     var auditTxt = document.getElementById('view-audit').innerText || '';
     out.auditMarkers = {
-      规则条数提示: /自动质检\\(错了怎么发现 · (\\d+) 条规则\\)/.exec(auditTxt),
+      规则条数提示: /自动质检明细\\(错了怎么发现 · (\\d+) 条规则\\)/.exec(auditTxt),
+      核查结果表: /本次核查结果/.exec(auditTxt),
       总体结论: /(全部通过|通过, 有 \\d+ 项建议人工确认|有 \\d+ 项必须处理\\(阻断\\))/.exec(auditTxt),
       抽检行数: (auditTxt.match(/打开季报|需自行检索/g) || []).length
     };
@@ -208,10 +215,13 @@ if (res.chartScale) {
 ok(c['ev-infer'] >= 3, '合理推断标注 >=3 处', String(c['ev-infer']));
 ok(c['ai-task'] === 5, '5 张 AI 任务卡(T1 主题归类 / T2 判断起草 / T3 用词清洗 / T4 结论提炼 / T5 深度报告)', String(c['ai-task']));
 ok(c.tbl >= 8, '表格 >=8 个', String(c.tbl));
+ok(c['gate-checkbox'] === 0, '质检页已无"请人打勾"的勾选框(.chk-sample / 门禁 3 三查)', String(c['gate-checkbox']));
+ok(c['gate2-controls'] === 0, '报告页门禁 2 已无输入框/按钮(改成只读显示引擎判断)', String(c['gate2-controls']));
 console.log('    完整计数: ' + JSON.stringify(c));
 
 console.log('\n=== F. 审计页文案 ===');
 ok(!!res.auditMarkers.规则条数提示, '显示规则条数', JSON.stringify(res.auditMarkers.规则条数提示));
+ok(!!res.auditMarkers.核查结果表, '质检页有"本次核查结果"表(直接给结论)', JSON.stringify(res.auditMarkers.核查结果表));
 ok(!!res.auditMarkers.总体结论, '显示总体结论', JSON.stringify(res.auditMarkers.总体结论));
 ok(res.auditMarkers.抽检行数 >= 12, '抽检清单 >=12 行', String(res.auditMarkers.抽检行数));
 

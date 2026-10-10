@@ -406,20 +406,22 @@ window.FC = window.FC || {};
     L.push('- 生成时间: ' + new Date().toISOString());
     if (analysis) L.push('- 对象: ' + analysis.fund.name + '(' + analysis.fund.code + ') · ' + analysis.range + ' · ' + analysis.quarterCount + ' 期');
     L.push('');
-    L.push('| 时间 | 通道 | 任务 | 输入摘要 | 输出摘要 | 耗时 | 校验 | 人工复核 |');
+    /* 最后一列原来叫"人工复核", 值都是"☐ 待人工打勾" —— 打勾已经从页面上拿掉了(见 ui.js 质检页注释),
+       现在这一列记的是备注(口径/拦截原因/是否改判), 所以列名也跟着改。 */
+    L.push('| 时间 | 通道 | 任务 | 输入摘要 | 输出摘要 | 耗时 | 校验 | 备注 |');
     L.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
     if (!FC.ai.runLog.length) L.push('| — | — | — | 本次未调用大模型 | — | — | — | — |');
     FC.ai.runLog.forEach(function (e) {
       L.push('| ' + e.at + ' | ' + (e.channel || '—') + ' | ' + (e.task || '—') + ' | ' + String(e.input || '').replace(/\|/g, '/').slice(0, 60) +
         ' | ' + String(e.output || '').replace(/\|/g, '/').slice(0, 80) + ' | ' + (e.latencyMs !== undefined ? e.latencyMs + ' ms' : '—') +
-        ' | ' + (e.valid === undefined ? '—' : (e.valid ? '通过' : '**未通过**')) + ' | ' + (e.manual || '☐') + ' |');
+        ' | ' + (e.valid === undefined ? '—' : (e.valid ? '通过' : '**未通过**')) + ' | ' + (e.manual || '—') + ' |');
     });
     L.push('');
     L.push('## 通道说明');
     L.push('');
     L.push('- **通道 A · 离线规则引擎**: 确定性计算, 无网络依赖, 同一输入结果逐位相同, 可复现;');
     L.push('- **通道 B · 大模型**: 承担"主题归类 / 判断起草 / 用词清洗"三类语言任务, 全部输出经上述校验后才可进入报告;');
-    L.push('- 大模型输出**不直接进入最终报告**: 判断方向需人工在门禁 2 确认, 数字需回查底稿。');
+    L.push('- 大模型输出**不直接进入最终报告**: 每一步输出都必须先过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒), 不通过一律拦截 —— 报告中留下的是规则引擎的结论, 上面按步记录了"哪一步被拦、为什么"。');
     return L.join('\n');
   };
 

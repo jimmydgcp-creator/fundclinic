@@ -8,7 +8,7 @@ window.FC = window.FC || {};
   'use strict';
 
   var $ = function (s) { return document.querySelector(s); };
-  var online = { available: false, health: null, summary: null, running: false, keyOk: false };
+  var online = { available: false, health: null, summary: null, running: false, keyOk: false, serverKey: false };
   FC.online = online;
 
   var LS_KEY = 'fundclinic.llm.v1';
@@ -23,7 +23,10 @@ window.FC = window.FC || {};
     try { v ? localStorage.setItem(LS_KEY, JSON.stringify(v)) : localStorage.removeItem(LS_KEY); } catch (e) {}
   }
 
-  /** 三个输入框都齐了才允许探路 —— AI 模块是必选 */
+  /** 探路的前置条件: 6 位代码 + AI 模块可用。
+   *  服务端已持有 Key 时(公网部署 / 本机配了 llm.local.json), #ai-key 里放的是占位符 __SERVER_SIDE__,
+   *  访客只需要填代码 —— 原来的写法要求"Key 长度 > 8", 公网上按钮会因为一个访客根本看不见的
+   *  输入框而被判成"没填好"(实际没坏, 但提示语是错的:"填好基金代码与 API Key 后可点")。 */
   function syncRunButton() {
     var btn = $('#btn-online-probe');
     if (!btn) return;
@@ -31,10 +34,14 @@ window.FC = window.FC || {};
     var key = ($('#ai-key').value || '').trim();
     var base = ($('#ai-base').value || '').trim();
     var model = ($('#ai-model').value || '').trim();
-    var ready = /^\d{6}$/.test(code) && key.length > 8 && base && model;
+    var keyReady = online.serverKey ? true : (key.length > 8 && !!base && !!model);
+    var ready = /^\d{6}$/.test(code) && keyReady;
     btn.disabled = !ready || online.running;
     var hint = $('#probe-hint');
-    if (hint) hint.textContent = ready ? '探路约 1 秒, 只抓元数据(概况/经理/报告期), 不抓持仓与 PDF' : '填好基金代码与 API Key 后可点';
+    if (hint) {
+      if (ready) hint.textContent = '探路约 1 秒, 只抓元数据(概况/经理/报告期), 不抓持仓与 PDF';
+      else hint.textContent = online.serverKey ? '填 6 位基金代码后即可点' : '填好基金代码与 API Key 后可点';
+    }
   }
 
   function setAiStatus(ok, text) {
@@ -138,8 +145,8 @@ window.FC = window.FC || {};
         '浏览器不允许网页从本地文件跨域抓取天天基金的数据, 也不允许直连大模型接口(CORS)。' +
         '所以"输入代码 → 自动爬取 → AI 生成报告"需要一个本地小服务:' +
         '双击项目里的 <code>启动_基金复诊台.bat</code>, 再打开 <code>http://127.0.0.1:8787</code>。' +
-        '抓取与生成全部在你自己的电脑上跑, 只有大模型那一步会用你自己的 Key 发一次请求出去。<br>' +
-        '离线模式下你仍可以用下面的"内置样例"和"粘贴数据"两条路线, 计算与质检完全相同。';
+        '抓取与生成全部在你自己的电脑上跑; 大模型那一步由本地服务转发, Key 只留在你本机, 不上传。<br>' +
+        '不想装服务也行 —— 用下面的<strong>内置样例</strong>看完整效果, 计算与质检完全相同。';
       return;
     }
     try {
@@ -162,17 +169,29 @@ window.FC = window.FC || {};
         FC.toast('服务在跑旧代码, 请重启: 关掉启动窗口再双击「启动_基金复诊台.bat」', 'err');
       }
 
-      // 服务端已配置 Key(环境变量或 llm.local.json)时, 自动填好, 用户不用重输
+      /* 服务端已持有 Key —— 这在公网上是**默认情形**, 也是访客唯一会遇到的情形:
+         所以整块 Key 表单收掉, 换一句人话, 不再出现"API Key / 申请 / 测试连通性"这些词。
+         #ai-key 里塞占位符, 这样 probe / runOnline 的取值逻辑一行都不用改。
+         本机没配 Key 时(自带 Key 自己跑)保持原样, 只是状态栏提示改成"需要你自己填"。 */
       if (h.llm) {
         if (!$('#ai-base').value || $('#ai-base').value === 'https://api.deepseek.com') $('#ai-base').value = h.llm.baseUrl;
         if (!$('#ai-model').value || $('#ai-model').value === 'deepseek-v4-flash') $('#ai-model').value = h.llm.model;
-        if (h.llm.hasKey && !$('#ai-key').value) {
-          $('#ai-key').value = '__SERVER_SIDE__';
+        if (h.llm.hasKey) {
+          online.serverKey = true;
+          if (!$('#ai-key').value) $('#ai-key').value = '__SERVER_SIDE__';
           $('#ai-key').disabled = true;
-          $('#ai-key').placeholder = '已由服务端配置(' + h.llm.keySource + '), 无需在此填写';
-          setAiStatus(true, '② API Key 已由服务端配置(' + h.llm.keySource + ')');
-        } else if (h.llm.hasKey) {
-          setAiStatus(true, '② API Key 已由服务端配置(' + h.llm.keySource + ')');
+          setAiStatus(true, '② AI 模块可用(服务端已配置)');
+          var ab = $('#ai-block'); if (ab) ab.classList.add('hidden');
+          var skn = $('#server-key-note');
+          if (skn) {
+            skn.classList.remove('hidden');
+            skn.innerHTML = 'AI 模块由<strong>本站服务端</strong>提供 —— 你只需要输入基金代码, 不用申请、也不用填写任何 Key。' +
+              '大模型只做语言类的事(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗), 抓取、计算、对账、质检全部由脚本完成; ' +
+              '它的每一份输出都要过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒)才允许进报告, 不通过一律拦截。' +
+              '你提供的只有那 6 位基金代码, 本站没有你的任何账号信息。';
+          }
+        } else {
+          setAiStatus(null, '② 需要你自己填一个 API Key(见下方)');
         }
       }
       // 本机浏览器记住过就直接填回来
@@ -195,7 +214,7 @@ window.FC = window.FC || {};
           var tight = q.dayLeft <= 5;
           box.innerHTML = '本站在线试用额度: 今天还剩 <b>' + q.dayLeft + '</b> 次(全站 ' + L.maxRunsDay + ' 次/天, 每台机器 '
             + L.perIpHour + ' 次/小时) · 今天已跑 ' + q.dayRuns + ' 次'
-            + (tight ? '<br><span style="color:var(--warn)">额度快用完了 —— 想反复试的话, 建议自带 API Key, 或用离线样例模式。</span>' : '');
+            + (tight ? '<br><span style="color:var(--warn)">额度快用完了 —— 想反复试的话, 用下面的内置样例模式, 不消耗额度。</span>' : '');
         }
       }
 
@@ -209,7 +228,7 @@ window.FC = window.FC || {};
         '数据来源: <strong>六类公开来源</strong>(官方定期报告 PDF 为最高权威, 第三方平台只做交叉验证)。' +
         '<span class="envchk">官方 PDF 解析 ' + (h.pdftotext ? '✓ ' + base(h.pdftotextPath) : '✗ 未安装 Poppler, 官方对账会标记为未完成') + '</span>' +
         '<span class="envchk">PDF 导出 ' + (h.edge ? '✓ ' + base(h.edge) : '✗ 未找到 Edge/Chrome') + '</span>' +
-        '<span class="envchk">AI 模块 <strong>必选</strong></span>' +
+        '<span class="envchk">AI 模块 ' + (online.serverKey ? '由本站服务端提供' : '<strong>需自带 Key</strong>') + '</span>' +
         /* 缺 Poppler 时直接把**本机对应的**安装命令摆出来, 不让用户自己去猜去搜 */
         (!h.pdftotext && h.popplerHint
           ? '<div class="note" style="margin-top:8px">装上它能让报告多出最关键的一栏(官方季报逐行对账)。在' +
@@ -219,6 +238,10 @@ window.FC = window.FC || {};
             ', 然后重启一次服务。</div>'
           : '');
       syncRunButton();
+      /* 质检页要按"有没有服务端"决定长什么样(有服务端就整页只读, 见 ui.js renderAudit)。
+         页面初始化时还不知道 -- 那时 FC.online.available 还是 false, 会先画成"要人工中转"的样子,
+         所以探到服务端之后必须重画一次, 否则公网上会残留一批本不该出现的按钮和输入框。 */
+      if (FC.renderAll && FC.state && FC.state.analysis) FC.renderAll();
       // 有历史就自动恢复最近一次 —— 刷新/回退/重开浏览器都不丢结果
       FC.restoreLast();
     } catch (e) {
@@ -445,7 +468,7 @@ window.FC = window.FC || {};
       log('已载入 ' + code + ' 的历史结果(' + String((j.summary && j.summary.range) || '') + ')', 'ok');
       renderResult(j.summary);
       renderCtxbar(j.summary);
-      FC.applyServerResult(j.analysis, j.check, j.datasetMeta);
+      FC.applyServerResult(j.analysis, j.check, j.datasetMeta, j.summary);
       try { localStorage.setItem('fundclinic.lastCode', code); } catch (e) {}
       if (opts.silent) { FC.setStatus('已恢复上次复盘: ' + code + '(' + ((j.summary && j.summary.range) || '') + ')'); }
       else { FC.toast('已恢复 ' + (j.summary && j.summary.name) + ' 的复盘结果', 'ok'); FC.show('report'); }
@@ -463,7 +486,11 @@ window.FC = window.FC || {};
     var code = last || (HISTORY[0] && HISTORY[0].code);
     if (!code) return;
     var box = $('#online-code');
-    if (box && !box.value) box.value = code;
+    /* 把上次的代码填回输入框之后**必须重算一次按钮状态**:
+       按钮只听 input/change 事件, 而这里是脚本赋值, 不触发事件 ——
+       结果是代码明明填好了(还是自动填的), "开始复盘"却一直是灰的, 得先手动碰一下输入框。
+       公网形态下更明显: 服务端有 Key, 唯一的前置条件就是这 6 位代码。 */
+    if (box && !box.value) { box.value = code; syncRunButton(); }
     await FC.loadRun(code, { silent: true });
   };
 
@@ -614,7 +641,7 @@ window.FC = window.FC || {};
       finishSteps(true);
       renderResult(done.summary);
       renderCtxbar(done.summary);
-      FC.applyServerResult(done.analysis, done.check, done.datasetMeta);
+      FC.applyServerResult(done.analysis, done.check, done.datasetMeta, done.summary);
       FC.toast('复盘完成: ' + done.summary.name + '(' + done.summary.formTag + ')', 'ok');
       FC.show('report');
     } catch (e) {
@@ -640,7 +667,7 @@ window.FC = window.FC || {};
                 finishSteps(true);
                 renderResult(saved.summary);
                 renderCtxbar(saved.summary);
-                if (saved.analysis) FC.applyServerResult(saved.analysis, saved.check, saved.datasetMeta);
+                if (saved.analysis) FC.applyServerResult(saved.analysis, saved.check, saved.datasetMeta, saved.summary);
                 log('  ✓ 结果其实已经生成好了(服务端已落盘), 已直接给你载入。', 'ok');
                 FC.toast('连接中断, 但结果已生成 —— 已自动载入', 'ok');
                 FC.show('report');

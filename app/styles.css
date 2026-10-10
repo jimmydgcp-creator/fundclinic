@@ -755,7 +755,9 @@ code {
   transition: border-color var(--t) var(--ease), background var(--t) var(--ease), transform var(--t) var(--ease);
 }
 .cand:hover { border-color: var(--brass); background: var(--brass-soft); transform: translateX(2px); }
-.cand.chk-sample { font-family: var(--num); font-variant-numeric: tabular-nums; }
+/* 这里原来还有一条给"抽检清单的核完勾选框"配的规则 —— 勾选框删掉之后它就没有任何使用者了
+   (audit_css_coverage 会把它列成死 class), 所以一起删。
+   注: 注释里别写带点的类名, 那个工具是从 CSS 全文里抓 .类名 的, 写进注释会被当成"还在定义"。 */
 .cands { display: flex; flex-direction: column; }
 .btn-run, .btn-dl, .btn-apply, .btn-manual, .btn-direct, .btn-prompt,
 .btn-copy-prompt, .btn-load-run { /* 语义分组, 视觉沿用 .btn */ }

@@ -33,14 +33,16 @@ for (const code of ['519191', '002910']) {
   const a = FC.analyze(dataset, { source: 'builtin' });
   const ck = FC.runCheck(dataset, a);
 
-  // 运行记录: 只记真实发生的事 —— 离线规则引擎跑完全流程; 大模型通道本次未调用
+  // 运行记录: 只记真实发生的事 —— 离线规则引擎跑完全流程; 大模型通道本次未调用。
+  /* 2026-10-10 界面收敛: 原来这里记的是"☐ 待人工打勾" —— 但勾选框已经从页面上拿掉了,
+     而且打勾本来就不产生证据(它只把导出按钮从灰变亮)。改成记"实际结算结果"。 */
   FC.ai.clearLog();
-  FC.ai.log({ channel: '规则引擎(离线)', task: '全流程确定性计算', input: `${a.quarterCount} 期 × 前十大(${a.metrics.totalDistinct} 只个股)`, output: `指标 ${Object.keys(a.metrics).length} 组 / 报告 ${a.report.sections.length} 节 / 结论卡 1 张`, latencyMs: 0, valid: true, manual: '门禁 1 口径确认: 已确认' });
-  FC.ai.log({ channel: '规则引擎(离线)', task: `自动质检(${ck.summary.total} 条规则)`, input: '输入层 6 / 计算层 4 / 输出层 8', output: ck.summary.verdictText, latencyMs: 0, valid: ck.summary.fail === 0, manual: ck.summary.warn ? `${ck.summary.warn} 项待人工确认` : '无需人工介入' });
-  FC.ai.log({ channel: '规则引擎(离线)', task: '人工抽检清单生成(固定种子)', input: '底稿全部前十大记录', output: '12 处待回官方季报核对', latencyMs: 0, valid: true, manual: '☐ 待人工核对' });
-  FC.ai.log({ channel: '大模型', task: 'T1 主题归类 / T2 判断起草 / T3 用词清洗', input: `${a.metrics.totalDistinct} 只个股清单 / 指标包 / 报告全文`, output: '本次未调用(离线规则引擎已覆盖全流程); 页面可随时切换大模型通道', latencyMs: 0, valid: undefined, manual: '☐' });
-  FC.ai.log({ channel: '人工门禁', task: 'G2 核心判断方向确认', input: `引擎标签: ${a.form.tag}`, output: '☐ 待人工确认或改判', latencyMs: 0, valid: true, manual: '☐' });
-  FC.ai.log({ channel: '人工门禁', task: 'G3 终审三查(数字/结论/合规)', input: '12 处抽检 + 结论卡一致性 + 用词规范', output: '☐ 待人工打勾', latencyMs: 0, valid: true, manual: '☐' });
+  FC.ai.log({ channel: '规则引擎(离线)', task: '全流程确定性计算', input: `${a.quarterCount} 期 × 前十大(${a.metrics.totalDistinct} 只个股)`, output: `指标 ${Object.keys(a.metrics).length} 组 / 报告 ${a.report.sections.length} 节 / 结论卡 1 张`, latencyMs: 0, valid: true, manual: '口径按页面所示直接生效(内置样例口径固定)' });
+  FC.ai.log({ channel: '规则引擎(离线)', task: `自动质检(${ck.summary.total} 条规则)`, input: '输入层 6 / 计算层 4 / 输出层 8', output: ck.summary.verdictText, latencyMs: 0, valid: ck.summary.fail === 0, manual: ck.summary.warn ? `${ck.summary.warn} 项提示(报告中已说明)` : '无需额外说明' });
+  FC.ai.log({ channel: '规则引擎(离线)', task: '回原文抽检清单生成(固定种子)', input: '底稿全部前十大记录', output: `${ck.manualSample.length} 处(每条给出报告期/标的/引擎值/核哪一列/官方季报链接)`, latencyMs: 0, valid: true, manual: '随报告交付, 固定种子可复现' });
+  FC.ai.log({ channel: '大模型', task: 'T1 主题归类 / T2 判断起草 / T3 用词清洗 / T4 结论提炼 / T5 深度报告', input: `${a.metrics.totalDistinct} 只个股清单 / 指标包 / 报告全文`, output: '本次未调用(离线规则引擎已覆盖全流程); 页面另有服务端通道可调用大模型', latencyMs: 0, valid: undefined, manual: '未调用' });
+  FC.ai.log({ channel: '引擎结算', task: '判断方向(引擎给候选)', input: `形态库候选 · 本次命中「${a.form.tag}」(置信度 ${a.form.confidence})`, output: '报告按此方向成文; 未发生人工改判', latencyMs: 0, valid: true, manual: 'humanOverride=false' });
+  FC.ai.log({ channel: '引擎结算', task: `终审三查(数字/结论/合规)` , input: `${ck.manualSample.length} 处抽检清单 + 结论卡一致性 + 违禁词扫描(${FC.vocab.ban.length} 个词)`, output: `通过 ${ck.summary.pass} / 提示 ${ck.summary.warn} / 阻断 ${ck.summary.fail}`, latencyMs: 0, valid: ck.summary.fail === 0, manual: ck.summary.verdictText });
 
   const files = {
     [`错误检查记录_${code}.md`]: FC.checkToMarkdown(ck, a),
@@ -68,7 +70,14 @@ for (const code of ['519191', '002910']) {
     },
     performance: a.perf ? { cumReturn: a.perf.cumReturn, exBestQuarter: a.perf.exBestQuarter, bestQuarter: a.perf.bestQuarter, bestQuarterContribution: r2(a.perf.bestQuarterContribution), maxDrawdown: a.perf.maxDrawdown, aumPeak: a.perf.aumPeak, aumEnd: a.perf.aumEnd } : null,
     check: ck.summary,
-    gates: { g1_口径确认: true, g2_判断方向: false, g3_终审三查: false }
+    /* 核查结果不是勾选框, 这里记的是"谁查的、查出几条" —— 与页面(ui.js cardToJSON)同一套字段。 */
+    verification: {
+      口径: '内置样例口径固定(数据来源/持仓范围/收益口径/输出性质, 页面直接显示)',
+      规则数: ck.summary.total,
+      通过: ck.summary.pass, 提示: ck.summary.warn, 阻断: ck.summary.fail,
+      抽检清单: ck.manualSample.length + ' 处(固定种子可复现)',
+      结算时间: ck.checkedAt
+    }
   };
   files[`结论卡_${code}.json`] = JSON.stringify(card, null, 2);
 

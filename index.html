@@ -48,14 +48,14 @@
           <p>所有数字来自公开定期报告, 或由这些数字<strong>加减乘除</strong>得到; 找不到出处的会被校验拦下, 不进报告。</p>
           <p>持仓只看前十大, 且是<strong>期末快照</strong> —— 所以"新进前十"不等于当季买入, "退出前十"不等于清仓或最高点卖出。</p>
           <p>证据分三级: <strong>披露事实 / 合理推断 / 事后解读</strong>。第一级直接陈述, 第二级标注推断依据, 第三级只作历史复盘、不冒充当时信号。</p>
-          <p>不评价基金经理个人, 不推荐任何基金, <strong>不构成投资建议</strong>; 用词禁区(马后炮、抄底、逃顶一类)会被自动清洗。</p>
+          <p>不评价基金经理个人, 不推荐任何基金, <strong>不构成投资建议</strong>。</p>
         </div>
       </aside>
     </div>
 
     <!-- 在线模式: 输入代码 -> 自动爬取 -> 出报告与演示稿 -->
     <div class="panel hidden" id="online-panel">
-      <h3>在线模式 · 输入基金代码 + API Key, 自动爬取并生成报告与演示稿</h3>
+      <h3>在线模式 · 输入基金代码, 自动采集并生成报告与演示稿</h3>
       <p class="panel-sub" id="online-hint"></p>
 
       <div class="grid3">
@@ -69,16 +69,20 @@
           </select>
         </label>
         <div class="field">
-          <span>② API Key 状态</span>
-          <div class="kb-status" id="ai-status">请填写并测试 API Key</div>
+          <span>② AI 模块状态</span>
+          <div class="kb-status" id="ai-status">检测中…</div>
         </div>
       </div>
 
+      <!-- 服务端已经持有 Key 时(公网部署 / 本机配了 llm.local.json), 用这一条替掉下面整块 Key 表单:
+           访客不需要知道 Key 这回事, 也不该被要求去申请一个。本机没配 Key 时这一条不出现。 -->
+      <p class="panel-sub hidden" id="server-key-note"></p>
+      <!-- 公网额度: 在点"开始复盘"之前就让访客知道今天还剩几次、为什么会被拦。
+           和 Key 表单无关 —— 它是本站的成本闸门, 所以放在 #ai-block 外面(否则会被一起收掉)。 -->
+      <p class="panel-sub hidden" id="quota-note"></p>
+
       <div class="gate" id="ai-block">
         <h4>② API Key(必填)· 在 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">platform.deepseek.com</a> 申请</h4>
-        <!-- 只在公网模式(服务端持有 Key + 启用额度)下由 online.js 显示: 告诉访客今天还剩几次、为什么会被拦。
-             本机模式整块 hidden, 页面和以前一模一样。 -->
-        <p class="panel-sub hidden" id="quota-note"></p>
         <div class="grid3">
           <label class="field"><span>API Base(OpenAI 兼容)</span><input type="text" id="ai-base" value="https://api.deepseek.com"></label>
           <label class="field"><span>模型名</span><input type="text" id="ai-model" value="deepseek-v4-flash"></label>
@@ -101,7 +105,7 @@
 
       <div class="btn-row" style="margin-bottom:4px">
         <button class="btn btn-primary" id="btn-online-probe" disabled>③ 开始复盘(先探路 → 填口径 → 再开跑)</button>
-        <span class="hint" id="probe-hint">填好基金代码与 API Key 后可点</span>
+        <span class="hint" id="probe-hint">填 6 位基金代码后即可点</span>
       </div>
 
       <!-- 第二阶段: 开跑前的口径确认表(SOP §0 八格, 人主做) -->
@@ -136,20 +140,25 @@
       <div id="online-result"></div>
     </div>
 
-    <!-- 离线兜底: 没有 Node / 不想填 Key 时, 用内置样例看完整效果 -->
+    <!-- 离线兜底: 不想等一场完整采集(6~7 分钟)时, 用内置样例直接看完整效果 -->
     <div class="panel" id="offline-panel">
-      <h3>没装 Node.js, 或不想填 Key?用内置样例看完整效果</h3>
+      <h3>用内置样例看完整效果</h3>
       <p class="panel-sub">
         下面两只基金的底稿已逐行与官方季报对过账(519191: 220 行权重全一致, 差 ≤0.11pp)。
         点一下即可跑完整条流水线 —— <strong>抓取与计算完全一样</strong>, 只是数据是预置的, 且没有大模型写的那部分深度内容。
       </p>
 
-      <!-- 门禁 1: 只对"手动指定的数据"生效, 所以放在这里, 而不是飘在页面中间 -->
+      <!-- 口径: 内置样例的口径是定死的。原来这里摆三个"必须勾满才允许开跑"的复选框,
+           2026-10-10 收掉了 —— 访客连数据都没提供, 让他确认"数据不含内部信息"是空勾,
+           填满它不能证明任何事。改成直接把口径摆出来给人看。 -->
       <div class="gate" id="gate1">
-        <h4>门禁 1 · 口径确认(人主做, 三项全勾选才允许开跑)</h4>
-        <label><input type="checkbox" id="g1-a"> <span><strong>数据合规</strong>: 我确认本次输入的数据来自公开渠道(公募基金定期报告 / 天天基金 F10 等), <strong>不含任何机构或实习单位的内部数据</strong>。</span></label>
-        <label><input type="checkbox" id="g1-b"> <span><strong>口径边界</strong>: 我确认本次只看<strong>前十大持仓</strong>(季报口径), 且季报持仓是<strong>期末快照</strong>, 期间买卖不可见。</span></label>
-        <label><input type="checkbox" id="g1-c"> <span><strong>结论边界</strong>: 我确认<strong>未提供净值序列时不做任何绩效结论</strong>; 全部输出为回溯复盘, 不构成投资建议。</span></label>
+        <h4>内置样例的口径(已经定好, 不需要你确认)</h4>
+        <table class="tbl tbl-compact"><tbody>
+          <tr><th style="width:150px">数据来源</th><td>公开渠道: 公募基金定期报告 / 天天基金 F10 —— 不含任何机构或实习单位的内部数据</td></tr>
+          <tr><th>持仓范围</th><td>只看<strong>前十大持仓</strong>(季报口径); 季报是<strong>期末快照</strong>, 期间买卖不可见</td></tr>
+          <tr><th>收益口径</th><td>分红再投总回报指数(单位净值 + 除息日分红回加); <strong>没有净值序列就不做任何绩效结论</strong></td></tr>
+          <tr><th>输出性质</th><td>回溯复盘, <strong>不构成投资建议</strong></td></tr>
+        </tbody></table>
       </div>
 
       <div id="builtin-list"></div>
@@ -181,7 +190,7 @@
         <div class="empty-actions">
           <button class="btn btn-primary" data-goto="input">去输入基金代码</button>
         </div>
-        <div class="empty-hint">没装 Node.js? 到 <a href="#offline-panel" data-goto="input">用内置样例</a> 也能看到完整报告</div>
+        <div class="empty-hint">想马上看效果? 到 <a href="#offline-panel" data-goto="input">用内置样例</a> 也能看到完整报告</div>
       </div>
     </div>
     <div class="report-layout hidden" id="report-layout">
@@ -211,7 +220,7 @@
       <div class="empty">
         <div class="empty-art"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
         <h3>还没有可质检的内容</h3>
-        <p>跑完之后这里会有 18 条质检规则的三态结果、12 处人工抽检清单(每条写明怎么核), 以及大模型每一步调用的原始记录。</p>
+        <p>跑完之后这里会有 18 条质检规则的三态结果、12 处回官方原文的抽检清单(每条写明去哪一节、核哪一列、合格判据), 以及大模型每一步调用的校验结果。</p>
         <div class="empty-actions">
           <button class="btn btn-primary" data-goto="input">去输入基金代码</button>
         </div>
@@ -276,11 +285,12 @@
 
     <div class="panel">
       <h3>三道人机门禁(人不可让渡)</h3>
+      <p class="panel-sub">门禁的意思不是"请你打勾", 而是"把机器查不了的那一步留给人"。所以页面上只保留人真正比机器多知道的两步(口径、判断方向), 其余一律由引擎结算成可核验的结果直接显示 —— 勾选框证明的是"有人点过鼠标", 不是"有人核过数"。</p>
       <table class="tbl">
         <tbody>
-          <tr><th style="width:22%">门禁 1 · 口径确认</th><td>开跑前把八格口径摆出来由人确认: 复盘哪一任经理、哪个区间、数据截止日、业绩比较基准、收益口径、只看前十大、产出位置。<strong>任何一格留空不许开跑。</strong></td></tr>
-          <tr><th>门禁 2 · 判断方向</th><td>形态标签由引擎给出候选, 但必须由人确认或改判, 改判要写理由并写进结论卡。</td></tr>
-          <tr><th>门禁 3 · 终审三查</th><td>数字查(抽检回原文核对)、结论查(每条结论能找到证据行)、合规查(无收益承诺、有免责声明)。三项打勾才允许标记"可交付"。</td></tr>
+          <tr><th style="width:22%">门禁 1 · 口径确认</th><td>开跑前把八格口径摆出来: 复盘哪一任经理、哪个区间、数据截止日、业绩比较基准、收益口径、只看前十大、产出位置。这几格机器猜不出来(同一只基金往往有几任经理、还跨共管期), 所以由人定; <strong>任何一格留空不许开跑。</strong></td></tr>
+          <tr><th>门禁 2 · 判断方向</th><td>形态标签由引擎给出候选与置信度, 报告按此方向成文; 人工改判要写理由, 并原样记进结论卡的 <code>humanOverride</code> 字段 —— 事后能看出来这条结论是谁定的。</td></tr>
+          <tr><th>门禁 3 · 终审三查</th><td>数字查(12 处抽检清单逐条给出官方原文链接)、结论查(每条结论找得到证据行)、合规查(违禁词扫描 + 免责声明)。三项都有规则在实际跑, 结果直接显示在「④ 质检与 AI 记录」页, 不需要访客替我们打勾。</td></tr>
         </tbody>
       </table>
     </div>

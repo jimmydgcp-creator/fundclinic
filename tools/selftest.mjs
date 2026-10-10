@@ -192,7 +192,7 @@ ok(FC.scanVocab(allText).length === 0, '519191 报告全文 0 违禁词');
 console.log('\n=== 9. 导出物 ===');
 const md = FC.checkToMarkdown(ck, a);
 ok(md.indexOf('# 错误检查记录') === 0, '错误检查记录 MD 头部正确');
-ok(md.indexOf('人工抽检清单') > 0 && md.split('\n').length > 30, 'MD 含抽检清单且篇幅足够', md.split('\n').length + ' 行');
+ok(md.indexOf('回官方原文抽检清单') > 0 && md.split('\n').length > 30, 'MD 含回原文抽检清单且篇幅足够', md.split('\n').length + ' 行');
 const logMd = FC.ai.runLogToMarkdown(a);
 ok(logMd.indexOf('# AI 模块运行记录') === 0, '运行记录 MD 头部正确');
 

@@ -28,7 +28,7 @@ const LANE = {
 const NODES = [
   { id: 'start', lane: 'human', w: 520, title: '双击启动文件', sub: 'Windows .bat ／ macOS .command' },
   { id: 'serve', lane: 'script', w: 520, title: '本地服务启动', sub: '只监听 127.0.0.1，数据不出本机' },
-  { id: 'input', lane: 'human', w: 520, title: '输入 6 位基金代码 + 自己的 API Key', sub: 'Key 只在内存过一次，不落盘、不进日志' },
+  { id: 'input', lane: 'human', w: 520, title: '输入 6 位基金代码（公网版不用填 Key）', sub: '公网: Key 在服务端, 访客只给代码 ／ 本机: Key 只在内存过一次, 不落盘、不进日志' },
   { id: 'probe', lane: 'script', w: 520, title: '探路 /api/probe（约 0.5 秒）', sub: '只抓元数据：基金概况 / 历任经理 / 报告期网格' },
   { id: 'gate', lane: 'human', w: 520, kind: 'decision', title: '口径确认表填齐了吗？', sub: 'SOP §0 八格：复盘哪一任经理、区间、数据截止、基准…' },
   { id: 'run', lane: 'script', w: 520, title: '按确认口径开跑 /api/run' },
@@ -54,7 +54,7 @@ const NODES = [
     items: ['复盘报告 .md', '深度复盘报告 .md', '深度演示稿 .html', '模板版演示稿 .html',
             '演示稿 .pdf', '结论卡 .json', '错误检查记录 .md', '来源清单 .md', '数据底稿 .json'] },
 
-  { id: 'final', lane: 'human', w: 520, title: '终审三查：数字 / 结论 / 合规', sub: '人签字后才对外交付' }
+  { id: 'final', lane: 'human', w: 520, title: '终审三查：数字 / 结论 / 合规', sub: '由 18 条规则 + 12 处回原文抽检清单结算, 结果直接显示 —— 不靠打勾' }
 ];
 
 /* 右侧的旁路(拦截/退回) */
@@ -181,7 +181,7 @@ fs.writeFileSync(svgPath, svg, 'utf8');
 /* ------------------------------------------------- Mermaid 源码(方便改) */
 const MERMAID = `flowchart TD
   A["人：双击启动文件<br/>Windows .bat / macOS .command"] --> B["脚本：本地服务启动<br/>只监听 127.0.0.1"]
-  B --> C["人：输入 6 位基金代码 + 自己的 API Key"]
+  B --> C["人：输入 6 位基金代码（公网版不用填 Key）"]
   C --> D["脚本：探路 /api/probe（约 0.5 秒）<br/>只抓元数据"]
   D --> E{"人：口径确认表填齐了吗？<br/>SOP §0 八格"}
   E -- "任何一格留空" --> E2["不许开跑"]
@@ -202,14 +202,15 @@ const MERMAID = `flowchart TD
   P -- "是" --> Q["大模型：T6 深度演示稿<br/>分镜 → 逐页成文 → 内联单文件"]
   Q --> R["脚本：导出 PDF（无头浏览器）"]
   R --> S["产出：报告 / 深度报告 / 两份演示稿 / PDF<br/>结论卡 / 错误检查记录 / 来源清单 / 数据底稿"]
-  S --> T["人：终审三查（数字 / 结论 / 合规）"]
+  S --> T["终审三查（数字 / 结论 / 合规）<br/>脚本逐条结算 → 结果直接显示"]
 
   classDef human fill:#FFF4E5,stroke:#D97706,stroke-width:2px,color:#7C4A03
   classDef script fill:#EAF2FD,stroke:#1D4ED8,stroke-width:2px,color:#123A85
   classDef llm fill:#F3EBFF,stroke:#7C3AED,stroke-width:2px,color:#4C1D95
   classDef out fill:#E8F7EF,stroke:#0E9F6E,stroke-width:2px,color:#065F46
-  class A,C,E,T human
-  class B,D,F,G,H,I,J,K,L,K2,R script
+  %% T(终审三查) 从 human 挪到 script: 2026-10-10 起由规则实际结算, 不再是"人签字才放行"
+  class A,C,E human
+  class B,D,F,G,H,I,J,K,L,K2,R,T script
   class M,N,O,P,Q llm
   class S out
 `;

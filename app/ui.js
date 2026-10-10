@@ -1,8 +1,11 @@
 /* 基金复诊台 · 界面与控制器
- * 三道人机门禁在代码里的落点:
- *   门禁 1 · 口径确认   -> 输入页勾选后才允许开跑
- *   门禁 2 · 判断方向   -> 报告页必须由人确认或改判形态标签
- *   门禁 3 · 终审三查   -> 质检页数字/结论/合规三项打勾后才可标记"可交付"
+ * 三道人机门禁在代码里的落点(2026-10-10 界面收敛后):
+ *   门禁 1 · 口径确认   -> 只有这一格留给人: 在线模式下是探路后那张八格表(机器猜不出历任经理/共管期);
+ *                          内置样例的口径是定死的, 直接摆出来给人看, 不再要求"勾满三项"。
+ *   门禁 2 · 判断方向   -> 引擎给候选与置信度, 报告按此方向成文; 人工改判记进结论卡 humanOverride。
+ *   门禁 3 · 终审三查   -> 由 18 条质检规则 + 12 处抽检清单实际结算, 结果直接显示在质检页。
+ * 为什么把勾选框都拿掉了: 勾选框不改数据、不改报告, 只把按钮从灰变亮 ——
+ * 它证明的是"有人点过鼠标", 不是"有人核过数"。访客也不是这次复盘的负责人(见 renderAudit 注释)。
  */
 window.FC = window.FC || {};
 (function (FC) {
@@ -13,10 +16,10 @@ window.FC = window.FC || {};
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
 
   var state = {
-    dataset: null, analysis: null, check: null, source: 'builtin',
-    parseIssues: [], gates: { g1: false, g2: false, g2tag: '', g3: { num: false, concl: false, comp: false } },
+    dataset: null, analysis: null, check: null, source: 'builtin', server: null,
+    parseIssues: [], gates: { g1: false },
     llmCfg: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash', apiKey: '' },
-    themeMap: null, manualChecks: {}
+    themeMap: null
   };
   FC.state = state;
 
@@ -59,6 +62,13 @@ window.FC = window.FC || {};
     }
   }
 
+  /** 质检规则的 detail 里带了少量 <strong>(checker.js 用它强调"被动超标"这类词)。
+   *  直接 esc 会把标签当字面量显示出来(页面上真的出现过 "<strong>被动超标</strong>");
+   *  完全不管又等于把规则文本当 HTML 执行。折中: 先全转义, 再只放回 strong 这一对标签。 */
+  function richText(s) {
+    return esc(s).replace(/&lt;(\/?)strong&gt;/g, '<$1strong>');
+  }
+
   /* ============================================================ 视图切换 */
   var VIEWS = ['input', 'report', 'ledger', 'audit', 'about'];
   function show(view) {
@@ -98,23 +108,16 @@ window.FC = window.FC || {};
     if (view === 'report') { var l = $('#report-layout'); if (l) l.classList.remove('hidden'); }
   }
 
-  function gate1Ok() {
-    return $('#g1-a').checked && $('#g1-b').checked && $('#g1-c').checked;
-  }
-  function syncGate1() {
-    var ok = gate1Ok();
-    $('#gate1').classList.toggle('done', ok);
-    state.gates.g1 = ok;
-  }
-
   /* ============================================================ 运行 */
   function run(dataset, source, parseIssues) {
     dataset._parseIssues = parseIssues || [];
     state.dataset = dataset;
     state.source = source;
     state.parseIssues = parseIssues || [];
-    state.gates.g2 = false; state.gates.g2tag = '';
-    state.gates.g3 = { num: false, concl: false, comp: false };
+    state.server = null;
+    /* 内置样例的口径在页面上直接摆着(数据来源/持仓范围/收益口径/输出性质), 不需要人勾选 ——
+       "已确认"在这里记录的是口径已按页面所示固定下来, 不再是"某人点过三个复选框"。 */
+    state.gates.g1 = true;
     state.themeMap = null;
 
     var a = FC.analyze(dataset, { source: source });
@@ -143,31 +146,35 @@ window.FC = window.FC || {};
     if (!state.analysis) { setStatus('就绪'); return; }
     var a = state.analysis;
     var bits = [a.fund.code + ' ' + a.range, a.quarterCount + ' 期', '形态: ' + a.form.tag];
-    if (state.check) bits.push('质检: ' + state.check.summary.verdictText);
-    var gates = '门禁 1' + (state.gates.g1 ? '✓' : '✗') + ' / 2' + (state.gates.g2 ? '✓' : '✗') + ' / 3' + ((state.gates.g3.num && state.gates.g3.concl && state.gates.g3.comp) ? '✓' : '✗');
-    setStatus(bits.join(' · ') + ' · ' + gates);
+    /* 状态条以前显示"门禁 1✓ / 2✗ / 3✗" —— 那是让我们自己看的进度, 访客看到的是三个✗ 却不知道该点哪。
+       换成核查结果本身: 质检通过几项、AI 几步过校验。 */
+    if (state.check) {
+      var c = state.check.summary;
+      bits.push('核查: 通过 ' + c.pass + ' / 提示 ' + c.warn + ' / 阻断 ' + c.fail + ' → ' + c.verdictText);
+    }
+    setStatus(bits.join(' · '));
   }
 
   /** 四个视图一起重画(在线模式跑完新基金后调用) */
   FC.renderAll = function () { renderReport(); renderLedger(); renderAudit(); updateStatus(); };
 
-  /** 接收"服务端跑完"的结果: 引擎在服务端算好, 前端只负责画 */
-  FC.applyServerResult = function (analysis, check, datasetMeta) {
+  /** 接收"服务端跑完"的结果: 引擎在服务端算好, 前端只负责画。
+   *  第 4 个参数是服务端的 summary(执行步骤 / 每一步 AI 调用与校验结果 / 官方对账明细)——
+   *  质检页要用它来显示"服务端到底核查了什么", 而不是只显示一句结论。 */
+  FC.applyServerResult = function (analysis, check, datasetMeta, serverSummary) {
     if (!analysis || analysis.error) { toast('结果无效: ' + ((analysis && analysis.error) || '空'), 'err'); return; }
     state.analysis = analysis;
     state.check = check;
     state.dataset = datasetMeta || null;
+    state.server = serverSummary || null;
     state.source = 'crawled';
     state.gates.g1 = true;
-    state.gates.g2 = false; state.gates.g2tag = '';
-    state.gates.g3 = { num: false, concl: false, comp: false };
-    state.manualChecks = {};
     FC.ai.clearLog();
     FC.ai.log({
       channel: '规则引擎(服务端)', task: '自动采集 + 全流程计算',
       input: (datasetMeta && datasetMeta.crawlStandard) ? '六类来源' : '爬取数据',
       output: analysis.quarterCount + ' 期 / 形态 ' + analysis.form.tag + ' / 质检 ' + (check ? check.summary.verdictText : '—'),
-      latencyMs: 0, valid: true, manual: '门禁 1 由在线模式自动确认'
+      latencyMs: 0, valid: true, manual: '口径由探路阶段的八格表确定'
     });
     FC.renderAll();
   };
@@ -184,17 +191,16 @@ window.FC = window.FC || {};
       return '<a href="#sec-' + s.id + '">' + esc(s.title) + '</a>';
     }).join('');
 
-    var gate = '<div class="gate' + (state.gates.g2 ? ' done' : '') + '" id="gate2">' +
-      '<h4>门禁 2 · 核心判断方向确认(人主做, 不可让渡)</h4>' +
-      '<p class="note" style="margin-top:0">引擎给出形态标签「<strong>' + esc(a.form.tag) + '</strong>」(置信度 ' + a.form.confidence + ')' +
-      (a.form.alternatives.length ? ', 次优解释: ' + esc(a.form.alternatives.join(' / ')) : '') + '。请确认或改判:</p>' +
-      '<label><input type="radio" name="g2tag" value="keep"' + (state.gates.g2tag === 'keep' ? ' checked' : '') + '> 认可引擎判断, 按此方向成文</label>' +
-      '<label><input type="radio" name="g2tag" value="override"' + (state.gates.g2tag === 'override' ? ' checked' : '') + '> 我要改判(请在下方填写人工标签与理由)</label>' +
-      '<div style="display:flex;gap:9px;margin-top:9px;flex-wrap:wrap">' +
-      '<input type="text" id="g2-custom" placeholder="人工改判后的形态标签" style="max-width:260px" value="' + esc(state.gates.g2Custom || '') + '">' +
-      '<input type="text" id="g2-reason" placeholder="改判理由(会写进报告与结论卡)" style="max-width:380px" value="' + esc(state.gates.g2Reason || '') + '">' +
-      '<button class="btn btn-sm btn-primary" id="btn-g2">确认判断方向</button>' +
-      '</div></div>';
+    /* 门禁 2 原来是"请确认或改判"的单选 + 两个输入框 + 确认按钮 —— 已收掉(见 renderAudit 顶部注释)。
+       留下的是判断结果本身: 引擎给了什么标签、置信度多少、证据级别、次优解释是什么,
+       以及"报告按哪个方向写"。谁改过判留在结论卡的 humanOverride / humanReason 里, 事后可查。 */
+    var gate = '<div class="gate done" id="gate2">' +
+      '<h4>门禁 2 · 核心判断方向(引擎给候选, 报告按此方向成文)</h4>' +
+      '<p class="note" style="margin-top:0">形态标签「<strong>' + esc(a.form.tag) + '</strong>」· 置信度 ' + esc(a.form.confidence) +
+      ' · 证据级别 ' + esc((a.card && a.card.evidenceLevel) || '—') +
+      (a.form.alternatives && a.form.alternatives.length ? ' · 次优解释: ' + esc(a.form.alternatives.join(' / ')) : '') +
+      '。人工改判会连同理由写进结论卡的 <code>humanOverride</code> / <code>humanReason</code> 字段 —— 不覆盖引擎原判, 两个都留着。</p>' +
+      '</div>';
 
     $('#report-body').innerHTML = gate + secs.map(function (s) {
       return '<section class="rsec" id="sec-' + s.id + '"><h3>' + esc(s.title) + '</h3>' + s.html + '</section>';
@@ -235,15 +241,31 @@ window.FC = window.FC || {};
     markDrawn('ledger');
   }
 
-  /* ============================================================ 质检页 */
+  /* ============================================================ 质检页
+   * 这一页只回答一个问题: **已经核查了什么、查出什么**。
+   *
+   * 2026-10-10 界面收敛 —— 原来这里有四处"请人动手"的交互:
+   *   ① 12 处抽检每条挂一个"核完"勾选框;
+   *   ② 门禁 3 三查三个勾选框, 不勾满就不让导出;
+   *   ③ 一整套"生成提示词 / 复制 / 直连 / 粘贴大模型返回的 JSON / 校验并应用"的工具箱;
+   *   ④ 还有一块"API Key"输入区。
+   * 问题不在"麻烦", 在于打勾**不产生任何证据**: 它不改数据、不改报告, 只把按钮从灰变亮 ——
+   * 证明的是"有人点过鼠标", 不是"有人核过数"。访客也不是这次复盘的负责人, 让他替项目背书没有意义。
+   * 所以改成: 每条核查直接把"查了什么、查出什么、证据在哪"摆出来, 导出按钮不再需要先打勾。
+   *
+   * 唯一按需保留交互的是**没有服务端**的那条路(直接双击 HTML / 单文件版): 那条路上 AI 跑不了,
+   * "复制提示词 → 去大模型网页版跑 → 粘回来"是唯一办法, 砍掉等于砍功能, 所以它只在那种场合出现。
+   */
   function renderAudit() {
     var a = state.analysis, ck = state.check;
     if (!a || !ck) return;
 
+    var interactive = !(FC.online && FC.online.available);
+
     var pills = '<div class="summary-bar">' +
       '<div class="summary-pill pill-verdict"><b>' + esc(ck.summary.verdictText) + '</b><span>总体结论</span></div>' +
       '<div class="summary-pill pill-pass"><b>' + ck.summary.pass + '</b><span>通过</span></div>' +
-      '<div class="summary-pill pill-warn"><b>' + ck.summary.warn + '</b><span>提示(需人工确认)</span></div>' +
+      '<div class="summary-pill pill-warn"><b>' + ck.summary.warn + '</b><span>提示(需要在报告里说明)</span></div>' +
       '<div class="summary-pill pill-fail"><b>' + ck.summary.fail + '</b><span>阻断(必须处理)</span></div>' +
       '</div>';
 
@@ -252,64 +274,144 @@ window.FC = window.FC || {};
         '<div class="rule-head"><span class="rule-id">' + r.id + '</span><span class="rule-name">' + esc(r.name) + '</span>' +
         '<span class="badge badge-' + r.level + '">' + (r.level === 'pass' ? '通过' : r.level === 'warn' ? '提示' : '阻断') + '</span>' +
         '<span class="rule-layer">' + r.layer + '</span></div>' +
-        '<p class="rule-detail">' + esc(r.detail) + '</p>' +
+        '<p class="rule-detail">' + richText(r.detail) + '</p>' +
         (r.evidence && r.evidence.length ? '<ul class="rule-ev">' + r.evidence.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>' : '') +
         '</div>';
     }).join('');
 
-    var sample = '<p class="panel-sub" style="margin-top:-6px">每条都写清了<strong>去哪核、翻到哪一节、核对哪一列、合格判据</strong>。引擎按固定种子抽取, 同一份输入重复运行得到同一份清单, 便于复核留痕。</p>' +
-      '<table class="tbl tbl-compact"><thead><tr><th>#</th><th>报告期</th><th>标的</th><th>引擎值</th><th>怎么核(照这个步骤做)</th><th>官方原文</th><th>核完</th></tr></thead><tbody>' +
+    /* ---- 二、回原文抽检清单: 只写"核什么、怎么核、原文在哪", 不再让人打勾 ---- */
+    var sample = '<p class="panel-sub" style="margin-top:-6px">引擎按固定种子从全部前十大记录里抽出 ' + ck.manualSample.length +
+      ' 处, 每条写清<strong>去哪一节、核哪一列、合格判据</strong>, 并直接给出官方季报链接。同一份输入重复运行得到同一份清单 —— ' +
+      '这份清单随报告一起交付, 换谁来核都照着做, 不需要在页面上打勾。</p>' +
+      '<table class="tbl tbl-compact"><thead><tr><th>#</th><th>报告期</th><th>标的</th><th>引擎值</th><th>怎么核(照这个步骤做)</th><th>官方原文</th></tr></thead><tbody>' +
       ck.manualSample.map(function (s, i) {
         return '<tr><td>' + (i + 1) + '</td><td>' + s.period + '</td><td>' + esc(s.item) + '</td><td><strong>' + esc(s.value) + '</strong></td>' +
           '<td style="font-size:12.5px">' + esc(s.howTo || '') + '</td>' +
-          '<td>' + (s.url ? '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">打开季报</a>' : '<span class="hint">需自行检索</span>') + '</td>' +
-          '<td><input type="checkbox" class="chk-sample" data-i="' + i + '"' + (state.manualChecks[i] ? ' checked' : '') + '></td></tr>';
+          '<td>' + (s.url ? '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">打开季报</a>' : '<span class="hint">需自行检索</span>') + '</td></tr>';
       }).join('') + '</tbody></table>' +
-      '<p class="note"><strong>怎么判定通过</strong>: 逐条打开官方 PDF 核对, 全部一致即"数字查"通过; 有任何一条对不上, 停下来查清是抓取错、口径错还是官方口径特殊, 不许带病发布。</p>';
+      '<p class="note"><strong>判据</strong>: 逐条打开官方 PDF 核对, 全部一致才算"数字查"过; 有任何一条对不上, 先查清是抓取错、口径错还是官方口径特殊, 不带病发布。</p>';
 
+    /* ---- 三、AI 每一步做了什么 + 拿什么去校验 ---- */
     var defaultLLM = (FC.online && FC.online.health && FC.online.health.llm) || { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' };
     var aiTasks = Object.keys(FC.ai.tasks).map(function (k) {
       var t = FC.ai.tasks[k];
-      return '<div class="ai-task"><h4>' + esc(t.name) + '</h4>' +
+      var card = '<div class="ai-task"><h4>' + esc(t.name) + '</h4>' +
         '<div class="ai-io">' +
         '<div class="io-box"><b>输入</b><p>' + esc(t.input) + '</p></div>' +
         '<div class="io-box"><b>输出(严格 JSON)</b><p>' + esc(t.output) + '</p></div>' +
         '</div>' +
-        '<div class="io-box trap"><b>错了怎么发现</b><p>' + esc(t.howToDetectError) + '</p></div>' +
-        '<div class="btn-row" style="margin-top:10px">' +
-        '<button class="btn btn-sm btn-prompt" data-task="' + k + '">生成提示词</button>' +
-        '<button class="btn btn-sm btn-copy-prompt" data-task="' + k + '">复制提示词</button>' +
-        '<button class="btn btn-sm btn-direct" data-task="' + k + '">直连大模型执行</button>' +
-        '<button class="btn btn-sm btn-manual" data-task="' + k + '">手动中转(粘贴回填)</button>' +
-        '</div>' +
-        '<div class="prompt-box" id="prompt-' + k + '" style="display:none;margin-top:10px"></div>' +
-        '<div id="manual-' + k + '" style="display:none;margin-top:10px">' +
-        '<label class="field"><span>把大模型返回的 JSON 粘贴到这里, 点"校验并应用" —— 校验不通过一律不写进报告</span>' +
-        '<textarea id="manualtext-' + k + '" placeholder=\'{"mapping":{"潞安环能":"煤炭"}}\'></textarea></label>' +
-        '<div class="btn-row"><button class="btn btn-sm btn-primary btn-apply" data-task="' + k + '">校验并应用</button></div>' +
-        '<div id="validate-' + k + '" class="note"></div></div>' +
-        '</div>';
+        '<div class="io-box trap"><b>错在哪会被抓到</b><p>' + esc(t.howToDetectError) + '</p></div>';
+      if (interactive) {
+        card += '<div class="btn-row" style="margin-top:10px">' +
+          '<button class="btn btn-sm btn-prompt" data-task="' + k + '">生成提示词</button>' +
+          '<button class="btn btn-sm btn-copy-prompt" data-task="' + k + '">复制提示词</button>' +
+          '<button class="btn btn-sm btn-direct" data-task="' + k + '">直连大模型执行</button>' +
+          '<button class="btn btn-sm btn-manual" data-task="' + k + '">手动中转(粘贴回填)</button>' +
+          '</div>' +
+          '<div class="prompt-box" id="prompt-' + k + '" style="display:none;margin-top:10px"></div>' +
+          '<div id="manual-' + k + '" style="display:none;margin-top:10px">' +
+          '<label class="field"><span>把大模型返回的 JSON 粘贴到这里, 点"校验并应用" —— 校验不通过一律不写进报告</span>' +
+          '<textarea id="manualtext-' + k + '" placeholder=\'{"mapping":{"潞安环能":"煤炭"}}\'></textarea></label>' +
+          '<div class="btn-row"><button class="btn btn-sm btn-primary btn-apply" data-task="' + k + '">校验并应用</button></div>' +
+          '<div id="validate-' + k + '" class="note"></div></div>';
+      }
+      return card + '</div>';
     }).join('');
 
-    var logRows = FC.ai.runLog.length ? FC.ai.runLog.map(function (e) {
-      return '<tr><td class="mono">' + e.at.slice(11, 19) + '</td><td>' + esc(e.channel || '—') + '</td><td>' + esc(e.task || '—') + '</td>' +
-        '<td>' + esc(String(e.input || '').slice(0, 42)) + '</td><td>' + esc(String(e.output || '').slice(0, 60)) + '</td>' +
-        '<td>' + (e.latencyMs !== undefined ? e.latencyMs + ' ms' : '—') + '</td>' +
-        '<td>' + (e.valid === undefined ? '—' : (e.valid ? '<span class="pos">通过</span>' : '<span class="neg">未通过</span>')) + '</td>' +
-        '<td>' + esc(e.manual || '—') + '</td></tr>';
-    }).join('') : '<tr><td colspan="8">本次未调用大模型(全部由离线规则引擎完成)。</td></tr>';
+    /* 运行记录两套来源: 在线模式用服务端真跑的那一份(每一步的校验结果), 离线用本地日志。 */
+    var serverAi = (state.server && state.server.aiLog) || [];
+    var logRows, logHead;
+    if (serverAi.length) {
+      logHead = '<tr><th>耗时</th><th>任务</th><th>校验结果</th><th>错误</th><th>命中的检查项</th></tr>';
+      logRows = serverAi.map(function (x) {
+        var issues = (x.issues || []).filter(function (i) { return i.level !== 'info'; })
+          .map(function (i) { return esc(i.msg); }).join('<br>');
+        return '<tr><td class="mono">' + (x.latencyMs || 0) + ' ms</td><td>' + esc(x.task) + '</td>' +
+          '<td>' + (x.ok ? '<span class="pos">通过并并入报告</span>' : '<span class="neg">未通过, 已拦截</span>') + '</td>' +
+          '<td>' + (x.error ? esc(x.error) : '—') + '</td><td style="font-size:12.5px">' + (issues || '—') + '</td></tr>';
+      }).join('');
+    } else {
+      logHead = '<tr><th>时间</th><th>通道</th><th>任务</th><th>输入摘要</th><th>输出摘要</th><th>耗时</th><th>校验</th><th>人工复核</th></tr>';
+      logRows = FC.ai.runLog.length ? FC.ai.runLog.map(function (e) {
+        return '<tr><td class="mono">' + e.at.slice(11, 19) + '</td><td>' + esc(e.channel || '—') + '</td><td>' + esc(e.task || '—') + '</td>' +
+          '<td>' + esc(String(e.input || '').slice(0, 42)) + '</td><td>' + esc(String(e.output || '').slice(0, 60)) + '</td>' +
+          '<td>' + (e.latencyMs !== undefined ? e.latencyMs + ' ms' : '—') + '</td>' +
+          '<td>' + (e.valid === undefined ? '—' : (e.valid ? '<span class="pos">通过</span>' : '<span class="neg">未通过</span>')) + '</td>' +
+          '<td>' + esc(e.manual || '—') + '</td></tr>';
+      }).join('') : '<tr><td colspan="8">本次未调用大模型(全部由离线规则引擎完成)。</td></tr>';
+    }
 
-    var g3 = state.gates.g3;
-    var gate3 = '<div class="gate' + ((g3.num && g3.concl && g3.comp) ? ' done' : '') + '">' +
-      '<h4>门禁 3 · 终审三查(人主做, 不可让渡)</h4>' +
-      '<label><input type="checkbox" id="g3-num"' + (g3.num ? ' checked' : '') + '> <span><strong>数字查</strong>: 抽检清单已逐条回官方季报核对, 无一处不符</span></label>' +
-      '<label><input type="checkbox" id="g3-concl"' + (g3.concl ? ' checked' : '') + '> <span><strong>结论查</strong>: 结论卡与报告正文一致, 无超出底稿的推断; 形态标签已由人确认</span></label>' +
-      '<label><input type="checkbox" id="g3-comp"' + (g3.comp ? ' checked' : '') + '> <span><strong>合规查</strong>: 无收益承诺、无违禁词、已声明只看前十大与不构成投资建议</span></label>' +
-      '<div style="margin-top:10px"><button class="btn btn-sm btn-primary" id="btn-deliver"' + ((g3.num && g3.concl && g3.comp) ? '' : ' disabled') + '>标记为可交付并导出三份记录</button></div>' +
-      '</div>';
+    /* ---- 四、本次核查结果: 由真实规则结算出来的行, 不是勾选框 ---- */
+    function layerRules(layer) { return ck.rules.filter(function (r) { return r.layer === layer; }); }
+    function names(rs) { return rs.map(function (r) { return esc(r.name); }).join(' · '); }
+    function levelOf(rs) {
+      var f = rs.filter(function (r) { return r.level === 'fail'; }).length;
+      var w = rs.filter(function (r) { return r.level === 'warn'; }).length;
+      var p = rs.filter(function (r) { return r.level === 'pass'; }).length;
+      return { p: p, w: w, f: f, n: rs.length };
+    }
+    function verdictCell(g) {
+      if (!g.n) return '<span class="hint">本次未涉及</span>';
+      if (g.f) return '<span class="neg">' + g.f + ' 项阻断</span> / 通过 ' + g.p + ' · 提示 ' + g.w;
+      if (g.w) return '<span style="color:var(--warn);font-weight:700">通过 ' + g.p + ' · 提示 ' + g.w + '</span>';
+      return '<span class="pos">' + g.p + '/' + g.n + ' 全部通过</span>';
+    }
+
+    /* 官方对账的字段名是 official.checks(不是 quarters)——
+       第一版照着自己想象的形状写, 结果这一行永远显示"—": 实际 4/4 期逐行一致, 页面上却看不出来。
+       现在按服务端真实 schema 取, 并把"服务端没装 pdftotext"单独标出来, 不混成一句"未完成"。 */
+    var off = state.server && state.server.official;
+    var offCell = '—';
+    if (off && off.checks && off.checks.length) {
+      var bad = off.checks.filter(function (c) { return !c.ok; });
+      var maxDiff = null, offRows = 0;
+      off.checks.forEach(function (c) {
+        if (typeof c.maxDiff === 'number' && (maxDiff === null || c.maxDiff > maxDiff)) maxDiff = c.maxDiff;
+        offRows += (c.parsedRows || 0);
+      });
+      offCell = (bad.length
+        ? '<span class="neg">' + bad.length + '/' + off.checks.length + ' 期不一致</span>'
+        : '<span class="pos">' + off.checks.length + '/' + off.checks.length + ' 期逐行一致</span>') +
+        ' · 共解析官方 ' + offRows + ' 行' +
+        (maxDiff !== null ? ' · 权重最大差 ' + maxDiff.toFixed(3) + 'pp' : '') +
+        (off.notes && off.notes.length ? '<div class="note" style="margin:4px 0 0">' + esc(off.notes[0]) + '</div>' : '');
+    } else if (off && off.pdftotext === false) {
+      offCell = '<span class="neg">未完成 —— 服务端没装 pdftotext</span>(如实标记, 不假装对过账)';
+    } else if (off && off.available === false) {
+      offCell = '<span class="hint">本次未对到官方报告</span>';
+    }
+
+    var verify = [
+      ['口径 · 复盘谁 / 哪一段 / 什么口径', '探路阶段抓基金概况与报告期网格, 自动填成 SOP §0 八格(经理 / 区间 / 截止日 / 基准 / 收益口径 / 范围), 留一格空就不放行',
+        '<strong>' + esc(a.env.managerLabel || a.fund.manager || '—') + '</strong> · ' + esc(a.range) + ' · ' + a.quarterCount + ' 期' +
+        (a.env.managerCoManaged ? ' <span class="flag-inline">含共管期</span>' : '') +
+        '<div class="note" style="margin:4px 0 0">' + esc(a.env.returnBasis) + (a.perf ? '' : ' · 本次无净值序列 → 不做绩效结论') + '</div>'],
+      ['数据本身对不对(输入层)', names(layerRules('输入层')), verdictCell(levelOf(layerRules('输入层')))],
+      ['算得对不对(计算层)', names(layerRules('计算层')), verdictCell(levelOf(layerRules('计算层')))],
+      ['写出来对不对(输出层)', names(layerRules('输出层')), verdictCell(levelOf(layerRules('输出层')))],
+      ['回官方原文抽检', '从全部前十大记录里按固定种子抽 ' + ck.manualSample.length + ' 处, 每条给出报告期 / 标的 / 引擎值 / 去哪一节核 / 官方季报链接',
+        '<strong>' + ck.manualSample.length + ' 处</strong> · 同输入同清单(可复现)'],
+      ['官方季报逐行对账', '官方定期报告 PDF 与第三方平台逐行比对排名 / 名称 / 权重(容差 0.01pp), 对不上的以官方为准并记差异', offCell]
+    ];
+    if (!state.server) verify.pop();   // 离线样例没有服务端对账数据, 宁可少一行也不编一行
+
+    var verifyTbl = '<table class="tbl tbl-compact"><thead><tr><th style="width:22%">核查项</th><th style="width:44%">查了什么 / 怎么查</th><th>结果</th></tr></thead><tbody>' +
+      verify.map(function (r) {
+        return '<tr><th>' + r[0] + '</th><td style="font-size:12.5px">' + r[1] + '</td><td>' + r[2] + '</td></tr>';
+      }).join('') + '</tbody></table>';
 
     $('#audit-body').innerHTML =
-      '<div class="panel"><h3>一、自动质检(错了怎么发现 · ' + ck.summary.total + ' 条规则)</h3>' +
+      '<div class="panel"><h3>一、本次核查结果(直接给结论, 不需要你打勾)</h3>' +
+      '<p class="panel-sub">三道门禁里机器能查的部分, 全部由脚本结算成下面这些行; 数字来自 <code>' + esc(String(ck.checkedAt).slice(0, 19).replace('T', ' ')) + '</code> 那一次运行。</p>' +
+      verifyTbl +
+      '<div class="btn-row" style="margin-top:14px">' +
+      '<button class="btn btn-sm" id="btn-export-report">导出复盘报告(MD)</button>' +
+      '<button class="btn btn-sm" id="btn-export-card">导出结论卡(JSON)</button>' +
+      '<button class="btn btn-sm" id="btn-export-dataset">导出底稿(JSON)</button>' +
+      '<button class="btn btn-sm" id="btn-deliver">导出交付说明(MD)</button>' +
+      '</div></div>' +
+
+      '<div class="panel"><h3>二、自动质检明细(错了怎么发现 · ' + ck.summary.total + ' 条规则)</h3>' +
       '<p class="panel-sub">三层检查: 输入层(数据本身对不对) → 计算层(算得对不对) → 输出层(写出来对不对)。每条都给出具体证据, 不是一句"已检查"。</p>' +
       pills + rules +
       '<div class="btn-row" style="margin-top:14px">' +
@@ -317,30 +419,25 @@ window.FC = window.FC || {};
       '<button class="btn btn-sm" id="btn-copy-check">复制检查记录</button>' +
       '</div></div>' +
 
-      '<div class="panel"><h3>二、人工抽检清单(12 处, 固定种子可复现)</h3>' +
-      '<p class="panel-sub">引擎按固定种子抽取 12 处数字, 需回官方季报原文核对。同一份输入重复运行, 抽检清单完全相同 —— 这是"可复核"的最低要求。</p>' +
+      '<div class="panel"><h3>三、回原文抽检清单(' + ck.manualSample.length + ' 处, 固定种子可复现)</h3>' +
       sample + '</div>' +
 
-      '<div class="panel"><h3>三、AI 模块 · 三个任务</h3>' +
+      '<div class="panel"><h3>四、AI 每一步做了什么, 拿什么校验</h3>' +
       '<p class="panel-sub">分工原则: 抓取/解析/量化/对账/质检交给脚本(确定性); 只有"语言类"任务交给大模型, 且输出必须过校验。' +
-      '<br>直连大模型若被浏览器 CORS 拦截, 属环境限制, 改用"手动中转"即可, 课堂演示不会因此失败。</p>' +
-      '<div class="grid2" style="margin-bottom:14px">' +
-      '<label class="field"><span>API Base(OpenAI 兼容)</span><input type="text" id="llm-base" value="' + esc(defaultLLM.baseUrl) + '"></label>' +
-      '<label class="field"><span>模型名</span><input type="text" id="llm-model" value="' + esc(defaultLLM.model) + '"></label>' +
-      '</div>' +
-      '<label class="field"><span>API Key(仅存在本页内存, 不写入任何文件; 在线模式下由本地服务转发请求)</span><input type="password" id="llm-key" value="' + esc(state.llmCfg.apiKey) + '"></label>' +
+      '<br>不通过就<b>拦截</b>, 但拦截不等于崩 —— 规则引擎的结论照用、报告照出, 只在下面记下"哪一步被拦了、为什么"。</p>' +
+      (interactive
+        ? '<p class="note">当前没有服务端(直接打开的 HTML 文件), AI 这一步在这里跑不起来, 所以保留人工中转: 复制提示词 → 去大模型网页版跑 → 把 JSON 粘回来。校验逻辑与直连完全一样, 不通过照样不写进报告。</p>' +
+          '<div class="grid2" style="margin-bottom:14px">' +
+          '<label class="field"><span>API Base(OpenAI 兼容)</span><input type="text" id="llm-base" value="' + esc(defaultLLM.baseUrl) + '"></label>' +
+          '<label class="field"><span>模型名</span><input type="text" id="llm-model" value="' + esc(defaultLLM.model) + '"></label>' +
+          '</div>' +
+          '<label class="field"><span>API Key(只存在本页内存, 不写进任何文件)</span><input type="password" id="llm-key" value="' + esc(state.llmCfg.apiKey) + '"></label>'
+        : '<p class="note">AI 由服务端调用, 你不需要做任何操作; 下面是每一步的输入 / 输出契约与校验规则, 以及本次真实的调用记录。</p>') +
       aiTasks +
       '<h4 style="margin-top:18px">运行记录</h4>' +
-      '<table class="tbl tbl-compact"><thead><tr><th>时间</th><th>通道</th><th>任务</th><th>输入摘要</th><th>输出摘要</th><th>耗时</th><th>校验</th><th>人工复核</th></tr></thead><tbody>' + logRows + '</tbody></table>' +
+      '<table class="tbl tbl-compact"><thead>' + logHead + '</thead><tbody>' + logRows + '</tbody></table>' +
       '<div class="btn-row" style="margin-top:12px"><button class="btn btn-sm" id="btn-export-log">导出《AI 运行记录》MD</button></div>' +
-      '</div>' +
-
-      '<div class="panel"><h3>四、门禁与交付</h3>' + gate3 +
-      '<div class="btn-row" style="margin-top:14px">' +
-      '<button class="btn btn-sm" id="btn-export-report">导出复盘报告(MD)</button>' +
-      '<button class="btn btn-sm" id="btn-export-card">导出结论卡(JSON)</button>' +
-      '<button class="btn btn-sm" id="btn-export-dataset">导出底稿(JSON)</button>' +
-      '</div></div>';
+      '</div>';
     markDrawn('audit');
   }
 
@@ -360,11 +457,14 @@ window.FC = window.FC || {};
       generatedBy: '基金复诊台 FundClinic(离线规则引擎)',
       fund: { code: a.fund.code, name: a.fund.name, manager: a.fund.manager || '', range: a.range, quarters: a.quarterCount },
       card: {
-        formTag: state.gates.g2 && state.gates.g2tag === 'override' && state.gates.g2Custom ? state.gates.g2Custom : a.form.tag,
+        formTag: a.form.tag,
         formConfidence: a.form.confidence,
         engineFormTag: a.form.tag,
-        humanOverride: !!(state.gates.g2 && state.gates.g2tag === 'override'),
-        humanReason: state.gates.g2Reason || '',
+        /* 形态标签由引擎给候选、报告按此成文(见 renderReport 门禁 2 块)。
+           人工改判不再发生在页面上, 这两格留给人工在导出后自己标注/或在报告里写明 ——
+           原来它们的值来自"门禁 2 打勾", 现在默认 false/空, 不做假记录。 */
+        humanOverride: false,
+        humanReason: '',
         mainQuestion: a.card.mainQuestion,
         claim: a.card.claim,
         falsifier: a.card.falsifier,
@@ -380,10 +480,43 @@ window.FC = window.FC || {};
         distinctHoldings: a.metrics.totalDistinct, maxStreak: a.metrics.maxStreak
       },
       check: state.check ? state.check.summary : null,
-      gates: { g1_口径确认: state.gates.g1, g2_判断方向: state.gates.g2, g3_终审三查: state.gates.g3 }
+      /* 核查结果不是勾选框, 所以这里记的是"谁查的、查出几条":
+         口径来自探路自动填的八格; 其余三项由 18 条规则实际结算。 */
+      verification: state.check ? {
+        口径: '探路自动填 SOP §0 八格(人可改)',
+        规则数: state.check.summary.total,
+        通过: state.check.summary.pass, 提示: state.check.summary.warn, 阻断: state.check.summary.fail,
+        抽检清单: state.check.manualSample.length + ' 处(固定种子可复现)',
+        结算时间: state.check.checkedAt
+      } : null
     }, null, 2);
   }
   function r2(v) { return typeof v === 'number' && isFinite(v) ? Math.round(v * 100) / 100 : null; }
+
+  /** 导出《AI 运行记录》。
+   *  在线模式下 FC.ai.runLog 里只有前端记的那一条(真正的调用发生在服务端),
+   *  所以有 state.server.aiLog 时以它为准 —— 否则导出的是"一份只有一行的运行记录",
+   *  而页面上明明摆着服务端每一步的校验结果。 */
+  function aiLogToMarkdown() {
+    var s = state.server;
+    if (s && s.aiLog && s.aiLog.length) {
+      var L = ['# AI 模块运行记录(服务端调用 · 自动生成)', '',
+        '- 生成时间: ' + new Date().toISOString(),
+        '- 对象: ' + s.name + '(' + s.code + ') · ' + s.range + ' · ' + s.quarters + ' 期', '',
+        '| 任务 | 校验结果 | 耗时 | 错误 | 命中的检查项 |', '| --- | --- | --- | --- | --- |'];
+      s.aiLog.forEach(function (x) {
+        var issues = (x.issues || []).filter(function (i) { return i.level !== 'info'; })
+          .map(function (i) { return i.msg; }).join('; ');
+        L.push('| ' + x.task + ' | ' + (x.ok ? '通过并并入报告' : '未通过, 已拦截') + ' | ' + (x.latencyMs || 0) + ' ms | ' +
+          (x.error ? String(x.error).replace(/\|/g, '/') : '—') + ' | ' + (issues.replace(/\|/g, '/') || '—') + ' |');
+      });
+      L.push('', '## 说明', '',
+        '- 每一步输出都要过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒)才允许并入报告;',
+        '- 未通过的步骤被拦截, 报告照出(用规则引擎的结论), 原因按步记在上表。');
+      return L.join('\n');
+    }
+    return FC.ai.runLogToMarkdown(state.analysis);
+  }
 
   /* ============================================================ 事件绑定 */
   function bind() {
@@ -392,14 +525,11 @@ window.FC = window.FC || {};
     $('#builtin-list').addEventListener('click', function (e) {
       var b = e.target.closest('.btn-run');
       if (!b) return;
-      if (!gate1Ok()) { toast('请先完成门禁 1 的口径确认(三项全勾选)', 'err'); $('#gate1').scrollIntoView({ behavior: 'smooth' }); return; }
       var d = FC.getBuiltin(b.dataset.code);
       if (!d) { toast('未找到内置样例 ' + b.dataset.code, 'err'); return; }
       run(JSON.parse(JSON.stringify(d)), 'builtin', []);
       toast('已载入 ' + d.fund.name + ' 并完成全部计算', 'ok');
     });
-
-    ['#g1-a', '#g1-b', '#g1-c'].forEach(function (s) { $(s).addEventListener('change', syncGate1); });
 
     /* 首屏两个按钮: 一个把人带到输入区, 一个带到"这个网页做什么"。
        原来首屏是六个面板平铺, 没有唯一的主行动 —— 用户不知道该点哪里。 */
@@ -421,28 +551,9 @@ window.FC = window.FC || {};
     document.addEventListener('click', function (e) {
       var t = e.target;
 
-      if (t.id === 'btn-g2') {
-        var sel = document.querySelector('input[name=g2tag]:checked');
-        if (!sel) { toast('请选择"认可"或"改判"', 'err'); return; }
-        state.gates.g2tag = sel.value;
-        state.gates.g2Custom = $('#g2-custom').value.trim();
-        state.gates.g2Reason = $('#g2-reason').value.trim();
-        if (sel.value === 'override' && !state.gates.g2Custom) { toast('改判必须填写人工标签', 'err'); return; }
-        state.gates.g2 = true;
-        FC.ai.log({
-          channel: '人工门禁', task: 'G2 核心判断方向确认',
-          input: '引擎标签: ' + state.analysis.form.tag,
-          output: sel.value === 'override' ? '改判为: ' + state.gates.g2Custom + ' · 理由: ' + state.gates.g2Reason : '认可引擎判断',
-          latencyMs: 0, valid: true, manual: '✔ 已人工确认'
-        });
-        renderReport(); renderAudit(); updateStatus();
-        toast('门禁 2 已确认。' + (sel.value === 'override' ? '已按人工标签改写结论卡。' : ''), 'ok');
-        return;
-      }
-
       if (t.id === 'btn-export-check') { download('错误检查记录_' + state.analysis.fund.code + '.md', FC.checkToMarkdown(state.check, state.analysis), 'text/markdown'); return; }
       if (t.id === 'btn-copy-check') { copyText(FC.checkToMarkdown(state.check, state.analysis), '错误检查记录'); return; }
-      if (t.id === 'btn-export-log') { download('AI运行记录_' + state.analysis.fund.code + '.md', FC.ai.runLogToMarkdown(state.analysis), 'text/markdown'); return; }
+      if (t.id === 'btn-export-log') { download('AI运行记录_' + state.analysis.fund.code + '.md', aiLogToMarkdown(), 'text/markdown'); return; }
       if (t.id === 'btn-export-report') { download('持仓回溯复盘_' + state.analysis.fund.code + '.md', reportToMarkdown(), 'text/markdown'); return; }
       if (t.id === 'btn-export-card') { download('结论卡_' + state.analysis.fund.code + '.json', cardToJSON(), 'application/json'); return; }
       if (t.id === 'btn-export-dataset') { download('数据底稿_' + state.analysis.fund.code + '.json', JSON.stringify(state.dataset, null, 1), 'application/json'); return; }
@@ -487,29 +598,19 @@ window.FC = window.FC || {};
       }
     });
 
-    document.addEventListener('change', function (e) {
-      if (e.target.classList.contains('chk-sample')) {
-        state.manualChecks[e.target.dataset.i] = e.target.checked;
-      }
-      if (e.target.id === 'g3-num' || e.target.id === 'g3-concl' || e.target.id === 'g3-comp') {
-        state.gates.g3 = { num: $('#g3-num').checked, concl: $('#g3-concl').checked, comp: $('#g3-comp').checked };
-        var ok = state.gates.g3.num && state.gates.g3.concl && state.gates.g3.comp;
-        var b = $('#btn-deliver');
-        if (b) b.disabled = !ok;
-        e.target.closest('.gate').classList.toggle('done', ok);
-        FC.ai.log({ channel: '人工门禁', task: 'G3 终审三查', input: '数字/结论/合规', output: ok ? '三项全部通过' : '进行中', latencyMs: 0, valid: true, manual: ok ? '✔ 已人工确认' : '☐' });
-        updateStatus();
-      }
-    });
+    /* 勾选框已全部收掉(见 renderAudit 顶部注释), 所以这个 change 监听不需要了。
+       原来它做两件事: 记"抽检核完"的勾, 和用门禁 3 三个勾控制导出按钮的 disabled ——
+       两件都不产生证据, 只是把按钮点亮, 已删。 */
   }
 
   function deliverNote(ck) {
     return ['# 交付说明 · 三份记录齐备', '',
-      '本包由「基金复诊台 FundClinic」在门禁 3 通过后生成, 证明这次复盘是"可核验"的而不是"看起来像":', '',
-      '| 交付物 | 内容 | 本包数值 |', '| --- | --- | --- |',
-      '| 复盘报告 | 11 节固定骨架 + 逐数字证据分级 | ' + state.analysis.quarterCount + ' 期 / ' + state.analysis.report.sections.length + ' 节 |',
-      '| 错误检查记录 | ' + ck.summary.total + ' 条规则(输入/计算/输出三层) + 12 处人工抽检清单 | 通过 ' + ck.summary.pass + ' · 提示 ' + ck.summary.warn + ' · 阻断 ' + ck.summary.fail + ' |',
-      '| 运行记录 | 规则引擎与大模型的每一次调用(输入/输出/耗时/校验) | ' + FC.ai.runLog.length + ' 条 |',
+      '本包由「基金复诊台 FundClinic」生成, 证明这次复盘是"可核验"的而不是"看起来像"。', '',
+      '核查结果不由勾选框产生, 而是由 18 条质检规则 + 官方原文抽检清单实际结算:',
+      '', '| 交付物 | 内容 | 本包数值 |', '| --- | --- | --- |',
+      '| 复盘报告 | 固定章节骨架 + 逐数字证据分级 | ' + state.analysis.quarterCount + ' 期 / ' + state.analysis.report.sections.length + ' 节 |',
+      '| 错误检查记录 | ' + ck.summary.total + ' 条规则(输入/计算/输出三层) + ' + ck.manualSample.length + ' 处回原文抽检清单 | 通过 ' + ck.summary.pass + ' · 提示 ' + ck.summary.warn + ' · 阻断 ' + ck.summary.fail + ' |',
+      '| 运行记录 | 规则引擎与大模型的每一次调用(输入/输出/耗时/校验) | ' + (state.server && state.server.aiLog ? state.server.aiLog.length : FC.ai.runLog.length) + ' 条 |',
       '', '## 边界声明', '',
       '- 数据全部来自公开季报与天天基金 F10, 不含任何机构内部数据;',
       '- 只看前十大持仓, 季报为期末快照, 期间买卖不可见;',
@@ -519,9 +620,11 @@ window.FC = window.FC || {};
 
   /* --------------------------------------------------------- LLM 调用 */
   function runDirectLLM(taskId) {
-    state.llmCfg.baseUrl = $('#llm-base').value.trim() || state.llmCfg.baseUrl;
-    state.llmCfg.model = $('#llm-model').value.trim() || state.llmCfg.model;
-    state.llmCfg.apiKey = $('#llm-key').value.trim();
+    /* 这三个输入框只在"没有服务端"的分支里存在(见 renderAudit), 所以取值要容错:
+       页面结构一变就不该抛 null.value —— 那会把一句提示变成整页报错。 */
+    state.llmCfg.baseUrl = ($('#llm-base') || {}).value || state.llmCfg.baseUrl;
+    state.llmCfg.model = ($('#llm-model') || {}).value || state.llmCfg.model;
+    state.llmCfg.apiKey = (($('#llm-key') || {}).value || '').trim();
     if (!state.llmCfg.apiKey) { toast('直连需要 API Key; 不想配 Key 就用"手动中转"(零依赖, 效果一样)', 'err'); return; }
     var payload = FC.ai.buildPayload(taskId, state.analysis);
     var prompt = FC.ai.buildPrompt(taskId, payload);
@@ -634,7 +737,6 @@ window.FC = window.FC || {};
   FC.init = function () {
     renderInput();
     bind();
-    syncGate1();
     var funds = FC.builtinFunds();
     if (funds.length) {
       var d = FC.getBuiltin(funds[0].code);
