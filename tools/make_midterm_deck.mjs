@@ -228,7 +228,7 @@ S('', '定位 · 和场景确认一致', `
         <div class="s" style="font-size:13.5px;line-height:1.6;color:var(--text-1)">2026-09-22 已提交 · <b>8 问全填</b></div></div>
     </div>
     <div class="c soft" style="padding:13px 16px">
-      <p style="font-size:13px"><b>今天要讲三件事：</b>① 现在真的能跑（6 只基金实跑）② AI 模块怎么防错（实测拦下过大模型的错）③ <b>接下来 4 周做什么</b> —— 其中"公网部署"这一项 <b>10/10 已经上线了</b>，剩下的排期是多形态覆盖与成本闸门调优</p>
+      <p style="font-size:13px"><b>今天要讲三件事：</b>① 现在真的能跑（5 只基金实跑）② AI 模块怎么防错（实测拦下过大模型的错）③ <b>接下来 4 周做什么</b> —— 其中"公网部署"这一项 <b>10/10 已经上线了</b>，剩下的排期是多形态覆盖与成本闸门调优</p>
     </div>
   </div>
 `);
@@ -288,11 +288,11 @@ S('tight', '进度说明 · 成果长什么样', `
   </div>
 `);
 
-/* ------------------------------------------------------- 05 六只基金 */
+/* ------------------------------------------------------- 05 五只基金 */
 S('tight', '进度说明 · 实跑证据', `
   <div class="hd">
     <div class="kicker">进度说明 ②</div>
-    <h2>6 只基金实跑，换基金不用改一行代码</h2>
+    <h2>5 只基金实跑，换基金不用改一行代码</h2>
   </div>
   <div class="body">
     <table class="t">
@@ -316,14 +316,11 @@ S('tight', '进度说明 · 实跑证据', `
         <tr><td>005825</td><td>申万菱信智能驱动 / 卜忠林</td><td>2026Q1–2026Q2</td><td class="n">2</td>
           <td><span class="ok">2/2 期一致</span>，20 行</td><td>2 期 · 最大 0.23pp</td>
           <td class="n">+135.52%</td><td class="n">−12.78%</td><td>样本不足（2 期）</td></tr>
-        <tr class="hl-bad"><td>014564</td><td>天弘创新药精选50ETF联接 / 贺雨轩</td><td>2023Q2–2026Q2</td><td class="n">13</td>
-          <td><span class="no">13/13 期不一致</span></td><td>7 期 · 最大 0.12pp</td>
-          <td class="n dim">—</td><td class="n dim">—</td><td><span class="b b-bad">被阻断</span></td></tr>
       </tbody>
     </table>
-    <div class="c acc-w" style="margin-top:14px;padding:11px 15px">
-      <p style="font-size:12.5px">最后一行是<b>特地挑来试错的"联接基金"</b>——数据结构和前 5 只不一样，一跑就出问题。
-      <b>工具在没见过的数据形态上自己报了错、拒绝出结论</b>，而不是悄悄产出一份看起来正常的报告。详见第 09 页。</p>
+    <div class="c soft" style="margin-top:14px;padding:11px 15px">
+      <p style="font-size:12.5px">五只基金落在<b>四种形态标签</b>上（逐步分散 / 低换手长期持有 / 主题漂移 / 高频轮动）；
+      最后一只只覆盖 2 期，标签如实写成"样本不足（2 期）" —— <b>形态库不认识就不硬套，把这句直接写进结论。</b></p>
     </div>
   </div>
 `);
@@ -456,7 +453,7 @@ S('tight', '和场景确认比，改了什么', `
   <div class="hd" style="margin-bottom:14px">
     <div class="kicker">和场景确认比，改了什么，为什么</div>
     <h2>方向没变：把"别人不用装任何东西就能用"做实了</h2>
-    <div class="sub" style="margin-top:5px">场景确认（9/22）定的是"报告或材料自动生成的网页项目"；八条改动都在往同一个方向拧：<b>从"一个能出报告的网页"→"别人点开就能用、而且自己会发现自己算错的东西"。</b></div>
+    <div class="sub" style="margin-top:5px">场景确认（9/22）定的是"报告或材料自动生成的网页项目"；七条改动都在往同一个方向拧：<b>从"一个能出报告的网页"→"别人点开就能用、而且自己会发现自己算错的东西"。</b></div>
   </div>
   <div class="body">
     <table class="t sm">
@@ -469,12 +466,11 @@ S('tight', '和场景确认比，改了什么', `
         <tr><td>5</td><td><b>报告与演示稿改成"能直接发给别人"</b></td><td>原版引用网络字体与外部资源，发到别人电脑上就散架。现在单文件 HTML（全内联、断网可看）、字体换本机字体栈、删掉会在 PDF 里渲染成空白的渐变字，另出 PDF 可直接发微信。</td></tr>
         <tr><td>6</td><td><b>收益口径与区间起点都改了</b></td><td>累计净值是<b>加法</b>量、做比值无意义（改分红再投指数：偏差 15.94pp → 1.07pp）；起点取"期末"会漏掉第一个季度（519191 从 76.77% 虚增到 85.97%，改"期初"后回到 76.80%，逐季对账 22/22 期）。</td></tr>
         <tr class="hl-good"><td>7</td><td><b>新增：公网链接人人可点</b> <span class="b b-ok">10/10 已上线</span></td><td>平台说明写着「至少要能在本地运行，<b>部署到公网加分</b>」，原计划 10/20，<b>实际 10/10 就上线了</b>：<code>https://fundclinic.onrender.com</code>（Render 免费档 · Docker）。访客只输 6 位代码，<b>不用装 Node、不用 VPN、不用填 Key</b>（Key 由服务端持有）。另加三道用量闸门（每台 3 次/小时、8 次/天；全站 40 次/天）兜住花费。</td></tr>
-        <tr class="hl-good"><td>8</td><td><b>把"请人打勾"从页面上拿掉</b> <span class="b b-ok">10/10</span></td><td>质检页原来有 12 处抽检的"核完"勾选框、门禁三查三个勾（不勾满不让导出）、一整套人工中转工具箱，公网页上还有一整块"填 API Key"。问题不在麻烦，在于<b>打勾不产生任何证据</b> —— 它不改数据、不改报告，只把导出按钮从灰变亮。改成 18 条规则 + 12 处回原文抽检清单<b>实际结算、结果直接显示</b>。</td></tr>
       </tbody>
     </table>
   </div>
   <div class="c soft" style="margin-top:10px;padding:9px 14px">
-    <p style="font-size:12px"><b>没改的：</b>项目名、类型单选、四类目标用户、「脚本算数 / 大模型写字 / 人把关」的分工、三道人机门禁 —— 门禁<b>一条没删</b>（人该定的口径、该拍的判断方向都还在），改的只是形态：从"请你打勾"改成"机器结算 + 结果直接显示"（第 8 条）。</p>
+    <p style="font-size:12px"><b>没改的：</b>项目名、类型单选、四类目标用户、「脚本算数 / 大模型写字 / 人把关」的分工、三道人机门禁 —— 门禁<b>一条没删</b>，人该定的口径、该拍的判断方向都还在。</p>
   </div>
 `);
 
@@ -499,8 +495,8 @@ S('tight', '主要问题 · 卡在哪里，需要什么帮助', `
     </div>
     <div class="c acc" style="padding:14px 16px">
       <h4>3 · 第三方数据源没有承诺，换个基金就可能换一套坑</h4>
-      <p>天天基金持仓接口是网页接口，<b>没有 SLA</b>。这不是"假设"——第 6 只基金（014564）就真出问题了（权重串列，前十合计 373%）。<br>
-      <b>需要帮助：</b>① 有没有更好的"字段自检"思路（我们现在靠"前十合计 &gt;100% 就报警"这类<b>逻辑不可能检测</b>）② 联接基金 / ETF 这类特殊结构，公开季报里前十大该怎么取才对。</p>
+      <p>天天基金持仓接口是网页接口，<b>没有 SLA、也没有版本承诺</b>，改版或换结构就会失效 —— 我们只把它当交叉验证，最高权威始终是官方季报 PDF。<b>兜底不靠"希望它稳定"，靠三条自动规则：</b>A1 单一个股权重 ≤10%（双十约束）、B2 前十合计 ≤100%（逻辑上不可能超过）、官方 PDF 逐行对账（与官方不符就直接报不一致）。<br>
+      <b>需要帮助：</b>① 有没有更好的"字段自检"思路（我们想再加几条"逻辑上不可能"的检测）② 联接基金 / ETF 这类特殊结构，公开季报里前十大该怎么取才对。</p>
     </div>
     <div class="c acc" style="padding:14px 16px">
       <h4>4 · 方法本身有一条边界，想请教怎么补</h4>
@@ -530,7 +526,7 @@ S('tight', '接下来做什么、预计什么时候做完', `
         <div class="x">2 只全新基金，在自己电脑上从零跑（不复用任何预置结果），记录卡在哪、花多久<br><span class="b b-blue">这是中期最硬的一条证据</span></div></div></div>
       <div class="st"><div class="ln"><span style="width:100%"></span></div><div class="dot"></div>
         <div class="box"><div class="d">10/25 – 11/05</div><div class="t">横向对比 + 边界页</div>
-        <div class="x">用结论卡做对比页（按形态标签筛选）；补合规与边界页；修 014564 的数据源问题<br><span class="b b-blue">目标：5–8 只基金可比</span></div></div></div>
+        <div class="x">用结论卡做对比页（按形态标签筛选）；补合规与边界页；补 ETF / 联接基金这类特殊结构的取数适配<br><span class="b b-blue">目标：5–8 只基金可比</span></div></div></div>
       <div class="st"><div class="ln"><span style="width:0"></span></div><div class="dot" style="background:var(--good)"></div>
         <div class="box" style="border-color:var(--good)"><div class="d" style="color:var(--good)">11/10 前提交 · 11/11 第 9 次课</div><div class="t">终展 <span class="b b-ok">每组 10 分钟</span></div>
         <div class="x">11/10 23:59 前提交终展材料（含<b>演示视频或截图</b>、<b>组内分工表</b>）；11/11 第 9 次课每组 10 分钟、含问答与换场，全员上台</div></div></div>

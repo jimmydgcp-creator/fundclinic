@@ -50,10 +50,10 @@ if (PDFTOTEXT) {
   fs.unlinkSync(txtFile);
   pdfPages = txt.split('\f').filter(s => s.trim()).length;
   pdfChars = txt.replace(/\s/g, '').length;
-  /* 关键内容清单必须跟着展示页走: 2026-10-10 删掉了「014564 联接基金报警」那张专页,
-     它独有的 192.89% / 373% 也随之消失 —— 不清掉的话这里会报"关键内容缺失"的假失败。
-     (014564 这个代码本身仍然在: 第 5 页那张 6 只基金表里它是被阻断的那一行, 卡点页也提到它。) */
-  const must = ['基金复诊台', '76.80%', '中期进度汇报', '现场演示', '014564', 'selftest', '请人打勾'];
+  /* 关键内容清单必须跟着展示页走: 2026-10-10 删掉了「联接基金报警」那张专页,
+     2026-10-12 又删掉了第 5 页那张表里的最后一行(以及卡点页、路线图里的同一处引用) ——
+     不清掉的话这里会报"关键内容缺失"的假失败。清单只留"每页都该出现"的东西。 */
+  const must = ['基金复诊台', '76.80%', '中期进度汇报', '现场演示', '005825', 'selftest'];
   missing = must.filter(s => !txt.includes(s));
   console.log('  页数 ' + pdfPages + '（应为 13 = 展示页张数）· 可见字 ' + pdfChars);
   console.log('  ' + (missing.length === 0 ? '✓' : '✗') + ' 关键内容齐全' + (missing.length ? ' 缺: ' + missing.join(', ') : ''));
