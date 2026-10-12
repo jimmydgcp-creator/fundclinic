@@ -53,9 +53,12 @@ if (PDFTOTEXT) {
   /* 关键内容清单必须跟着展示页走: 2026-10-10 删掉了「联接基金报警」那张专页,
      2026-10-12 又删掉了第 5 页那张表里的最后一行(以及卡点页、路线图里的同一处引用) ——
      不清掉的话这里会报"关键内容缺失"的假失败。清单只留"每页都该出现"的东西。 */
-  const must = ['基金复诊台', '76.80%', '中期进度汇报', '现场演示', '005825', 'selftest'];
+  /* 关键内容清单必须跟着展示页走：现在是**三页版**（平台要求材料限 3 页），
+     所以钉的是三个页面标题。13 页版那会儿钉的"现场演示"（尾页）已经不存在了 ——
+     清单不跟着改，这里就会报"关键内容缺失"的假失败。 */
+  const must = ['基金复诊台', '76.80%', '当前进展', '遇到的问题', '后续计划', 'selftest'];
   missing = must.filter(s => !txt.includes(s));
-  console.log('  页数 ' + pdfPages + '（应为 13 = 展示页张数）· 可见字 ' + pdfChars);
+  console.log('  页数 ' + pdfPages + '（应为 ' + slideCount + ' = 展示页张数）· 可见字 ' + pdfChars);
   console.log('  ' + (missing.length === 0 ? '✓' : '✗') + ' 关键内容齐全' + (missing.length ? ' 缺: ' + missing.join(', ') : ''));
 } else {
   console.log('  (没有 pdftotext, 跳过 PDF 文本自检)');
@@ -63,8 +66,8 @@ if (PDFTOTEXT) {
 
 /* ------------------------------------------------- ①之二 备用版(零脚本)实测 */
 /* 备用版的意义是"正式版打不开时还能讲", 所以必须真的量一次:
-   13 页是不是**都可见**(不是 opacity:0 / display:none)、是不是**竖直排开**(不是全叠在同一坐标)。
-   只数文件里有没有 13 个 <section> 是不够的 —— 正式版里也有 13 个, 禁用脚本时它照样白屏。 */
+   每一页是不是**都可见**(不是 opacity:0 / display:none)、是不是**竖直排开**(不是全叠在同一坐标)。
+   只数文件里有没有 N 个 <section> 是不够的 —— 正式版里也有 N 个, 禁用脚本时它照样白屏。 */
 const FB = path.join(SRC_DIR, '备用_无需脚本版.html');
 let fbText = null, fbInfo = null;
 if (fs.existsSync(FB)) {
@@ -98,7 +101,7 @@ if (!fbText) {
   if (!fbInfo) {
     fbChecks.push(['备用版能渲染(探针返回)', false]);
   } else {
-    fbChecks.push(['备用版 13 页都在 DOM 里', fbInfo.n === slideCount]);
+    fbChecks.push(['备用版每一页都在 DOM 里（数出来 ' + slideCount + ' 页）', fbInfo.n === slideCount]);
     fbChecks.push(['备用版每一页都可见(不是 opacity:0 那种白屏)', fbInfo.vis === fbInfo.n]);
     fbChecks.push(['备用版每页都有真实高度(没被压扁)', fbInfo.minH >= 690]);
     fbChecks.push(['备用版是竖直排开的(不是全叠在同一个坐标)', fbInfo.stacked >= (fbInfo.n - 1) * 700]);
@@ -169,7 +172,7 @@ const README = `基金复诊台 FundClinic · 小组作业 II · 中期进度汇
 
 ※ **如果 index.html 打不开、或者打开是一片空白**（个别电脑会禁用脚本 / 或者浏览器太老），
    双击同目录的 **备用_无需脚本版.html** —— 同一个内容的兜底版本：
-   它不含任何脚本，13 页竖直排下来，打开就能滚、按 Ctrl+P 就能打印，
+   它不含任何脚本，3 页竖直排下来，打开就能滚、按 Ctrl+P 就能打印，
    同样不依赖网络和任何素材。两份的页码是一样的，讲稿照用。
 
 说明

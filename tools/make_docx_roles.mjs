@@ -82,7 +82,9 @@ for (let i = 0; i < SL.length; i++) {
   pages.push({ n: Number(m[1]), title: m[2].trim(), sec: Number(m[3]), role: m[4], text });
   i = i; /* 继续扫后面的页 */
 }
-if (pages.length !== 13) { console.error('讲稿里只解析到 ' + pages.length + ' 页(应为 13)'); process.exit(1); }
+if (pages.length !== 5) { console.error('讲稿里只解析到 ' + pages.length + ' 段(应为 5：3 页拆成 5 段)'); process.exit(1); }
+/* 标题里写着"第 N 页"（三页版一页可能两个人讲），拿它判断要不要翻页 */
+const slideOf = p => { const m = /第\s*(\d+)\s*页/.exec(p.title); return m ? Number(m[1]) : p.n; };
 const roleOf = n => (pages.find(p => p.n === n) || {}).role;
 
 /* 上台前 60 秒检查（讲稿附录）。
@@ -116,7 +118,8 @@ for (const r of roleRows) {
 /* 逐人卡片：### A · 标题（P1–P3，55 秒）下面的 bullet，分"逐页提示"和"这一段注意事项" */
 let curRole = null;
 for (const raw of RL) {
-  const h = /^### ([A-E]) · (.+?)（P(\d+)–P(\d+)，(\d+) 秒）/.exec(raw);
+  /* 卡片标题：（P1–P3，55 秒）或（50 秒）两种写法都认 */
+  const h = /^### ([A-E]) · (.+?)（(?:P\d+(?:–P\d+)?，)?\d+ 秒）/.exec(raw);
   if (h) { curRole = h[1]; if (roles[curRole]) roles[curRole].cardTitle = h[2]; continue; }
   if (/^## /.test(raw)) { curRole = null; continue; }
   if (!curRole || !roles[curRole]) continue;
@@ -173,7 +176,7 @@ doc.push(TBL(
   [1.5, 0.7, 0.5, 2.2, 3.0]
 ));
 doc.push(Blank());
-doc.push(Small('体检线：到 P8 开始的时候，应该还剩两分二十秒左右。超时就按第九节的顺序砍，P8、P9 一秒都不砍。'));
+doc.push(Small('体检线：讲完第 1 页（A+B）应该还剩三分钟出头，讲完第 2 页还剩一分半左右。超时就按第九节的顺序砍，A 段和 E 段一秒都不砍。'));
 
 /* 二~六 逐人 */
 const order = ['A', 'B', 'C', 'D', 'E'];
@@ -190,11 +193,14 @@ for (const k of order) {
     if (r.hint[p.n]) doc.push(Rich('提示：' + r.hint[p.n], { size: 9.5, color: '2E5496', indent: 180 }));
     doc.push(Label('你说：'));
     for (const t of p.text) doc.push(Say(t));
-    /* 动作：上台 / 翻页 / 收尾 */
+    /* 动作：上台 / 翻页 / 收尾。三页版里一页可能两个人讲 ——
+       同一页里后讲的那个人不用翻页，翻页交给这一页最后讲的那位。 */
     const acts = [];
+    const next = pages.slice().sort((a, b) => a.n - b.n).find(q => q.n > p.n);
+    const slideNo = slideOf(p);
     if (idx === 0) acts.push('**上台**，站定再说第一句');
-    acts.push('讲完按 `→` 翻下一页');
-    if (p.n === 13) acts.push('**全体上前**站成一排，别急着下台');
+    acts.push(next && slideOf(next) === slideNo ? '接着讲，**不用翻页**（这一页由最后讲的人翻）' : '讲完按 `→` 翻下一页');
+    if (!next) acts.push('**全体上前**站成一排，别急着下台');
     doc.push(Small('动作：' + acts.join('；') + '。'));
   }
   if (r.note.length) {
@@ -234,6 +240,6 @@ doc.push(Blank());
 doc.push(Small('这份文件是 tools/make_docx_roles.mjs 从《讲稿_5分钟.md》和《组内分工_5人上台.md》里读出来拼的。那两份改了，重跑一次这份就跟着更新。'));
 
 writeDocx(OUT, doc, {
-  must: ['P1', 'P5', 'P8', 'P9', 'P13', '角色 A', '角色 B', '角色 C', '角色 D', '角色 E',
-    '金句', '衔接', '掐表', 'P8、P9 一秒都不砍', '5 只基金']
+  must: ['P1', 'P5', '角色 A', '角色 B', '角色 C', '角色 D', '角色 E',
+    '金句', '衔接', '掐表', 'A 段和 E 段一秒都不砍', '5 只基金', '第 1 页', '第 3 页']
 });
