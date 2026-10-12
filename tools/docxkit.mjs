@@ -172,6 +172,7 @@ ${paragraphs.join('')}
     }
   }
   fs.writeFileSync(target, buf);
+  if (target !== outPath) outPath = target;   /* 日志要报真正写出的那个文件 */
   const text = DOC.replace(/<[^>]+>/g, '');
   console.log('写出 ' + outPath);
   console.log('  文件大小   ' + (buf.length / 1024).toFixed(1) + ' KB');

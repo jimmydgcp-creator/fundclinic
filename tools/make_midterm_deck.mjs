@@ -238,13 +238,13 @@ S('', '定位 · 和场景确认一致', `
 S('tight', '进度说明 · 现在能不能跑起来', `
   <div class="hd">
     <div class="kicker">进度说明 ①</div>
-    <h2>能跑。双击一个文件，出全套交付物</h2>
-    <div class="sub">本机：Windows 双击 <code>.bat</code>、Mac 双击 <code>.command</code>。<b>公网：打开链接输 6 位代码就行</b>，不用装 Node、不用 VPN，也不用填 Key。另外还有<b>零依赖单文件版</b>兜底，断网也能演示。</div>
+    <h2>能跑。现在点开一个网站就能用</h2>
+    <div class="sub"><b>打开 <code>https://fundclinic.onrender.com</code>，输 6 位基金代码，全套交付物就出来了</b>：不用装 Node、不用 VPN，也不用填 Key（Key 在我们服务端）。想在自己电脑上跑也行：Windows 双击 <code>.bat</code>、Mac 双击 <code>.command</code>；断网还有零依赖单文件版兜底。</div>
   </div>
   <div class="body row">
     <div style="flex:0 0 372px;display:flex;flex-direction:column;gap:11px">
       <div class="steps">
-        <div class="step"><div class="num">1</div><div class="tx"><b>双击启动</b>（或直接打开公网地址）→ 浏览器里就是完整页面</div></div>
+        <div class="step"><div class="num">1</div><div class="tx"><b>打开 fundclinic.onrender.com</b><span class="dim">（或双击本机启动器）</span> → 浏览器里就是完整页面</div></div>
         <div class="step"><div class="num">2</div><div class="tx"><b>输入 6 位基金代码</b><span class="dim">（本机版再填自己的 Key；公网页的 Key 在服务端，访客不用填）</span></div></div>
         <div class="step"><div class="num">3</div><div class="tx"><b>探路（约 0.5 秒）</b>：只抓概况/历任经理/报告期网格，把 SOP §0 的<b>八格口径确认表</b>填好候选值摆出来</div></div>
         <div class="step"><div class="num">4</div><div class="tx"><b>人确认口径</b> → 点「按此口径开跑」<span class="dim">（预置样例约 10 秒；真去抓六类来源时约 6–7 分钟）</span></div></div>
