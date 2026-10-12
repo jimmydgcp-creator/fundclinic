@@ -152,9 +152,26 @@ ${paragraphs.join('')}
 </w:body>
 </w:document>`;
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  if (fs.existsSync(outPath)) fs.unlinkSync(outPath);
   const buf = zip([['[Content_Types].xml', CT], ['_rels/.rels', RELS], ['word/document.xml', DOC]]);
-  fs.writeFileSync(outPath, buf);
+  /* 目标文件可能正被 Word 打开（同目录会出现 ~$xxx.docx 锁文件），这时删不掉也覆盖不了。
+     处理：先等一会儿（人可能马上就关了），实在不行就另存成 "(改版).docx"，
+     而不是让整个生成过程崩在 unlink 上。 */
+  let target = outPath;
+  for (let i = 0; i < 10; i++) {
+    try {
+      if (fs.existsSync(target)) fs.unlinkSync(target);
+      break;
+    } catch (e) {
+      if (i === 9) {
+        target = outPath.replace(/\.docx$/i, '(改版).docx');
+        console.log('  ! ' + path.basename(outPath) + ' 正被占用（Word 开着），改写为 ' + path.basename(target));
+      } else {
+        console.log('  目标被占用，等 3 秒再试（' + (i + 1) + '/10）…');
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 3000);
+      }
+    }
+  }
+  fs.writeFileSync(target, buf);
   const text = DOC.replace(/<[^>]+>/g, '');
   console.log('写出 ' + outPath);
   console.log('  文件大小   ' + (buf.length / 1024).toFixed(1) + ' KB');

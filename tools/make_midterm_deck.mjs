@@ -200,12 +200,12 @@ slides.push(`<section class="slide cover">
   <h1>基金复诊台</h1>
   <div class="en">FUND CLINIC</div>
   <div class="rule2"></div>
-  <p class="lede">输入一个 6 位基金代码，<br>出一份<strong>每个数字都能追到公开季报原文</strong>的持仓回溯复盘。</p>
+  <p class="lede">输入一个 6 位基金代码，<br>出一份<strong>每个数字都能追到公开季报原文</strong>的复盘。</p>
   <div class="meta">
     <span class="b b-blue">第 2 组</span>
     <span>2026-10-14 · 第 5 次课</span>
     <span class="dim">·</span>
-    <span>全员上台 · 5 分钟</span>
+    <span>5 人全员上台 · 5 分钟</span>
   </div>
 </section>`);
 
@@ -213,11 +213,12 @@ slides.push(`<section class="slide cover">
 S('', '定位 · 和场景确认一致', `
   <div class="hd">
     <div class="kicker">先说结论</div>
-    <h2>项目定位没有变，变的是"从打算做"变成"已经能跑"</h2>
+    <h2>定位没变。变的是：现在已经能跑了</h2>
   </div>
   <div class="body">
     <div class="concl" style="margin-bottom:16px">
-      给〔<b>基民 · 基金公司初步评价考核 · FOF 初步评价</b>〕用，把〔<b>一只公募基金的代码 + 复盘区间</b>〕变成〔<b>一份可核验的"十大持仓回溯复盘报告"网页 + 一份能直接发给别人的演示稿</b>〕。
+      做给三种人用：<b>基民</b>、基金公司里做初步评价考核的、做 FOF 评价的。你给一个基金代码和一段区间，
+      它出一份能核验的复盘网页，外加一份能直接发给别人的演示稿。
     </div>
     <div class="kpi" style="margin-bottom:14px">
       <div class="k"><div class="l" style="margin:0 0 6px;color:var(--accent-2);font-size:12.5px">项目名（交上去就是组名）</div>
@@ -228,7 +229,7 @@ S('', '定位 · 和场景确认一致', `
         <div class="s" style="font-size:13.5px;line-height:1.6;color:var(--text-1)">2026-09-22 已提交 · <b>8 问全填</b></div></div>
     </div>
     <div class="c soft" style="padding:13px 16px">
-      <p style="font-size:13px"><b>今天要讲三件事：</b>① 现在真的能跑（5 只基金实跑）② AI 模块怎么防错（实测拦下过大模型的错）③ <b>接下来 4 周做什么</b> —— 其中"公网部署"这一项 <b>10/10 已经上线了</b>，剩下的排期是多形态覆盖与成本闸门调优</p>
+      <p style="font-size:13px"><b>今天讲三件事：</b>① 现在真的能跑，5 只基金都跑过 ② AI 怎么防错，实测拦下过大模型写的错 ③ 接下来 4 周做什么。公网部署这一项 <b>10 月 10 号已经上线了</b>，后面的排期是多覆盖几种基金形态、把成本闸门调一下。</p>
     </div>
   </div>
 `);
@@ -238,7 +239,7 @@ S('tight', '进度说明 · 现在能不能跑起来', `
   <div class="hd">
     <div class="kicker">进度说明 ①</div>
     <h2>能跑。双击一个文件，出全套交付物</h2>
-    <div class="sub">本机：Windows 双击 <code>.bat</code>、macOS 双击 <code>.command</code>；<b>公网：打开一条链接输 6 位代码就行</b>（不用装 Node、不用 VPN、不用填 Key）；另有<b>零依赖单文件版</b>兜底（不用 Node、不用网、不用 Key）</div>
+    <div class="sub">本机：Windows 双击 <code>.bat</code>、Mac 双击 <code>.command</code>。<b>公网：打开链接输 6 位代码就行</b>，不用装 Node、不用 VPN，也不用填 Key。另外还有<b>零依赖单文件版</b>兜底，断网也能演示。</div>
   </div>
   <div class="body row">
     <div style="flex:0 0 372px;display:flex;flex-direction:column;gap:11px">
@@ -265,7 +266,7 @@ S('tight', '进度说明 · 现在能不能跑起来', `
 S('tight', '进度说明 · 成果长什么样', `
   <div class="hd">
     <div class="kicker">进度说明 ① · 接着说</div>
-    <h2>出的东西长这样：结论先行、每个数字带证据级别、判断方向由人拍板</h2>
+    <h2>出来的东西长这样：先给结论，每个数字带证据级别，判断方向由人拍板</h2>
   </div>
   <div class="body row">
     <div class="shot" style="flex:1;height:402px;position:relative">
@@ -319,8 +320,8 @@ S('tight', '进度说明 · 实跑证据', `
       </tbody>
     </table>
     <div class="c soft" style="margin-top:14px;padding:11px 15px">
-      <p style="font-size:12.5px">五只基金落在<b>四种形态标签</b>上（逐步分散 / 低换手长期持有 / 主题漂移 / 高频轮动）；
-      最后一只只覆盖 2 期，标签如实写成"样本不足（2 期）" —— <b>形态库不认识就不硬套，把这句直接写进结论。</b></p>
+      <p style="font-size:12.5px">五只基金落在<b>四种形态标签</b>上：逐步分散、低换手长期持有、主题漂移、高频轮动。
+      最后一只只覆盖 2 期，标签就写"样本不足（2 期）"。<b>引擎不认识这种，它不硬套。</b></p>
     </div>
   </div>
 `);
@@ -329,7 +330,7 @@ S('tight', '进度说明 · 实跑证据', `
 S('tight', '进度说明 · 数据合规', `
   <div class="hd">
     <div class="kicker">进度说明 ③</div>
-    <h2>六类公开来源（严格按 SOP §2），官方 PDF 是最高权威</h2>
+    <h2>六类公开来源，全按 SOP §2 取；官方 PDF 是最高权威</h2>
     <div class="sub">全部公开数据 · 不含任何机构或实习单位内部数据 · 不构成投资建议</div>
   </div>
   <div class="body row">
@@ -346,7 +347,7 @@ S('tight', '进度说明 · 数据合规', `
     </table>
     <div style="flex:0 0 352px;display:flex;flex-direction:column;gap:11px">
       <div class="c acc" style="padding:13px 15px">
-        <h4>对账是自动动作，不是声明</h4>
+        <h4>对账是代码自己在跑</h4>
         <p style="font-size:12.5px">自动挑<b>首季、末季、每 4 季抽样</b> → 下官方 PDF → 抽前十名股票投资明细表 → <b>按股票代码</b>逐行比对（容差 ±0.011pp）→ 对不上以官方为准并记录差异。</p>
       </div>
       <div class="c soft" style="padding:12px 15px">
@@ -363,7 +364,7 @@ S('tight', '进度说明 · 数据合规', `
 S('tight', 'AI 模块 · 分工', `
   <div class="hd">
     <div class="kicker">AI 模块 ①</div>
-    <h2>确定性计算归脚本，推理归纳归大模型，把关归人</h2>
+    <h2>算数交给脚本，写字交给大模型，把关还是人</h2>
   </div>
   <div class="body">
     <div style="display:flex;gap:16px;margin-bottom:15px">
@@ -393,7 +394,7 @@ S('tight', 'AI 模块 · 分工', `
 S('tight', 'AI 模块 · 错了怎么发现（实测）', `
   <div class="hd">
     <div class="kicker">AI 模块 ② · 这段是实测，不是设想</div>
-    <h2>"错了怎么发现"——用真实 API Key 跑出来的拦截记录</h2>
+    <h2>"错了怎么发现"：用真实 API Key 跑出来的拦截记录</h2>
   </div>
   <div class="body">
     <table class="t">
@@ -408,7 +409,7 @@ S('tight', 'AI 模块 · 错了怎么发现（实测）', `
       </tbody>
     </table>
     <div class="c acc" style="margin-top:14px;padding:12px 16px">
-      <p style="font-size:13px"><b>拦截之后不是报错结束，而是降级继续</b>——规则引擎的结论卡照用、报告照出，只是在质检页明确标出"AI 输出未通过校验，已拦截"。<b>一次接口抖动或一次模型幻觉，不会让整条流水线什么都没有。</b></p>
+      <p style="font-size:13px"><b>被拦下来不等于这条流水线就废了。</b>规则引擎的结论卡照用，报告照出，质检页上标明 AI 输出没过校验、已经拦截。<b>一次模型幻觉，或者一次接口抖动，不会让我们什么都交不出来。</b></p>
     </div>
   </div>
 `);
@@ -429,22 +430,22 @@ S('tight', '进度说明 · 工具抓出了我们自己的错', `
         <p style="font-size:12.5px"><b>错在哪：</b>复盘区间写的是 2020Q4–2026Q2，但基准点错取了 2020-12-31（2020Q4 的<b>期末</b>），于是第一个季度自己的收益被漏掉。</p>
       </div>
       <div class="c acc-g" style="padding:12px 15px">
-        <p style="font-size:12.5px"><b>怎么钉死的：</b>如果 85.97% 是对的，每个单季收益都该比官方季报高 —— 但实测逐季与官方<b>完全吻合</b>。所以错的不是收益算法，是<b>起点</b>。改成「第一个报告期的<b>期初</b>」后逐季对账 <b>22/22 期、最大偏差 0.01pp</b>。</p>
+        <p style="font-size:12.5px"><b>怎么钉死的：</b>如果 85.97% 是对的，每个单季收益都该比官方季报高，可实测逐季跟官方<b>完全吻合</b>。所以错的不是收益算法，是<b>起点</b>。改成「第一个报告期的<b>期初</b>」之后，逐季对账 <b>22/22 期，最大偏差 0.01pp</b>。</p>
       </div>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:12px;justify-content:center">
       <div class="c" style="padding:14px 17px">
         <h4>另一个错：累计净值不能拿来做比值</h4>
         <p>累计净值 = 单位净值 + 累计分红，是<b>加法</b>累积量，做比值在数学上无意义。<br>
-        改用<b>分红再投总回报指数</b>（除息日把每份分红加回去，链式相乘），并用官方季报披露的过去三年/五年/七年/十年净值增长率反向校准 —— 平均绝对偏差 <b>15.94pp → 1.07pp</b>。</p>
+        改用<b>分红再投总回报指数</b>（除息日把每份分红加回去，链式相乘），再拿官方季报披露的过去三年/五年/七年/十年净值增长率反过来校准，平均绝对偏差 <b>15.94pp → 1.07pp</b>。</p>
       </div>
       <div class="c acc" style="padding:14px 17px">
-        <p style="font-size:15px;line-height:1.7"><b>这就是为什么整个流程把「官方 PDF 逐行对账」放在最高优先级 ——</b><br>不是为了让报告好看，是为了在<b>我们自己也看不出来</b>的时候，有个东西能指出来。</p>
+        <p style="font-size:15px;line-height:1.7"><b>所以我们把「官方 PDF 逐行对账」放在最高优先级：</b><br>报告好不好看是次要的，要紧的是<b>我们自己也看不出来</b>的时候，有个东西能指出来。</p>
       </div>
     </div>
   </div>
   <div class="c soft" style="margin-top:14px;padding:11px 16px">
-    <p style="font-size:13.5px;color:var(--text-1)">一条教训，写在文档里也写进代码注释：<b>工具给出的数字比手工算的更好看时，恰恰是最该怀疑它的时候。</b></p>
+    <p style="font-size:13.5px;color:var(--text-1)">这条教训我们写在文档里，也写进了代码注释：<b>它算出来的数字比手算的还漂亮的时候，先别高兴，先去核对。</b></p>
   </div>
 `);
 
@@ -452,14 +453,14 @@ S('tight', '进度说明 · 工具抓出了我们自己的错', `
 S('tight', '和场景确认比，改了什么', `
   <div class="hd" style="margin-bottom:14px">
     <div class="kicker">和场景确认比，改了什么，为什么</div>
-    <h2>方向没变：把"别人不用装任何东西就能用"做实了</h2>
-    <div class="sub" style="margin-top:5px">场景确认（9/22）定的是"报告或材料自动生成的网页项目"；七条改动都在往同一个方向拧：<b>从"一个能出报告的网页"→"别人点开就能用、而且自己会发现自己算错的东西"。</b></div>
+    <h2>方向没变：别人不用装任何东西就能用，这件事做成了</h2>
+    <div class="sub" style="margin-top:5px">场景确认（9/22）定的是"做一个报告或材料自动生成的网页项目"。后来改了七处，方向是同一个：<b>从一个能出报告的网页，变成别人点开就能用、而且自己会发现自己算错的东西。</b></div>
   </div>
   <div class="body">
     <table class="t sm">
       <thead><tr><th style="width:26px">#</th><th style="width:232px">改了什么</th><th>为什么（都是跑出来的理由，不是偏好）</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td><b>AI 模块：可选 → 必选</b></td><td>"主题"没有公开接口可替代（天天基金、巨潮都不给这个字段）。缺了它，「主题坚守型 / 主题漂移型」两条形态规则直接跳过 —— 519191 实测只能判成"逐步分散型"，补上才判出"主题坚守型"。</td></tr>
+        <tr><td>1</td><td><b>AI 模块：可选 → 必选</b></td><td>"主题"这个字段没有公开接口可替代（天天基金、巨潮都不给）。缺了它，「主题坚守型 / 主题漂移型」两条形态规则直接跳过：519191 实测只能判成"逐步分散型"，补上才判出"主题坚守型"。</td></tr>
         <tr><td>2</td><td><b>加「探路 → 口径确认表 → 开跑」两阶段</b></td><td>SOP §0 原话是「<b>任何一格留空不许开跑</b>」。价值在<b>共管期</b>：005827 现任经理 2026-05-23 才接手（仅 1 期），引擎<b>建议</b>改用张坤那一任（30 期），但最终由人拍板，不偷偷替你换。</td></tr>
         <tr><td>3</td><td><b>演示稿 1 份 → 2 份（新增 AI 深度版）</b></td><td>第一版 9 页长得一样、一眼是报表。现在大模型<b>先分镜、再逐页单独成文</b>（页数与标题由内容决定）。<b>保底</b>：深度版失败时跳过，模板版照常产出。</td></tr>
         <tr><td>4</td><td><b>交付形态：发压缩包 → 发一个文件</b></td><td>组员在 macOS 上双击 <code>.bat</code> 打不开。现在三件套：Windows <code>.bat/.cmd</code>、macOS <code>.command</code>（LF 换行 + 无 BOM + 可执行位 755，启动时自己补 PATH）、零依赖单文件 HTML。</td></tr>
@@ -470,7 +471,7 @@ S('tight', '和场景确认比，改了什么', `
     </table>
   </div>
   <div class="c soft" style="margin-top:10px;padding:9px 14px">
-    <p style="font-size:12px"><b>没改的：</b>项目名、类型单选、四类目标用户、「脚本算数 / 大模型写字 / 人把关」的分工、三道人机门禁 —— 门禁<b>一条没删</b>，人该定的口径、该拍的判断方向都还在。</p>
+    <p style="font-size:12px"><b>没改的：</b>项目名、类型单选、四类目标用户、「脚本算数 / 大模型写字 / 人把关」的分工，还有三道人机门禁。门禁<b>一条没删</b>，人该定的口径、该拍的判断方向都还在。</p>
   </div>
 `);
 
@@ -482,7 +483,7 @@ S('tight', '主要问题 · 卡在哪里，需要什么帮助', `
   </div>
   <div class="body" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:start">
     <div class="c acc" style="padding:14px 16px">
-      <h4>1 · 公网部署 —— 已解决，但冒出一个新问题 <span class="b b-ok">已上线</span></h4>
+      <h4>1 · 公网部署：已经上线了，但冒出一个新问题 <span class="b b-ok">已上线</span></h4>
       <p><b>10/10 已上线：</b><code>https://fundclinic.onrender.com</code>，并用我们自己的 Key <b>真实跑通两只基金</b>（519191 二十三期 453 秒、005825 九期 366 秒），报告 / 结论卡 / 质检 / 来源清单 / <b>AI 深度版演示稿</b>全部可下载。<br>
       <b>新问题：</b>形态变成"服务端持有我们的 Key"之后，<b>Key 就是任何点开链接的人都能花的钱</b>。所以加了三道闸门（每台 3 次/小时、8 次/天；全站 40 次/天）。<b>实测单次约 0.3 元</b>，40 次/天约 12 元封顶。<br>
       <b>需要帮助：</b>① 课堂对"部署到公网"是否另有要求 ② <b>全站每天 40 次这个额度定多少合适</b>（真钱，想听老师意见）。</p>
@@ -495,14 +496,14 @@ S('tight', '主要问题 · 卡在哪里，需要什么帮助', `
     </div>
     <div class="c acc" style="padding:14px 16px">
       <h4>3 · 第三方数据源没有承诺，换个基金就可能换一套坑</h4>
-      <p>天天基金持仓接口是网页接口，<b>没有 SLA、也没有版本承诺</b>，改版或换结构就会失效 —— 我们只把它当交叉验证，最高权威始终是官方季报 PDF。<b>兜底不靠"希望它稳定"，靠三条自动规则：</b>A1 单一个股权重 ≤10%（双十约束）、B2 前十合计 ≤100%（逻辑上不可能超过）、官方 PDF 逐行对账（与官方不符就直接报不一致）。<br>
+      <p>天天基金持仓接口是网页接口，<b>没有 SLA、也没有版本承诺</b>，改版或换结构就会失效。我们只把它当交叉验证，最高权威始终是官方季报 PDF。<b>兜底靠三条自动规则，不是指望它稳定：</b>A1 单一个股权重 ≤10%（双十约束）、B2 前十合计 ≤100%（逻辑上不可能超过）、官方 PDF 逐行对账（跟官方对不上就直接报不一致）。<br>
       <b>需要帮助：</b>① 有没有更好的"字段自检"思路（我们想再加几条"逻辑上不可能"的检测）② 联接基金 / ETF 这类特殊结构，公开季报里前十大该怎么取才对。</p>
     </div>
     <div class="c acc" style="padding:14px 16px">
       <h4>4 · 方法本身有一条边界，想请教怎么补</h4>
-      <p>公募季报<b>只披露前十大</b>，且是<b>期末快照</b>——期间怎么买卖看不见。这决定了我们只能做"期末结构 + 前后两期对比"，做不了"真实换手"。我们在每份报告里都写明了这条边界。<br>
-      <b>需要帮助：</b>有没有公开渠道能拿到季报之外更像"过程"的证据？或者公认的做法来处理"期末快照"这个局限？<br>
-      <span class="dim">另：中期是全员上台、每组 5 分钟，也想请老师给个节奏建议——我们暂定「定位 30 秒 → 现在真的能跑 85 秒 → AI 怎么防错 85 秒 → 改动与卡点 70 秒 → 收尾 10 秒」，<b>以展示页为主，公网站只插 20 秒</b>（输入代码那一跑要 6–7 分钟，课堂上等不起）。</span></p>
+      <p>公募季报<b>只披露前十大</b>，而且是<b>期末快照</b>，期间怎么买卖看不见。所以我们只能做"期末结构 + 前后两期对比"，做不了"真实换手"。这条边界每份报告里都写明了。<br>
+      <b>需要帮助：</b>有没有公开渠道能拿到季报之外更像"过程"的证据？或者大家公认怎么处理"期末快照"这个局限？<br>
+      <span class="dim">另：中期是 5 个人全上台、每组 5 分钟，我们按一人一段分：A 55 秒、B 55 秒、C 60 秒、D 60 秒、E 55 秒，留 15 秒机动，<b>以展示页为主，公网站只插 20 秒</b>（真去抓一次要 6–7 分钟，课堂上等不起）。也想请老师看看这个节奏行不行。</span></p>
     </div>
   </div>
 `);
@@ -511,13 +512,13 @@ S('tight', '主要问题 · 卡在哪里，需要什么帮助', `
 S('tight', '接下来做什么、预计什么时候做完', `
   <div class="hd">
     <div class="kicker">接下来做什么、预计什么时候做完</div>
-    <h2>功能主线已跑通，剩下两件事：让别人也能用 · 多覆盖几种基金形态</h2>
+    <h2>主线跑通了，剩下两件事：让别人也能用、多覆盖几种基金形态</h2>
   </div>
   <div class="body" style="justify-content:center">
     <div class="road">
       <div class="st"><div class="ln"><span style="width:50%"></span></div><div class="dot"></div>
         <div class="box"><div class="d">10/10 – 10/13</div><div class="t">中期材料定稿</div>
-        <div class="x">5 分钟讲稿按「痛点 30s → 演示 2min → AI 1min → 下一步 1.5min」压缩；展示页打成 zip</div></div></div>
+        <div class="x">5 分钟讲稿按 5 个人一人一段压缩；展示页打成 zip</div></div></div>
       <div class="st"><div class="ln"><span style="width:100%"></span></div><div class="dot"></div>
         <div class="box"><div class="d">10/14 – 10/20 → <b>10/10 已提前完成</b></div><div class="t">部署到公网 <span class="b b-ok">已上线</span></div>
         <div class="x">从"本地点开"变成"发条链接谁都能点开"，同学不用装 Node、不用 VPN<br><span class="b b-ok">验收：https://fundclinic.onrender.com 已可公开访问</span></div></div></div>
@@ -532,7 +533,7 @@ S('tight', '接下来做什么、预计什么时候做完', `
         <div class="x">11/10 23:59 前提交终展材料（含<b>演示视频或截图</b>、<b>组内分工表</b>）；11/11 第 9 次课每组 10 分钟、含问答与换场，全员上台</div></div></div>
     </div>
     <div class="c soft" style="margin-top:20px;padding:12px 16px">
-      <p style="font-size:13px"><b>一句话：</b>功能主线已经跑通；剩下的是「<b>让别人也能用</b>」和「<b>多覆盖几种基金形态</b>」。<b>交付物不是 PPT，是一个别人点开就能用的网页。</b></p>
+      <p style="font-size:13px"><b>说到底：</b>主线已经跑通，剩下的是<b>让别人也能用</b>和<b>多覆盖几种基金形态</b>。<b>我们交的不是 PPT，是一个别人点开就能用的网页。</b></p>
     </div>
   </div>
 `);
@@ -540,8 +541,8 @@ S('tight', '接下来做什么、预计什么时候做完', `
 /* ------------------------------------------------------- 13 尾页 */
 slides.push(`<section class="slide end">
   <h1>现场演示</h1>
-  <p>输入一个 6 位基金代码，当场出报告与演示稿。<br>
-  <span class="dim" style="font-size:15px">网络不通 / 环境不对时的兜底：双击零依赖单文件版，不用 Node、不用网、不用 Key。</span></p>
+  <p>输入一个 6 位基金代码，当场出报告和演示稿。<br>
+  <span class="dim" style="font-size:15px">网络不通、环境不对也不怕：双击零依赖单文件版，不用 Node、不用网、不用 Key。</span></p>
   <div class="rule2" style="margin:30px auto 22px"></div>
   <p style="font-size:15px;color:var(--text-3)">基金复诊台 FundClinic · 第 2 组 · 2026-10-14</p>
 </section>`);
