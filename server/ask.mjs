@@ -63,6 +63,10 @@ export function buildDigest(code) {
     put('fit.r2', fd.regression && fd.regression.r2, '回归R²');
     put('fit.alpha', fd.regression && fd.regression.alphaAnnual, '年化α');
     put('fit.weeks', fd.window && fd.window.weeks, '拟合周数');
+    /* 拟合窗口的"实际 vs 理论"累计收益是这一节最常被问的两个数, 之前没进字段表,
+       于是问"拟合一节里实际收益是多少"必被降级。fit.json 里存的是倍数(1.3073), 这里换成百分数。 */
+    put('fit.actual', fd.fit && fd.fit.cumActual != null ? (fd.fit.cumActual - 1) * 100 : null, '拟合窗口实际累计收益(%)');
+    put('fit.theory', fd.fit && fd.fit.cumTheory != null ? (fd.fit.cumTheory - 1) * 100 : null, '拟合窗口理论累计收益(%)');
   }
   if (check) {
     const rules = check.rules || check.items || [];
@@ -87,15 +91,24 @@ const SYSTEM = [
   '输出 JSON：{"answer":"...","refs":["字段id",...],"refused":false,"reason":""}'
 ].join('\n');
 
-/** 校验：引用 id 必须存在；回答里的数字必须能在被引用字段里找到（允许 0.01 舍入） */
+/** 校验：引用 id 必须存在；回答里的数字必须能在被引用字段里找到（允许 0.01 舍入）
+ *
+ * 2026-11-01 线上实测修过一次, 两个坑都是"把对的答案判成错的":
+ *   ① 回答里出现"2020Q4–2026Q3"这种**季度标签**, 拆出来是 4、3 这种一位数,
+ *      被当成"找不到出处的数字", 于是整条回答被降级成"我不敢直接给你" —— 用户看到的是坏体验,
+ *      而回答本身完全没错。所以年份、6 位基金代码、一位数都不参与回查(和主报告里的判定口径对齐)。
+ *   ② 字段里存的是 -0.3245(小数), 回答写"-32.45%"或"32.45%"都合法, 但白名单只算了
+ *      v 和 |v| 和 v*100, 漏了 |v|*100 —— 正好就是"最大回撤 32.45%"这一种最常见的写法。 */
 export function validateAnswer(answer, refs, digest) {
   const problems = [];
   const refsArr = Array.isArray(refs) ? refs.filter(r => digest[r]) : [];
-  const nums = String(answer || '').match(/-?\d+(?:\.\d+)?/g) || [];
+  const safeAnswer = String(answer || '').replace(/(沪深|中证|上证|创业板指?|科创|纳斯达克|标普|恒生|国证)\s*\d{2,4}/g, ' ');
+  const nums = (safeAnswer.match(/-?\d+(?:\.\d+)?/g) || []).filter(t =>
+    !/^(19|20)\d\d$/.test(t) && !/^\d{6}$/.test(t) && !/^-?\d$/.test(t));
   const pool = new Set();
   for (const r of (refsArr.length ? refsArr : Object.keys(digest))) {
-    const v = digest[r].v;
-    const vals = [v, Math.abs(Number(v)), Number(v) * 100];
+    const v = Number(digest[r].v);
+    const vals = [v, Math.abs(v), v * 100, Math.abs(v) * 100];
     for (const x of vals) {
       const n = Number(x);
       if (isFinite(n)) { pool.add(n.toFixed(2)); pool.add(n.toFixed(1)); pool.add(String(Math.round(n))); }
