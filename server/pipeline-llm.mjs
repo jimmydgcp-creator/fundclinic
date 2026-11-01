@@ -131,23 +131,46 @@ function expandAllowedNumbers(base, payloadText) {
   return out;
 }
 
-/** 跑一个 AI 任务: 组提示词 -> 调模型 -> 解析 JSON -> 过校验。返回 {ok, value, issues, raw, latencyMs, usage} */
+/* 校验失败后**带着失败原因重写一次**。
+ *
+ * 为什么要有这一步(2026-11-01 四次真跑总结): 大模型被退回时, 写的人(模型)根本不知道
+ * 自己错在哪 —— 我们只把"未通过校验"记进日志, 然后整节不要了。于是:
+ *   · T5 深度复盘报告 4 次全被拦(一次违禁词、一次 46 个自算数字), 交付物少一件;
+ *   · T2 判断起草、T3 用词清洗在同一个模型上时好时坏, 全靠运气。
+ * 而退回原因是**机器可读的**(哪个数字、哪个词、缺哪一节), 直接回灌给模型, 让它只改这些,
+ * 通过率会高得多 —— 这是"修复"而不是"放宽": 数字回查、违禁词、骨架这些闸门一个没动。
+ *
+ * 每个任务最多重写 1 次(FUNDCLINIC_AI_REPAIR=0 可关): 再多就是烧钱, 且说明任务本身没设计好。
+ * 重写失败的返回里会同时带上第一次的问题, 报告里能看出"改了一次还是不行"。 */
+function repairHint(issues) {
+  const fails = (issues || []).filter(i => i && i.level === 'fail');
+  if (!fails.length) return '';
+  return '\n\n## 上一次输出被退回(不要解释, 直接改)\n'
+    + '上一份输出没有通过自动校验, 具体问题如下。请**只修这些问题**, 其余内容、结构、口径照旧, 重新输出完整 JSON:\n'
+    + fails.map((f, i) => (i + 1) + '. ' + String(f.msg || '').replace(/\n/g, ' ')).join('\n')
+    + '\n\n提醒: 数字只能用证据/指标包里原样出现过的写法; 派生数字用定性表述; 上面列出的违禁词一个都不要出现。';
+}
+
+function sumUsage(a, b) {
+  if (!a) return b || null;
+  if (!b) return a;
+  const out = { ...a };
+  ['prompt_tokens', 'completion_tokens', 'total_tokens'].forEach(k => {
+    if (a[k] != null || b[k] != null) out[k] = (Number(a[k]) || 0) + (Number(b[k]) || 0);
+  });
+  return out;
+}
+
+/** 跑一个 AI 任务: 组提示词 -> 调模型 -> 解析 JSON -> 过校验 -> (没过就带着原因重写一次) -> 再过校验。
+ *  返回 {ok, value, issues, raw, latencyMs, usage, repaired?, firstIssues?} */
 export async function runTask(taskId, cfg, analysis, extra = {}) {
   const FC = getFC();
   const t = FC.ai.tasks[taskId];
   if (!t) throw new LLMError('未知任务: ' + taskId);
   const payload = FC.ai.buildPayload(taskId, analysis, extra);
   const prompt = FC.ai.buildPrompt(taskId, payload);
-
-  const call = await callLLM(cfg, prompt, { timeoutMs: TASK_TIMEOUT_MS[taskId] || 120000 });
-  const parsed = FC.ai.parseJSON(call.content);
-  if (!parsed.ok) {
-    return {
-      ok: false, taskId, name: t.name, value: null, raw: call.content.slice(0, 1200),
-      issues: [{ level: 'fail', msg: '大模型返回的不是合法 JSON: ' + (parsed.error || '') }],
-      latencyMs: call.latencyMs, usage: call.usage
-    };
-  }
+  const timeoutMs = TASK_TIMEOUT_MS[taskId] || 120000;
+  const maxRepair = process.env.FUNDCLINIC_AI_REPAIR === '0' ? 0 : 1;
 
   const ctx = { stockList: payload.stockList, formLibrary: payload.formLibrary, original: payload.text };
   /* 数字回查白名单: 不同的任务要查不同的集合 ——
@@ -169,10 +192,55 @@ export async function runTask(taskId, cfg, analysis, extra = {}) {
        那样能扩出几十万个键, 既慢又失去"这是核心判断"的焦点。 */
     ctx.allowedNumbers = expandAllowedNumbers(s, JSON.stringify({ metrics: analysis.metrics, perf: analysis.perf }));
   }
-  const v = FC.ai.validate(taskId, parsed.value, ctx);
+
+  let promptNow = prompt;
+  let totalMs = 0;
+  let usage = null;
+  let firstIssues = null;
+  let lastRaw = '';
+  let lastValue = null;
+
+  for (let attempt = 0; attempt <= maxRepair; attempt++) {
+    const call = await callLLM(cfg, promptNow, { timeoutMs });
+    totalMs += call.latencyMs;
+    usage = sumUsage(usage, call.usage);
+    lastRaw = call.content || '';
+
+    const parsed = FC.ai.parseJSON(lastRaw);
+    let issues;
+    if (!parsed.ok) {
+      issues = [{ level: 'fail', msg: '大模型返回的不是合法 JSON: ' + (parsed.error || '') }];
+    } else {
+      lastValue = parsed.value;
+      const v = FC.ai.validate(taskId, parsed.value, ctx);
+      if (v.ok) {
+        return {
+          ok: true, taskId, name: t.name, value: parsed.value, raw: lastRaw.slice(0, 1200),
+          issues: v.issues, latencyMs: totalMs, usage, promptChars: prompt.length,
+          repaired: attempt > 0 ? true : undefined, repairAttempts: attempt,
+          firstIssues: attempt > 0 ? firstIssues : undefined
+        };
+      }
+      issues = v.issues;
+    }
+
+    if (attempt === 0) firstIssues = issues;
+    const hint = repairHint(issues);
+    /* 没有失败项(只有 warn)就别重写了 —— 那本来就是要通过并留痕的 */
+    if (!hint) {
+      return {
+        ok: false, taskId, name: t.name, value: lastValue, raw: lastRaw.slice(0, 1200),
+        issues, latencyMs: totalMs, usage, promptChars: prompt.length, repairAttempts: attempt
+      };
+    }
+    promptNow = prompt + hint;
+  }
+
   return {
-    ok: v.ok, taskId, name: t.name, value: parsed.value, raw: call.content.slice(0, 1200),
-    issues: v.issues, latencyMs: call.latencyMs, usage: call.usage, promptChars: prompt.length
+    ok: false, taskId, name: t.name, value: lastValue, raw: lastRaw.slice(0, 1200),
+    issues: (firstIssues || []).concat([{ level: 'info', msg: `已按校验意见重写 ${maxRepair} 次, 仍未通过 —— 判定本节不产出(不用套话填充)。` }]),
+    latencyMs: totalMs, usage, promptChars: prompt.length, repairAttempts: maxRepair,
+    firstIssues
   };
 }
 

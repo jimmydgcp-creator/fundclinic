@@ -136,7 +136,14 @@ console.log('\n=== 7. AI 模块: 提示词 / 校验 / 拦截 ===');
 const payload = FC.ai.buildPayload('theme_classify', a);
 ok(payload.stockList.length === a.metrics.totalDistinct, '主题归类输入=去重个股清单', String(payload.stockList.length));
 const prompt = FC.ai.buildPrompt('theme_classify', payload);
-ok(prompt.indexOf('禁止使用以下表述') >= 0, '提示词含用词红线');
+/* 这里原本只断言"提示词里有'禁止使用以下表述'这句话"—— 那种测法只钉住措辞, 钉不住真正要紧的事:
+   提示词列出来的禁用词, 和检查器实际扫描的词表**是不是同一份**。
+   2026-11-01 就是这里出的问题: 提示词列 7 个、检查器扫 13 个, 模型写了它从没被告知的"高点卖出",
+   整份深度报告被退回。所以改成直接比对两张表。 */
+const banList = (FC.vocab && FC.vocab.ban) || [];
+const missingBan = banList.filter(w => prompt.indexOf(w) < 0);
+ok(banList.length > 0 && missingBan.length === 0, '提示词把检查器的禁用词全表都告诉了模型',
+  missingBan.length ? '漏掉: ' + missingBan.join('、') : banList.length + ' 个词全覆盖');
 ok(prompt.indexOf('严格输出 JSON') >= 0, '提示词含输出约束');
 const pj = FC.ai.buildPayload('judgement', a);
 ok(!!pj.metrics['前十合计权重_均值'], '判断任务输入含指标包');

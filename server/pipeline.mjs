@@ -135,7 +135,7 @@ export async function runPipeline(code, opts = {}) {
     // T1 主题归类 —— 唯一没有公开接口可替代的一步, 缺它形态判定会退化
     try {
       const r1 = await runTask('theme_classify', ai, analysis);
-      aiLog.push({ task: r1.name, ok: r1.ok, latencyMs: r1.latencyMs, usage: r1.usage, issues: r1.issues });
+      aiLog.push({ task: r1.name, ok: r1.ok, latencyMs: r1.latencyMs, usage: r1.usage, issues: r1.issues, repaired: r1.repaired });
       if (r1.ok && r1.value && r1.value.mapping) {
         const applied = applyThemeClassification(FC, dataset, r1.value.mapping);
         step('T1 主题归类', `已应用 ${applied} 期主题, 形态库的主题类规则现在可以参与判定`);
@@ -149,11 +149,11 @@ export async function runPipeline(code, opts = {}) {
     // T2 判断起草
     try {
       const r2 = await runTask('judgement', ai, analysis);
-      aiLog.push({ task: r2.name, ok: r2.ok, latencyMs: r2.latencyMs, usage: r2.usage, issues: r2.issues });
+      aiLog.push({ task: r2.name, ok: r2.ok, latencyMs: r2.latencyMs, usage: r2.usage, issues: r2.issues, repaired: r2.repaired });
       if (r2.ok && r2.value) {
         applyJudgement(FC, analysis, r2.value, dataset.sources);
         check = FC.runCheck(dataset, analysis);
-        step('T2 判断起草', '输出通过校验(形态标签在库内 / 数字全部回查得到 / 无违禁词), 已并入结论卡');
+        step('T2 判断起草', '输出通过校验(形态标签在库内 / 数字全部回查得到 / 无违禁词), 已并入结论卡' + (r2.repaired ? '（按校验意见重写 1 次后通过）' : ''));
       } else {
         step('T2 判断起草', '输出未通过校验, 已拦截, 沿用规则引擎的结论卡');
       }
@@ -219,10 +219,10 @@ export async function runPipeline(code, opts = {}) {
   if (ai.apiKey && opts.cleanReport !== false) {
     try {
       const r3 = await runTask('polish', ai, analysis);
-      aiLog.push({ task: r3.name, ok: r3.ok, latencyMs: r3.latencyMs, usage: r3.usage, issues: r3.issues });
+      aiLog.push({ task: r3.name, ok: r3.ok, latencyMs: r3.latencyMs, usage: r3.usage, issues: r3.issues, repaired: r3.repaired });
       if (r3.ok && r3.value && r3.value.cleaned) {
         reportClean = r3.value.cleaned;
-        step('T3 用词清洗', '输出通过校验(数字守恒 / 无违禁词 / 未删减), 已生成对外版报告');
+        step('T3 用词清洗', '输出通过校验(数字守恒 / 无违禁词 / 未删减), 已生成对外版报告' + (r3.repaired ? '（按校验意见重写 1 次后通过）' : ''));
       } else {
         step('T3 用词清洗', '输出未通过校验, 已拦截, 对外版报告不生成(原稿不受影响)');
       }
@@ -263,11 +263,11 @@ export async function runPipeline(code, opts = {}) {
           chainedGapPp: evidence.period.chainedGapPp
         };
         const r5 = await runTask('deepReport', ai, analysis, { evidence });
-        aiLog.push({ task: r5.name, ok: r5.ok, latencyMs: r5.latencyMs, usage: r5.usage, issues: r5.issues });
+        aiLog.push({ task: r5.name, ok: r5.ok, latencyMs: r5.latencyMs, usage: r5.usage, issues: r5.issues, repaired: r5.repaired });
         deepCheck = r5.issues;
         if (r5.ok && r5.value && r5.value.markdown) {
           deepMd = r5.value.markdown;
-          step('深度复盘报告', '已通过校验(骨架 10 节 / 数字全部回查得到 / 无前瞻无违禁词)');
+          step('深度复盘报告', '已通过校验(骨架 10 节 / 数字全部回查得到 / 无前瞻无违禁词)' + (r5.repaired ? '（按校验意见重写 1 次后通过）' : ''));
         } else {
           step('深度复盘报告', '未通过校验, 已拦截 —— 详见"错误检查记录"里的 T5 明细');
         }

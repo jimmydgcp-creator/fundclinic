@@ -34,7 +34,11 @@ const addDays = (s, n) => {
 /* 抓一次, 失败重试。
  * 为什么必须有: 腾讯这个周线接口偶尔直接回 501(不是我们请求写错, 是它那一侧在抖),
  * 而 2026-11-01 实跑时**一次 501 就把整节《持仓拟合》丢掉了** —— 用户点名要的一节,
- * 因为对方抖一下就整节消失。这里重试 3 次(退避 400ms / 1200ms), 连续失败才算真失败。 */
+ * 因为对方抖一下就整节消失。这里重试 3 次(退避 400ms / 1200ms), 连续失败才算真失败。
+ *
+ * 另一件事(同一天踩到): 开着 VPN / 代理时, 这个接口不是超时, 而是返回 **HTTP 501 + 一个 HTML 跳转页**
+ * (中间层拦截)。浏览器里看不出来, 但 Node 这边 json() 会抛一个跟真实原因毫无关系的解析错误。
+ * 所以这里改成先取文本: 状态码不对、或返回的是 HTML, 就给一句人话, 让报告里那节"为什么没跑成"能看懂。 */
 async function fetchJson(url, timeoutMs = 20000) {
   let lastErr = null;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -42,8 +46,15 @@ async function fetchJson(url, timeoutMs = 20000) {
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
       const res = await fetch(url, { headers: { 'User-Agent': UA, Accept: '*/*' }, signal: ctrl.signal });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return await res.json();
+      const txt = await res.text();
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status + (res.status === 501 || res.status === 502 || res.status === 403
+          ? '（行情源被网络中间层拦截：常见于开着 VPN / 代理，关掉再试）' : ''));
+      }
+      if (txt.trim().startsWith('<')) {
+        throw new Error('行情源返回了 HTML 页面而不是数据（被网络中间层拦截：常见于开着 VPN / 代理，关掉再试）');
+      }
+      return JSON.parse(txt);
     } catch (e) {
       lastErr = e;
       const m = /HTTP (\d+)/.exec(String((e && e.message) || ''));
