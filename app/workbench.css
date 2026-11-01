@@ -1,0 +1,97 @@
+/* 投研工作台补充样式：横向对比 + 页面内问答。
+   只新增组件，不改原有变量与排版；配色沿用 styles.css 的纸感中性色。 */
+
+/* ---------------- 横向对比 ---------------- */
+.cmp-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 8px; }
+.cmp-form input {
+  width: 168px; padding: 9px 11px; border: 1px solid var(--line-strong); border-radius: var(--r-sm, 6px);
+  background: var(--surface, #fff); color: var(--ink, #151b23); font: inherit; font-variant-numeric: tabular-nums;
+}
+.cmp-form input:focus { outline: 2px solid var(--brass-soft, #f5efe4); border-color: var(--brass, #8f6231); }
+.cmp-msg { min-height: 18px; margin: 6px 0 0; color: var(--brass, #8f6231); font-size: 13px; }
+.cmp-tip { margin-top: 10px; font-size: 12px; }
+
+.cmp-head h3 { margin: 16px 0 4px; font-size: 15px; letter-spacing: .2px; }
+.cmp-warn { margin: 10px 0; padding: 8px 11px; border-left: 3px solid var(--warn, #8a5a12); background: var(--warn-bg, #faf3e5); border-radius: 4px; font-size: 12.5px; }
+.cmp-warn p { margin: 2px 0; }
+
+.cmp-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0 2px; font-size: 12px; }
+.cmp-lg { display: inline-flex; align-items: center; gap: 6px; color: var(--ink, #151b23); }
+.cmp-lg i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+.cmp-svg { width: 100%; height: auto; display: block; margin: 4px 0 12px; }
+.cmp-grid { stroke: var(--line, #e7e2d7); stroke-width: 1; }
+.cmp-base { stroke: var(--line-strong, #d5cec0); stroke-width: 1; stroke-dasharray: 3 4; }
+.cmp-axis { fill: #6b7280; font-size: 10px; font-variant-numeric: tabular-nums; }
+
+.cmp-tbl { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0 6px; }
+.cmp-tbl th, .cmp-tbl td { padding: 7px 8px; border-bottom: 1px solid var(--line, #e7e2d7); text-align: left; vertical-align: top; }
+.cmp-tbl th { font-weight: 600; color: var(--navy, #1b2a3a); background: rgba(27, 42, 58, .03); white-space: nowrap; }
+.cmp-tbl td.n, .cmp-tbl th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cmp-tbl .muted { font-size: 11.5px; }
+.cmp-dim { opacity: .58; }
+
+/* ---------------- 问一句（抽屉） ---------------- */
+.ask-fab {
+  position: fixed; right: 22px; bottom: 22px; z-index: 60;
+  padding: 11px 16px; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--navy, #1b2a3a); color: #fff; font: inherit; font-size: 13.5px;
+  box-shadow: 0 8px 22px rgba(21, 27, 35, .18);
+}
+.ask-fab:hover { background: #24384b; }
+
+.ask-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61; width: min(408px, 94vw);
+  display: flex; flex-direction: column; gap: 8px; padding: 16px 16px 12px;
+  background: var(--surface, #fff); border-left: 1px solid var(--line-strong, #d5cec0);
+  box-shadow: -10px 0 30px rgba(21, 27, 35, .12);
+  transform: translateX(102%); transition: transform .22s cubic-bezier(.32, .72, 0, 1);
+}
+.ask-drawer.open { transform: translateX(0); }
+.ask-hd { display: flex; align-items: baseline; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--line, #e7e2d7); }
+.ask-hd .muted { font-size: 11.5px; }
+.ask-x { margin-left: auto; border: 0; background: none; font-size: 20px; line-height: 1; color: #6b7280; cursor: pointer; }
+
+.ask-meta { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #4b5563; }
+.ask-meta input {
+  width: 92px; padding: 5px 8px; border: 1px solid var(--line-strong, #d5cec0);
+  border-radius: var(--r-sm, 6px); font: inherit; font-variant-numeric: tabular-nums;
+}
+.ask-hint { color: #8a8f98; }
+
+.ask-log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 6px 0; }
+.ask-b { max-width: 92%; padding: 9px 11px; border-radius: 10px; font-size: 13px; line-height: 1.62; }
+.ask-b p { margin: 0 0 6px; }
+.ask-b p:last-child { margin-bottom: 0; }
+.ask-b.me { align-self: flex-end; background: var(--brass-soft, #f5efe4); color: #3b2c1a; }
+.ask-b.bot { align-self: flex-start; background: #f5f6f8; color: var(--ink, #151b23); }
+.ask-b.sys { align-self: center; background: none; color: #8a8f98; font-size: 12px; }
+.ask-refs { font-size: 11px; color: #6b7280; font-family: var(--mono, monospace); }
+.ask-warn { font-size: 11.5px; color: var(--warn, #8a5a12); }
+.ask-cost { font-size: 11px; color: #9ca3af; font-variant-numeric: tabular-nums; }
+.ask-dots { color: #9ca3af; }
+
+.ask-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.ask-quick button {
+  padding: 5px 9px; border: 1px solid var(--line-strong, #d5cec0); background: #fff;
+  border-radius: 999px; font: inherit; font-size: 11.5px; color: #4b5563; cursor: pointer;
+}
+.ask-quick button:hover { border-color: var(--brass, #8f6231); color: var(--brass, #8f6231); }
+
+.ask-form { display: flex; gap: 8px; }
+.ask-form input {
+  flex: 1; padding: 9px 11px; border: 1px solid var(--line-strong, #d5cec0);
+  border-radius: var(--r-sm, 6px); font: inherit; font-size: 13px;
+}
+.ask-form input:focus { outline: 2px solid var(--brass-soft, #f5efe4); border-color: var(--brass, #8f6231); }
+.ask-form button {
+  padding: 9px 15px; border: 0; border-radius: var(--r-sm, 6px); cursor: pointer;
+  background: var(--navy, #1b2a3a); color: #fff; font: inherit; font-size: 13px;
+}
+.ask-foot { margin: 2px 0 0; font-size: 10.5px; color: #9ca3af; line-height: 1.5; }
+
+@media (max-width: 720px) {
+  .cmp-form input { width: 100%; }
+  .ask-drawer { width: 100vw; }
+  .ask-fab { right: 14px; bottom: 14px; }
+}

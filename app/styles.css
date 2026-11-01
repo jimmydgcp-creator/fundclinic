@@ -52,6 +52,10 @@
   --warn:    #8a5a12;   --warn-bg: #faf3e5;
   --fail:    #96332b;   --fail-bg: #fbeeec;
 
+  /* 涨跌色: A 股习惯, 红涨绿跌(数字的方向色, 与上面的状态语义色分开用) */
+  --up:      #b3392f;
+  --down:    #2f6a4f;
+
   /* 几何 */
   --r:      10px;
   --r-sm:   6px;
@@ -377,6 +381,30 @@ table.tbl-compact th, table.tbl-compact td { padding: 6px 9px; font-size: 12.5px
 .ev-fact { color: var(--navy); border-bottom-color: var(--navy); border-bottom-style: solid; }
 .ev-infer { color: var(--brass); border-bottom-color: var(--brass); border-bottom-style: dashed; }
 .ev-hindsight { color: #6a4b7a; border-bottom-color: #6a4b7a; border-bottom-style: dotted; }
+
+/* ------------------------------------------------- 涨跌色: 红涨绿跌(A 股习惯)
+   只给"正负号本身有经济含义"的数字用: 收益 / 超额 / 涨跌 / 回撤。
+   零值既不是涨也不是跌, 保持原墨色 —— 所以 .up / .down 只在 > 0 / < 0 时才加
+   (判断集中在 app/engine.js 的 FC.dirCls, 前端三处渲染都用它)。
+   注意: .pos / .neg 是**状态标签**的语义色(逐行一致 / 未通过 / 本次采用…),
+   数字一律走 .up / .down, 两者不要混用, 否则状态文案会被染成涨跌色。 */
+.up { color: var(--up); }
+.down { color: var(--down); }
+/* 表格数字沿用 .pos / .neg 原来的"加粗 + 等宽对齐", 只换色, 字重与字号不动 */
+td.up, .num.up { color: var(--up); font-weight: 700; font-variant-numeric: tabular-nums; }
+td.down, .num.down { color: var(--down); font-weight: 700; font-variant-numeric: tabular-nums; }
+/* 证据分级: 下划线的**样式**继续表示证据级别(solid/dashed/dotted), 颜色跟数字方向走,
+   否则内层 .ev-fact/.ev-infer 的墨蓝/铜金会把红绿盖掉。字重仍按 600。 */
+td.up .ev, .ev.up { color: var(--up); border-bottom-color: currentColor; font-weight: 600; }
+td.down .ev, .ev.down { color: var(--down); border-bottom-color: currentColor; font-weight: 600; }
+
+/* 旧报表兜底(2026-11-01): 改色之前生成的 _runs/<代码>/analysis.json 里,
+   表格数字还是 <td class="pos"> / <td class="neg">。这些文件是历史产出, 不能回炉重写,
+   但主页面 index.html **不加载** variant.css, 缺了这两条它们会按状态语义色渲染
+   (绿涨红跌, 正好反) —— 于是同一份报告在变体页和主页面颜色不一样, 最容易被当成 bug 拍下来。
+   只作用于 td/.num(表格数字), span.pos / span.neg 这类状态标签完全不受影响。 */
+td.pos, .num.pos { color: var(--up); }
+td.neg, .num.neg { color: var(--down); }
 
 /* ---------------------------------------------------------------- 报告 */
 .report-layout { display: grid; grid-template-columns: 232px 1fr; gap: 26px; align-items: start; }

@@ -90,6 +90,47 @@ export async function pingLLM(cfg) {
   }
 }
 
+/* 各任务的超时上限(毫秒)。默认 120 秒对短任务够, 但对**输出很长**的任务不够:
+   2026-11-01 端到端实跑时 T5 深度复盘报告(10 节 Markdown)在 120 秒被掐断,
+   报错是"大模型调用超时(120000 ms)", 后果是整份深度复盘报告缺失 —— 交付物少一件,
+   而页面上只显示一行"调用失败", 很容易被当成网络问题忽略过去。
+   长文任务给 5 分钟: 慢一点没关系, 掐断了就是白跑。 */
+const TASK_TIMEOUT_MS = { deepReport: 300000, polish: 180000 };
+
+/* 数字回查白名单的"够用"标准(2026-11-01 端到端实跑修正)。
+ *
+ * 早先白名单只登记少数几个指标值, 且**只登记原样写法**: 回撤 -0.3245 只出 "-0.32 / -0.3 / 0",
+ * 于是模型老老实实写"最大回撤 32.45%"就被判成**疑似编造**, 两条 AI 成文任务因此长期被退回:
+ *   T2 判断起草: "5 个数字在指标包中不存在: 0.45、11、32.45、1.8、519191"
+ *   T5 深度报告: "23 个数字未能在证据包中找到出处: 77.08、21.60、103.27…"
+ * 这些数字没一个是编的 —— 32.45 就是 -0.3245 取绝对值再换百分数, 77.08 是净值序列里算出来的累计收益。
+ *
+ * 所以白名单按两条规则扩:
+ *   ① 同一个数允许出现为 正/负/绝对值/百分数 四种写法(模型没法反推出你存的量纲);
+ *   ② 证据包/指标包里**字面出现过的数字**一律允许 —— 它本身就可溯源, 卡它没有意义。
+ * 白名单变宽会略微降低"抓编造"的严格度, 但换来的是"不把合规输出误判成编造":
+ * 前者是漏报(可接受, 后面还有人工复核), 后者是**误杀**(直接让交付物缺失), 代价更大。 */
+function expandAllowedNumbers(base, payloadText) {
+  const out = {};
+  const put = v => {
+    if (!isFinite(v)) return;
+    [v, -v, v * 100, -v * 100].forEach(x => {
+      out[x.toFixed(2)] = 1; out[x.toFixed(1)] = 1; out[String(Math.round(x))] = 1;
+    });
+  };
+  Object.keys(base || {}).forEach(k => {
+    out[k] = 1;
+    const v = Number(k);
+    if (isFinite(v)) put(v);
+  });
+  (String(payloadText || '').match(/-?\d+(?:\.\d+)?/g) || []).forEach(t => {
+    out[t] = 1;
+    const v = Number(t);
+    if (isFinite(v)) put(v);
+  });
+  return out;
+}
+
 /** 跑一个 AI 任务: 组提示词 -> 调模型 -> 解析 JSON -> 过校验。返回 {ok, value, issues, raw, latencyMs, usage} */
 export async function runTask(taskId, cfg, analysis, extra = {}) {
   const FC = getFC();
@@ -98,7 +139,7 @@ export async function runTask(taskId, cfg, analysis, extra = {}) {
   const payload = FC.ai.buildPayload(taskId, analysis, extra);
   const prompt = FC.ai.buildPrompt(taskId, payload);
 
-  const call = await callLLM(cfg, prompt);
+  const call = await callLLM(cfg, prompt, { timeoutMs: TASK_TIMEOUT_MS[taskId] || 120000 });
   const parsed = FC.ai.parseJSON(call.content);
   if (!parsed.ok) {
     return {
@@ -113,8 +154,9 @@ export async function runTask(taskId, cfg, analysis, extra = {}) {
      judgement 查指标包; deepReport 查整个证据包(它引用的数据面广得多)。
      漏了这一步的后果是"每个数字都被判成编造", 报告必然退回(实测踩过)。 */
   if (taskId === 'deepReport') {
-    ctx.allowedNumbers = (extra && extra.evidence && extra.evidence.allowedNumbers) || {};
-    if (!Object.keys(ctx.allowedNumbers).length) throw new LLMError('证据包缺少数字白名单, 无法做数字回查 —— 拒绝出报告');
+    const ev = (extra && extra.evidence) || {};
+    if (!ev.allowedNumbers || !Object.keys(ev.allowedNumbers).length) throw new LLMError('证据包缺少数字白名单, 无法做数字回查 —— 拒绝出报告');
+    ctx.allowedNumbers = expandAllowedNumbers(ev.allowedNumbers, JSON.stringify(ev));
   } else if (taskId === 'judgement') {
     const m = analysis.metrics;
     const s = {};
@@ -123,7 +165,9 @@ export async function runTask(taskId, cfg, analysis, extra = {}) {
      m.leader.avg, m.leader.max, m.totalDistinct, m.maxStreak, analysis.quarterCount].forEach(add);
     if (m.theme) add(m.theme.switches);
     if (analysis.perf) [analysis.perf.cumReturn, analysis.perf.exBestQuarter, analysis.perf.maxDrawdown, analysis.perf.bestQuarterContribution, analysis.perf.aumPeak, analysis.perf.aumEnd].forEach(add);
-    ctx.allowedNumbers = s;
+    /* 只用指标包与绩效的紧凑摘要来扩白名单 —— 别把整份 analysis(含 24 期逐笔持仓)丢进去,
+       那样能扩出几十万个键, 既慢又失去"这是核心判断"的焦点。 */
+    ctx.allowedNumbers = expandAllowedNumbers(s, JSON.stringify({ metrics: analysis.metrics, perf: analysis.perf }));
   }
   const v = FC.ai.validate(taskId, parsed.value, ctx);
   return {

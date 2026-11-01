@@ -258,7 +258,11 @@ window.FC = window.FC || {};
       var vocab = FC.scanVocab(blob);
       if (vocab.length) issues.push({ level: 'fail', msg: '命中违禁词: ' + vocab.map(function (v) { return v.word; }).join('、') });
       var allowed = (ctx && ctx.allowedNumbers) || {};
-      var toks = (blob.match(/\d+(?:\.\d+)?/g) || []).filter(function (t) { return !/^\d{4}$/.test(t) && !/^[1-9]$/.test(t) && t !== '10'; });
+      var toks = (blob.match(/\d+(?:\.\d+)?/g) || []).filter(function (t) {
+        /* 年份、一位数、6 位基金代码都不是"论点里的数字", 不该进回查。
+           519191 被当成编造数字报出来过一次 —— 那只是它在正文里提到了基金代码。 */
+        return !/^(19|20)\d\d$/.test(t) && !/^\d{6}$/.test(t) && !/^[1-9]$/.test(t) && t !== '10';
+      });
       var bad = toks.filter(function (t) { return !allowed[t]; });
       if (bad.length) issues.push({ level: 'fail', msg: '数字回查失败, ' + bad.length + ' 个数字在指标包中不存在(疑似编造): ' + bad.slice(0, 8).join('、') });
       if (!/推翻|不成立|反之|若.*则/.test(String(parsed.falsifier || ''))) issues.push({ level: 'warn', msg: '推翻条件读起来不像可证伪条件, 建议改为"若 X 未达到, 则本判断降级"。' });
@@ -336,7 +340,9 @@ window.FC = window.FC || {};
       if (fwd) issues.push({ level: 'fail', msg: '出现收益预期或投资建议字样「' + fwd[0] + '」—— 复盘报告不许给前瞻' });
 
       var allowed = (ctx && ctx.allowedNumbers) || {};
-      var toks = (blob.match(/\d+(?:\.\d+)?/g) || []).filter(function (t) { return !/^\d{4}$/.test(t) && !/^[1-9]$/.test(t) && t !== '10' && t !== '100'; });
+      var toks = (blob.match(/\d+(?:\.\d+)?/g) || []).filter(function (t) {
+        return !/^(19|20)\d\d$/.test(t) && !/^\d{6}$/.test(t) && !/^[1-9]$/.test(t) && t !== '10' && t !== '100';
+      });
       var badNums = toks.filter(function (t) { return !allowed[t]; });
       if (badNums.length) issues.push({ level: 'fail', msg: '数字回查失败, ' + badNums.length + ' 个数字在本次指标包里不存在(疑似编造): ' + badNums.slice(0, 8).join('、') });
       else if (toks.length) issues.push({ level: 'pass', msg: '数字回查: ' + toks.length + ' 个数字全部命中指标包。' });

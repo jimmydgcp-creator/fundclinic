@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { runPipeline, findEdge, stripDataset } from './server/pipeline.mjs';
 /* 公网用量闸门: 服务端持有 Key 时, Key 就是"任何访客都能花的钱", 必须在开跑前拦一道。
    细节与三道闸的默认值见 server/quota.mjs 顶部注释。 */
-import { initQuota, quotaCheck, quotaRecord, quotaAddUsage, quotaSnapshot, quotaEnabledFromEnv } from './server/quota.mjs';
+import { initQuota, quotaCheck, quotaRecord, quotaAddUsage, quotaAddUsageOne, quotaSnapshot, quotaEnabledFromEnv } from './server/quota.mjs';
 import { getFC } from './server/engine.mjs';
 import { runTask, pingLLM, LLMError } from './server/pipeline-llm.mjs';
 import { findPdftotext, popplerInstallNote, popplerInstallHint } from './server/official.mjs';
@@ -242,7 +242,18 @@ function send(res, status, body, headers = {}) {
   });
   res.end(buf);
 }
-function json(res, status, obj) { send(res, status, JSON.stringify(obj, null, 1), { 'Content-Type': 'application/json; charset=utf-8' }); }
+function json(res, status, obj, headers = {}) { send(res, status, JSON.stringify(obj, null, 1), { 'Content-Type': 'application/json; charset=utf-8', ...headers }); }
+
+/* 用量闸门的统一拒绝出口。
+   run / ask / compare 三个会花钱的入口共用这个函数, 免得三处各写一遍、
+   其中一处忘了带 Retry-After —— 那种不一致最难查(页面上表现只是"有时能重试有时不能")。 */
+function quotaReject(res, gate) {
+  return json(res, gate.status || 429, {
+    error: gate.reason,
+    quota: quotaSnapshot(),
+    retryAfterSec: gate.retryAfterSec || null
+  }, { 'Retry-After': String(gate.retryAfterSec || 600) });
+}
 
 function safeJoin(root, target) {
   const p = path.normalize(path.join(root, decodeURIComponent(target)));
@@ -353,6 +364,65 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
+    /* ---------------- 多基金对比（最多 3 只，只抓净值不跑全流程） ---------------- */
+    if (pathname === '/api/compare' && req.method === 'POST') {
+      let body;
+      try { body = JSON.parse(await readBody(req) || '{}'); } catch (e) { return json(res, 400, { error: '请求体不是合法 JSON' }); }
+      const codes = (Array.isArray(body.codes) ? body.codes : String(body.codes || '').split(/[\s,，、]+/))
+        .map(c => String(c || '').trim()).filter(c => /^\d{6}$/.test(c));
+      if (!codes.length) return json(res, 400, { error: '请至少输入一个 6 位基金代码' });
+      if (codes.length > 3) return json(res, 400, { error: '最多对比 3 只基金' });
+      /* 用量闸门: 对比不调大模型, 但每次要发 1–3 个外部抓取请求, 公网上同样能被刷。
+         缓存命中也照记 —— 这道闸门管的是"谁在用这个入口", 不是"这次花了多少钱"。 */
+      const gate = quotaCheck(clientIp(req), 'compare');
+      if (!gate.ok) return quotaReject(res, gate);
+      quotaRecord(clientIp(req), 'compare');
+      try {
+        const { compareFunds } = await import('./server/compare.mjs');
+        const r = await compareFunds(codes);
+        return json(res, 200, r);
+      } catch (e) {
+        return json(res, 502, { error: '对比失败: ' + e.message });
+      }
+    }
+
+    /* ---------------- 页面内问答（只答报告里已有的事） ---------------- */
+    if (pathname === '/api/ask' && req.method === 'POST') {
+      let body;
+      try { body = JSON.parse(await readBody(req) || '{}'); } catch (e) { return json(res, 400, { error: '请求体不是合法 JSON' }); }
+      const code = String(body.code || '').replace(/[^\d]/g, '');
+      if (!/^\d{6}$/.test(code)) return json(res, 400, { error: '先选一只已复盘的基金（6 位代码）' });
+      /* 密钥来源：优先用服务端自己的 Key；服务端没配时才接受浏览器带来的，且只允许 https。
+         不这么限制的话，公网部署后任何人都能拿本站当代理去打内网地址。 */
+      const serverAi = mergeLLM({});
+      let ai;
+      if (serverAi.apiKey) {
+        ai = serverAi;
+      } else {
+        const asked = body.ai || {};
+        const base = String(asked.baseUrl || '').trim();
+        if (base && !/^https:\/\//i.test(base)) return json(res, 400, { error: '模型地址必须是 https://' });
+        ai = mergeLLM({ baseUrl: base, model: asked.model, apiKey: asked.apiKey });
+      }
+      if (!ai.apiKey) return json(res, 400, { error: '问答需要 API Key：填在页面设置里，或由服务端配置' });
+      /* 闸门放在 Key 检查之后: 没配 Key 时该报的是"缺 Key", 不是"额度用完", 否则排查方向被带偏。
+         问一句虽然只有一轮模型调用, 但它是**成本最低的入口** —— 一段循环脚本能刷几百次,
+         所以单独一套额度(默认 10/小时、30/天、全站 150/天)比共用跑复盘的额度更合理。 */
+      const gate = quotaCheck(clientIp(req), 'ask');
+      if (!gate.ok) return quotaReject(res, gate);
+      quotaRecord(clientIp(req), 'ask');
+      try {
+        const { askAboutRun } = await import('./server/ask.mjs');
+        const r = await askAboutRun(ai, { code, question: body.question });
+        quotaAddUsageOne(r && r.usage);
+        /* 客户端问题(没复盘过 / 问题为空)用 400，上游模型失败才用 502，别把两种情况混成一个状态码 */
+        const clientErr = r.ok === false && /还没有跑过复盘|问题为空/.test(String(r.error || ''));
+        return json(res, r.ok ? 200 : (clientErr ? 400 : 502), r);
+      } catch (e) {
+        return json(res, 502, { error: '问答失败: ' + e.message });
+      }
+    }
+
     /* ---------------- 主流程(NDJSON 流式) ---------------- */
     if (pathname === '/api/run' && req.method === 'POST') {
       let body;
@@ -375,13 +445,7 @@ const server = http.createServer(async (req, res) => {
          为什么放在流水线之前: 一次完整复盘要调好几轮大模型(采集+官方对账+T1..T6),
          花费是真金白银, 必须在动手之前拦下来。 */
       const gate = quotaCheck(clientIp(req));
-      if (!gate.ok) {
-        return json(res, gate.status || 429, {
-          error: gate.reason,
-          quota: quotaSnapshot(),
-          retryAfterSec: gate.retryAfterSec || null
-        });
-      }
+      if (!gate.ok) return quotaReject(res, gate);
 
       res.writeHead(200, { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-store', 'X-Accel-Buffering': 'no' });
       const emit = obj => { try { res.write(JSON.stringify(obj) + '\n'); } catch (e) { /* client gone */ } };
@@ -561,7 +625,13 @@ function announce(port) {
     const L = QUOTA.limits;
     console.log('  额度:   每台机器 ' + L.perIpHour + ' 次/小时 · ' + L.perIpDay + ' 次/天 · 全站 ' + L.maxRunsDay + ' 次/天');
     console.log('          今天是 ' + QUOTA.day + ' · 已用 ' + QUOTA.dayRuns + '/' + L.maxRunsDay + ' 次 · 累计 ' + QUOTA.totalRuns + ' 次 · ' + QUOTA.tokens.total + ' token');
-    console.log('          改额度: FUNDCLINIC_MAX_PER_IP_HOUR / _PER_IP_DAY / _MAX_RUNS_DAY; 关掉: FUNDCLINIC_QUOTA=0');
+    /* 另两种入口也报出来 —— "问答没反应"和"对比转圈"这两种求助, 十有八九是被轻闸门拦住了,
+       不写在横幅上就只能靠人猜。 */
+    const A = QUOTA.ask && QUOTA.ask.limits, C = QUOTA.compare && QUOTA.compare.limits;
+    if (A) console.log('          问答:   ' + A.perIpHour + ' 次/小时 · ' + A.perIpDay + ' 次/天/台 · 全站 ' + A.maxDay + ' 次/天(今天已用 ' + QUOTA.ask.usedToday + ')');
+    if (C) console.log('          对比:   ' + C.perIpHour + ' 次/小时 · ' + C.perIpDay + ' 次/天/台(今天已用 ' + QUOTA.compare.usedToday + ')');
+    console.log('          改额度: FUNDCLINIC_MAX_PER_IP_HOUR / _PER_IP_DAY / _MAX_RUNS_DAY;');
+    console.log('                  以及 _ASK_PER_IP_HOUR / _ASK_PER_IP_DAY / _ASK_DAY / _COMPARE_PER_IP_HOUR / _COMPARE_PER_IP_DAY; 关掉: FUNDCLINIC_QUOTA=0');
   } else {
     console.log('  额度:   未启用(本机模式各自用自己的 Key, 不限额; 上公网会自动启用)');
   }

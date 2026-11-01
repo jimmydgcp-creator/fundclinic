@@ -70,7 +70,7 @@ window.FC = window.FC || {};
   }
 
   /* ============================================================ 视图切换 */
-  var VIEWS = ['input', 'report', 'ledger', 'audit', 'about'];
+  var VIEWS = ['input', 'report', 'ledger', 'audit', 'compare', 'about'];
   function show(view) {
     if (VIEWS.indexOf(view) < 0) view = 'input';
     $$('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-' + view); });
@@ -231,7 +231,9 @@ window.FC = window.FC || {};
 
     var caseTbl = '<table class="tbl tbl-compact"><thead><tr><th>股票</th><th>进入前十</th><th>推算价</th><th>最后在榜</th><th>推算价</th><th>持有期推算价变动</th><th>期数</th><th>仍在前十</th></tr></thead><tbody>' +
       a.cases.wins.map(function (c) {
-        return '<tr><td>' + esc(c.name) + '</td><td>' + c.entryPeriod + '</td><td>' + FC.util.fx(c.entryPrice) + '</td><td>' + c.exitPeriod + '</td><td>' + FC.util.fx(c.exitPrice) + '</td><td class="' + (c.change >= 0 ? 'pos' : 'neg') + '">' + (c.change > 0 ? '+' : '') + FC.util.fx(c.change) + '%</td><td>' + c.heldQuarters + '</td><td>' + (c.stillHeld ? '是' : '否') + '</td></tr>';
+        /* 持有期推算价变动是"涨跌", 按 A 股习惯红涨绿跌(零值不上色); 用 FC.dirCls 统一判断 */
+        var dc = FC.dirCls(c.change);
+        return '<tr><td>' + esc(c.name) + '</td><td>' + c.entryPeriod + '</td><td>' + FC.util.fx(c.entryPrice) + '</td><td>' + c.exitPeriod + '</td><td>' + FC.util.fx(c.exitPrice) + '</td><td' + (dc ? ' class="' + dc + '"' : '') + '>' + (c.change > 0 ? '+' : '') + FC.util.fx(c.change) + '%</td><td>' + c.heldQuarters + '</td><td>' + (c.stillHeld ? '是' : '否') + '</td></tr>';
       }).join('') + '</tbody></table>';
 
     $('#ledger-body').innerHTML =

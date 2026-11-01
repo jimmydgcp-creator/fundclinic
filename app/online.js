@@ -695,6 +695,12 @@ window.FC = window.FC || {};
   };
 
   /* ------------------------------------------------------------ 结果面板 */
+  /** KPI 里的方向性数字: 收益/回撤按 A 股习惯红涨绿跌(FC.dirCls), 零值不上色。
+   *  只给"正负号本身有经济含义"的数字用; 规模、期数这类"量"不要走这里。 */
+  function dirStrong(v, unit) {
+    var c = FC.dirCls(v);
+    return '<strong' + (c ? ' class="' + c + '"' : '') + '>' + v + unit + '</strong>';
+  }
   function renderResult(s) {
     var box = $('#online-result');
     var dl = function (key, label) {
@@ -758,7 +764,7 @@ window.FC = window.FC || {};
       '<div class="metric"><div class="metric-l">形态标签</div><div class="metric-v" style="font-size:16px">' + FC.esc(s.formTag) + '</div></div>' +
       '<div class="metric"><div class="metric-l">质检</div><div class="metric-v" style="font-size:16px">' + FC.esc(s.check.verdictText) + '</div></div>' +
       '</div>' +
-      (s.perf ? '<p class="note">绩效(' + FC.esc(s.perfMethod || '分红再投总回报指数') + '): 区间 <strong>' + s.perf.cumReturn + '%</strong> · 剔除最好一季 <strong>' + s.perf.exBestQuarter + '%</strong> · 最大回撤 <strong>' + s.perf.maxDrawdown + '%</strong></p>' : '') +
+      (s.perf ? '<p class="note">绩效(' + FC.esc(s.perfMethod || '分红再投总回报指数') + '): 区间 ' + dirStrong(s.perf.cumReturn, '%') + ' · 剔除最好一季 ' + dirStrong(s.perf.exBestQuarter, '%') + ' · 最大回撤 ' + dirStrong(s.perf.maxDrawdown, '%') + '</p>' : '') +
       '<p class="note"><strong>复盘区间怎么定的:</strong> ' + FC.esc(rangeBasis) + '</p>' +
       (cands.length ? '<details><summary style="cursor:pointer;font-size:13px">全部候选区间(可在服务端用 fromPeriod/toPeriod 指定后重跑)</summary><table class="tbl tbl-compact"><thead><tr><th>候选</th><th>区间</th><th>期数</th><th>说明</th></tr></thead><tbody>' +
         cands.map(function (c) {

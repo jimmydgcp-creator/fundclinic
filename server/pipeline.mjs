@@ -11,6 +11,7 @@ import { getFC, analyzeDataset, ROOT } from './engine.mjs';
 import { renderDeck } from './deck.mjs';
 import { runTask, applyThemeClassification, applyJudgement } from './pipeline-llm.mjs';
 import { buildEvidence } from './evidence.mjs';
+import { fitHoldings } from './fit.mjs';
 import { popplerInstallNote } from './official.mjs';
 
 const RUNS = path.join(ROOT, '_runs');
@@ -20,6 +21,23 @@ export function runDir(code) {
   const d = path.join(RUNS, String(code));
   fs.mkdirSync(d, { recursive: true });
   return d;
+}
+
+/* 报告小节的插入位置。
+ *
+ * 为什么不能一律 push 到末尾(2026-11-01 端到端实跑发现): 新加的三节全堆在最后,
+ * 结果《逐期前十大索引》这个附录排在了《持仓拟合》《该追问的三个问题》**前面**部分,
+ * 读起来像"报告写完了后面又贴了两页附件"; 而《产品类型》最该出现在开头讲读法的地方。
+ * 卡片(结论卡/演示稿)都从 sections 顺序取内容, 所以只调整顺序、不改内容。 */
+function insertAfterTitle(sections, part, sec) {
+  const i = sections.findIndex(s => String((s && s.title) || '').indexOf(part) >= 0);
+  if (i < 0) sections.push(sec); else sections.splice(i + 1, 0, sec);
+  return sections;
+}
+function insertBeforeAppendix(sections, sec) {
+  const i = sections.findIndex(s => /附录/.test(String((s && s.title) || '')));
+  if (i < 0) sections.push(sec); else sections.splice(i, 0, sec);
+  return sections;
 }
 
 /** 传给前端的底稿元信息(不含 230 行明细), /api/run 与落盘恢复共用同一份形状。
@@ -142,6 +160,55 @@ export async function runPipeline(code, opts = {}) {
     } catch (e) { aiLog.push({ task: 'T2 判断起草', ok: false, error: e.message }); step('T2 判断起草', '调用失败: ' + e.message); }
   } else {
     step('AI 模块', '已按 FUNDCLINIC_ALLOW_NO_AI 跳过(仅用于链路自测, 正式出报告必须带 Key)');
+  }
+
+  /* ---------- 3.4 产品类型：主动 / 被动指数 / ETF / 联接 ---------- */
+  const kind = FC.detectFundKind(dataset.fund);
+  analysis.kind = kind;
+  if (analysis.report && Array.isArray(analysis.report.sections)) {
+    const ksec = FC.kindSection && FC.kindSection(kind);
+    /* 紧跟《口径与证据边界》—— 它讲的是"这份报告该怎么读", 属于前提而不是附录 */
+    if (ksec) insertAfterTitle(analysis.report.sections, '口径与证据边界', ksec);
+  }
+
+  /* ---------- 3.5 持仓拟合（前十理论净值 vs 实际净值，实验性一节） ---------- */
+  /* 只用公开行情与季报前十，不调大模型；失败不影响主流程，但要在报告里如实说明。 */
+  let fit = null;
+  if (opts.fit !== false) {
+    try {
+      step('持仓拟合', '取周线行情，按季报前十权重拟合"经理不动"的理论净值');
+      fit = await fitHoldings({
+        code,
+        quarters: dataset.quarters,
+        onProgress: m => step('持仓拟合', m)
+      });
+      if (fit && fit.ok) {
+        analysis.fit = fit;
+        if (analysis.report && Array.isArray(analysis.report.sections) && FC.fitSection) {
+          insertBeforeAppendix(analysis.report.sections, FC.fitSection(fit, analysis.kind));
+        }
+        step('持仓拟合', `完成：${fit.window.weeks} 周 · 相关性 ${(fit.fit.corr * 100).toFixed(1)}% · R² ${(fit.regression && fit.regression.r2 * 100 || 0).toFixed(1)}%`);
+      } else {
+        step('持仓拟合', '未完成：' + (fit && fit.reason || '原因未知'));
+        /* 没算出来也要留一节说明原因 —— 悄悄消失会让读者以为报告本来就没这块内容 */
+        if (analysis.report && Array.isArray(analysis.report.sections) && FC.fitSectionFailed) {
+          insertBeforeAppendix(analysis.report.sections, FC.fitSectionFailed(fit));
+        }
+      }
+    } catch (e) {
+      fit = { ok: false, reason: e.message };
+      step('持仓拟合', '调用失败：' + e.message);
+      if (analysis.report && Array.isArray(analysis.report.sections) && FC.fitSectionFailed) {
+        insertBeforeAppendix(analysis.report.sections, FC.fitSectionFailed(fit));
+      }
+    }
+  }
+
+  /* ---------- 3.6 该追问的三个问题（从已有证据里抽，不调模型） ---------- */
+  if (analysis.report && Array.isArray(analysis.report.sections) && FC.followupSection) {
+    const fsec = FC.followupSection(analysis);
+    /* 放在附录之前(与持仓拟合同一处), 顺序是: …跟踪清单 → 持仓拟合 → 该追问的三个问题 → 附录 */
+    if (fsec) insertBeforeAppendix(analysis.report.sections, fsec);
   }
 
   const deckPayload = { analysis, dataset, check };

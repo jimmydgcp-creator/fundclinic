@@ -60,6 +60,25 @@ window.FC = window.FC || {};
 
   FC.util = { n: n, fx: fx, mean: mean, sum: sum, slope: slope };
 
+  /* -------------------------------------------------------- 涨跌色(A 股习惯) */
+  /** 数字的方向类名: 涨/正数 -> up(红), 跌/负数 -> down(绿), 零与无效值 -> 不加类(保持原墨色)。
+   *  为什么单独一个函数: 项目里 .pos / .neg 已经被"状态标签"占用(逐行一致 / 未通过 / 本次采用…),
+   *  那两类的配色是状态语义, 不能拿去标涨跌; 数字一律用 up / down(样式见 app/styles.css)。
+   *  只给"正负号本身有经济含义"的量用(收益 / 超额 / 涨跌 / 回撤);
+   *  份额、期数、权重、费率、相关性这类"量"没有方向, 不要上色。 */
+  function dirCls(v) {
+    var x = (v === null || v === undefined || v === '') ? NaN : Number(v);
+    if (!isFinite(x) || x === 0) return '';
+    return x > 0 ? 'up' : 'down';
+  }
+  /** 把一段数字 HTML 包成方向色; 没有方向时原样返回 */
+  function dirSpan(html, v) {
+    var c = dirCls(v);
+    return c ? '<span class="' + c + '">' + html + '</span>' : html;
+  }
+  FC.dirCls = dirCls;
+  FC.dirSpan = dirSpan;
+
   /** 数据来源要显示成人能读的文本。
    *  爬取来的来源是对象 {type, url, fetchedAt}, 内置样例是字符串 —— 以前直接 join,
    *  对象会被拼成 "[object Object]"(用户实际看到的 bug)。这里统一成 "类型 · URL"。 */
@@ -510,8 +529,12 @@ window.FC = window.FC || {};
       benchmarkDeclared: env.benchmarkDeclared, benchmarkVerified: env.benchmarkVerified
     });
 
-    function num(v, unit, level, src, d) {
-      var cls = 'ev ev-' + (level || 'fact');
+    /** 带"证据级别 + 来源"标注的数字。
+     *  第 5 个参数 dirVal 传"原始数值"时, 会给这个数字加上涨跌色 up / down(红涨绿跌);
+     *  不传就不上色 —— 只有方向性数字才该传(收益 / 超额 / 回撤), 份额与期数这类别传。 */
+    function num(v, unit, level, src, dirVal) {
+      var dir = dirCls(dirVal);
+      var cls = 'ev ev-' + (level || 'fact') + (dir ? ' ' + dir : '');
       return '<span class="' + cls + '" data-src="' + (src || '底稿') + '" title="证据级别: ' + levelName(level) + ' · 来源: ' + (src || '底稿') + '">' + v + (unit || '') + '</span>';
     }
     function levelName(l) { return l === 'infer' ? '合理推断' : l === 'hindsight' ? '事后解读' : '披露事实'; }
@@ -581,10 +604,10 @@ window.FC = window.FC || {};
       id: 'performance', title: '三、总成绩也看清代价',
       html: perf ?
         '<table class="tbl"><tbody>' +
-        row('区间复利收益', num(fx(perf.cumReturn), '%', 'fact', '官方季报')) +
-        row('剔除最好一季(' + esc(perf.bestQuarter) + ')后', num(fx(perf.exBestQuarter), '%', 'infer', '由区间收益与单季收益推算')) +
+        row('区间复利收益', num(fx(perf.cumReturn), '%', 'fact', '官方季报', perf.cumReturn)) +
+        row('剔除最好一季(' + esc(perf.bestQuarter) + ')后', num(fx(perf.exBestQuarter), '%', 'infer', '由区间收益与单季收益推算', perf.exBestQuarter)) +
         row('最好一季贡献占比', num(fx(perf.bestQuarterContribution), '%', 'infer', '推算') + (perf.concentratedInOneQuarter ? ' <span class="flag">收益高度集中于单一季度, 可持续性需单独论证</span>' : '')) +
-        row('区间最大回撤', num(fx(perf.maxDrawdown), '%', 'fact', '净值序列')) +
+        row('区间最大回撤', num(fx(perf.maxDrawdown), '%', 'fact', '净值序列', perf.maxDrawdown)) +
         row('规模', num(fx(perf.aumPeak), ' 亿元', 'fact', '规模序列') + ' → ' + num(fx(perf.aumEnd), ' 亿元', 'fact', '规模序列')) +
         '</tbody></table>' + '<p class="note">' + esc(perf.note) + '</p>' :
         '<p class="gap-block">本次输入未包含净值/收益序列, <strong>不判定绩效形态, 也不给出任何收益结论</strong>。' +
@@ -782,8 +805,9 @@ window.FC = window.FC || {};
     if (!list.length) return '<p class="note">无可用案例(需要至少两期披露持股数与市值)。</p>';
     return '<table class="tbl tbl-compact"><thead><tr><th>股票</th><th>进入前十</th><th>推算价</th><th>最后在榜</th><th>推算价</th><th>持有期变动</th><th>期数</th></tr></thead><tbody>' +
       list.map(function (c) {
-        var cls = c.change >= 0 ? 'pos' : 'neg';
-        return '<tr><td>' + esc(c.name) + '</td><td>' + c.entryPeriod + '</td><td>' + fx(c.entryPrice) + '</td><td>' + c.exitPeriod + (c.stillHeld ? '(仍在榜)' : '') + '</td><td>' + fx(c.exitPrice) + '</td><td class="' + cls + '">' + (c.change > 0 ? '+' : '') + fx(c.change) + '%</td><td>' + c.heldQuarters + '</td></tr>';
+        /* 持有期推算价变动: 有涨跌含义 -> 红涨绿跌(零值不上色) */
+        var cls = dirCls(c.change);
+        return '<tr><td>' + esc(c.name) + '</td><td>' + c.entryPeriod + '</td><td>' + fx(c.entryPrice) + '</td><td>' + c.exitPeriod + (c.stillHeld ? '(仍在榜)' : '') + '</td><td>' + fx(c.exitPrice) + '</td><td' + (cls ? ' class="' + cls + '"' : '') + '>' + (c.change > 0 ? '+' : '') + fx(c.change) + '%</td><td>' + c.heldQuarters + '</td></tr>';
       }).join('') + '</tbody></table>';
   }
 
@@ -850,6 +874,201 @@ window.FC = window.FC || {};
   };
 
   /** 把整份报告导出成 Markdown(含口径头与免责尾) */
+  /* 产品类型判定：主动 / 被动指数 / ETF / ETF 联接 / 跨境 / 货币 / 债券。
+   * 被动产品的"形态标签、轮动、调仓"这套话术不适用，报告要换一套读法。 */
+  FC.detectFundKind = function (fund) {
+    var name = String((fund && (fund.name || fund.fullName)) || '');
+    var type = String((fund && fund.type) || '');
+    var s = name + ' ' + type;
+    var isQDII = /QDII|海外|全球|美元|港股|纳斯达克|标普|恒生/i.test(s);
+    var isFeeder = /联接/.test(s);
+    var isETF = /ETF/i.test(s);
+    var isIndex = /指数/.test(s) || isETF || isFeeder;
+    var isBond = /债券|纯债|可转债/.test(s) && !/混合/.test(s);
+    var isMoney = /货币/.test(s);
+    var kind;
+    if (isMoney) kind = { code: 'money', label: '货币市场基金', isPassive: false, isCrossBorder: false };
+    else if (isBond) kind = { code: 'bond', label: '债券基金', isPassive: false, isCrossBorder: false };
+    else if (isFeeder) kind = { code: 'feeder', label: 'ETF 联接基金（被动）', isPassive: true, isCrossBorder: isQDII };
+    else if (isETF) kind = { code: 'etf', label: 'ETF（被动跟踪指数）', isPassive: true, isCrossBorder: isQDII };
+    else if (isIndex) kind = { code: 'index', label: '指数基金（被动）', isPassive: true, isCrossBorder: isQDII };
+    else kind = { code: 'active', label: '主动管理基金', isPassive: false, isCrossBorder: isQDII };
+    kind.notes = kind.isPassive ? [
+      '被动产品的持仓基本由标的指数决定，前十权重是"指数的样子"，不是基金经理的判断。',
+      '成分股变化主要来自指数定期调整与再平衡，不能按"主动调仓"解读。',
+      '形态标签（主题坚守 / 主题漂移 / 高频轮动）对被动产品不适用，本报告改为看跟踪偏离。',
+      '真正该关注的是：跟踪误差、日均偏离、费率、规模与流动性、场内折溢价（ETF）。'
+    ] : (kind.code === 'money' || kind.code === 'bond' ? [
+      '货币 / 债券基金不以股票前十大为主要持仓，本文的持仓轮动与形态标签适用性有限。',
+      '应当看久期、信用等级、杠杆与费用，而不是股票前十。'
+    ] : [
+      /* 主动产品同样要写明"这是什么、所以该看什么"。
+         早先这里给的是空数组, kindSection 于是直接返回 null —— 结果是**最常见的那一类基金
+         反而看不到产品类型判定**, "区分主动 / 被动"这件事在主动产品上等于没做。
+         2026-11-01 真跑一只主动基金才暴露: 报告里只有持仓拟合和追问, 没有产品类型。 */
+      '这是主动管理产品，不是被动跟踪指数的产品：前十权重与换手是基金经理的判断结果。',
+      '所以「主题坚守 / 逐步分散 / 主题漂移」这套形态标签对它适用，对被动产品不适用 —— 横向比较时两者不能直接比形态。',
+      '没有跟踪误差、跟踪偏离、场内折溢价这几个概念；判断重点是选股与择时的持续性、可重复性。'
+    ]);
+    return kind;
+  };
+
+  /* 产品类型：**所有类型都出一节** —— 主动产品同样需要这句"我是主动产品, 所以该看这些"。
+     早先只在被动产品推、主动产品直接返回 null, 结果读者看不出类型判定, 而"区分主动 / 被动"
+     恰恰在最常见的主动基金上失效(2026-11-01 端到端实跑发现)。 */
+  FC.kindSection = function (kind) {
+    if (!kind || !kind.label) return null;
+    var notes = kind.notes || [];
+    var h = [];
+    h.push('<p>本基金判定为 <b>' + kind.label + '</b>' + (kind.isCrossBorder ? '（跨境产品，还涉及汇率与境外市场交易日差异）' : '') + '。' +
+      (kind.isPassive
+        ? '被动产品的读法跟主动产品不一样，下面几条决定了本文哪些结论能直接用、哪些要换个读法。'
+        : '下面几条说明本文按什么读法来、哪些指标对它不适用。') + '</p>');
+    if (notes.length) {
+      h.push('<ul>');
+      notes.forEach(function (n) { h.push('<li>' + n + '</li>'); });
+      h.push('</ul>');
+    }
+    return { title: '产品类型：' + kind.label, html: h.join('') };
+  };
+
+  /* 持仓拟合小节：只出「信号 + 证伪条件」，不出归因结论。
+   * 数据来自 server/fit.mjs（季报前十权重 × 个股周线），失败时 pipeline 不会推这一节。 */
+  FC.fitSection = function (fit, kind) {
+    var passive = !!(kind && kind.isPassive);
+    if (!fit || !fit.ok) return null;
+    var f = fit.fit || {}, rg = fit.regression || {}, cv = fit.coverage || {}, w = fit.window || {};
+    var pct = function (v, d) {
+      return (v == null || !isFinite(v)) ? '—' : (v * 100).toFixed(d == null ? 2 : d) + '%';
+    };
+    var pp = function (v) {
+      if (v == null || !isFinite(v)) return '—';
+      return (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + 'pp';
+    };
+    /* 这一节里的方向性数字(实际/理论累计、年化 α、每周实际/理论/残差)按红涨绿跌上色;
+       相关性、跟踪误差、R²、β 是"量"不是"方向", 保持原墨色。 */
+    var pctDir = function (v, d) { return dirSpan(pct(v, d), v); };
+    var ppDir = function (v) { return dirSpan(pp(v), v); };
+    var h = [];
+    h.push('<h4>这一节在算什么</h4>');
+    h.push('<p>拿每个季度末的前十大权重，乘上这些股票下一季度的真实涨跌，得到「如果经理一直没动，这只基金应该怎么走」；再与它实际净值比，差出来的部分叫残差。'
+      + '前十合计平均占净值 ' + (cv.avgTop10Sum == null ? '—' : cv.avgTop10Sum + '%') + '，剩下那部分用沪深300代理。残差只能提示「可能发生了什么」，不构成证据。</p>');
+    h.push('<h4>拟合质量</h4>');
+    h.push('<table><thead><tr><th>项目</th><th>值</th></tr></thead><tbody>');
+    h.push('<tr><td>拟合窗口</td><td>' + (w.from || '—') + ' 至 ' + (w.to || '—') + '，共 ' + (w.weeks || 0) + ' 周</td></tr>');
+    h.push('<tr><td>覆盖报告期</td><td>' + (cv.quarters || 0) + ' 期</td></tr>');
+    h.push('<tr><td>成分股匹配</td><td>' + (cv.matched || 0) + ' / ' + (cv.stocks || 0) + ' 只</td></tr>');
+    h.push('<tr><td>实际累计 / 理论累计</td><td>' + pctDir((f.cumActual || 0) - 1) + ' / ' + pctDir((f.cumTheory || 0) - 1) + '</td></tr>');
+    h.push('<tr><td>周收益相关性</td><td>' + pct(f.corr, 1) + '</td></tr>');
+    h.push('<tr><td>年化跟踪误差（残差）</td><td>' + pct(f.trackingErrorAnnual) + '</td></tr>');
+    if (rg.r2 != null) {
+      h.push('<tr><td>回归 R² / 前十暴露 / 市场暴露</td><td>' + pct(rg.r2, 1) + ' / '
+        + rg.betaBasket.toFixed(2) + ' / ' + rg.betaMarket.toFixed(2) + '</td></tr>');
+      h.push('<tr><td>年化 α（前十与市场都解释不了的部分）</td><td>' + pctDir(rg.alphaAnnual) + '</td></tr>');
+    }
+    h.push('</tbody></table>');
+    h.push('<p>读法：相关性越高、跟踪误差越小，说明「前十张持仓」越能代表这只基金这一段时间的实际样子；'
+      + '反过来，如果相关性低，说明经理的动作或非前十持仓占比很大，这一节的参考价值就要打折。</p>');
+
+    if (fit.divergences && fit.divergences.length) {
+      h.push('<h4>残差最大的三周（值得回原文核一眼）</h4>');
+      h.push('<table><thead><tr><th>周</th><th>实际</th><th>理论</th><th>残差</th><th>当时披露期</th><th>可以怎么解释（都待核实）</th></tr></thead><tbody>');
+      fit.divergences.forEach(function (d) {
+        var why = passive
+          ? '被动产品：残差主要来自跟踪误差、费率、现金与申赎，不是调仓信号'
+          : (d.resid < 0
+            ? '实际弱于前十组合：可能前十之外有拖累、或已减仓、或当期非前十仓位更重'
+            : '实际强于前十组合：可能前十之外另有机会、打新贡献、或已加仓');
+        h.push('<tr><td>' + d.d + '</td><td>' + ppDir(d.fund) + '</td><td>' + ppDir(d.theory) + '</td><td>'
+          + ppDir(d.resid) + '</td><td>' + (d.period || '—') + '</td><td>' + why + '</td></tr>');
+      });
+      h.push('</tbody></table>');
+      h.push('<p>要证实这些解释，需要回官方季报看下一期的持仓变化与经理原话，或对比同期业绩基准。'
+        + '证伪条件：如果同期沪深300 与理论组合同向、幅度相当，那这一周的残差不能算到经理头上。</p>');
+    }
+
+    h.push('<h4>这一节的边界</h4>');
+    h.push('<ul>');
+    (fit.caveats || []).forEach(function (c) { h.push('<li>' + c + '</li>'); });
+    h.push('</ul>');
+    return { title: '持仓拟合：如果经理一直没动', html: h.join('') };
+  };
+
+  /* 持仓拟合没跑成时也留一节。
+   * 为什么必须留: 这一节是用户点名要的, 悄悄消失会让读者以为"报告本来就没有这块";
+   * 而实跑里一次行情源 501 就足以让它整节不见。如实写清"没跑成、为什么、怎么办"比留白诚实。 */
+  FC.fitSectionFailed = function (fit) {
+    var why = String((fit && fit.reason) || '原因未知').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return {
+      title: '持仓拟合：本次未完成',
+      html: '<p>这一节算的是「如果经理一直没动，这只基金应该怎么走」：拿每季末前十权重乘上这些股票下一季的真实涨跌，得到理论净值，再跟实际净值比。'
+        + '这次没能算出来，原因是：<b>' + why + '</b>。</p>'
+        + '<p class="note">其余各节不受影响。行情源偶尔会抽风（报 501 或超时），重跑一次通常就出来了；'
+        + '如果连续几次都失败，那多半是取数口径变了，该去修取数，而不是回头改结论。</p>'
+    };
+  };
+
+  /* 该追问的三个问题：不编，全部从本文已有的数字里挑，每条带证据行。
+   * 目前是规则抽取（确定性）；接上大模型后可换成模型生成 + 同样的证据校验。 */
+  FC.followupSection = function (analysis) {
+    if (!analysis) return null;
+    var perf = analysis.perf || {}, m = analysis.metrics || {}, fit = analysis.fit || null;
+    var conc = (m.conc && typeof m.conc === 'object') ? m.conc : {};
+    var card = analysis.card || {};
+    var cands = [];
+
+    if (fit && fit.ok && fit.divergences && fit.divergences.length) {
+      var d0 = fit.divergences[0];
+      cands.push({
+        q: (d0.d || '') + ' 这一周实际 ' + (d0.fund * 100).toFixed(2) + '%，前十组合理论 ' + (d0.theory * 100).toFixed(2) + '%，差了 '
+          + (d0.resid * 100).toFixed(2) + 'pp。那一周到底发生了什么？',
+        why: '前十解释不了的那一段，可能是加仓减仓，也可能是非前十持仓、打新、停牌估值。回原文核一眼再下结论。',
+        ev: '证据：持仓拟合节 · 残差最大的三周（' + d0.d + '，' + (d0.period || '') + '）'
+      });
+    }
+    if (perf.concentratedInOneQuarter && perf.bestQuarter && perf.bestQuarterContribution != null) {
+      cands.push({
+        q: '区间收益 ' + Number(perf.cumReturn).toFixed(2) + '% 里，有 ' + Number(perf.bestQuarterContribution).toFixed(1)
+          + '% 来自 ' + perf.bestQuarter + ' 这一个季度。这是选股能力，还是赶上了一波行业行情？',
+        why: '单季贡献过半，说明总收益高度依赖某一段时间。把那一季的持仓与同期行业指数并列看，才知道是能力还是运气。',
+        ev: '证据：绩效节 · 单季贡献（' + perf.bestQuarter + '，' + Number(perf.bestQuarterContribution).toFixed(1) + '%）；持仓节 · 该季前十'
+      });
+    }
+    if (conc.first != null && conc.latest != null) {
+      var up = Number(conc.latest) - Number(conc.first);
+      cands.push({
+        q: '前十合计占净值从 ' + Number(conc.first).toFixed(2) + '% 变成 ' + Number(conc.latest).toFixed(2)
+          + '%（' + (up >= 0 ? '上升 ' : '下降 ') + Math.abs(up).toFixed(2) + 'pp），'
+          + (up >= 0 ? '是主动集中，还是被涨上去的？' : '是主动减仓分散，还是别的持仓涨上来把它稀释了？'),
+        why: '集中度变化有两种来源：主动加减仓，或原有持仓涨得比别人快。看持股数有没有变，就能把两者分开。',
+        ev: '证据：底稿 · 逐报告期前十合计（首期 ' + Number(conc.first).toFixed(2) + '% / 末期 ' + Number(conc.latest).toFixed(2) + '%）'
+      });
+    }
+    if (card.formTag) {
+      cands.push({
+        q: '判定为「' + card.formTag + '」的关键依据是哪两条？换成相邻形态要满足什么条件？',
+        why: '形态标签是引擎按规则给的，说清"为什么不选另一个"，比只报答案更站得住。',
+        ev: '证据：结论卡 · 形态标签与置信度（' + card.formTag + (card.formConfidence != null ? '，置信度 ' + card.formConfidence : '') + '）'
+      });
+    }
+    if (perf.bestQuarter && perf.exBestQuarter != null) {
+      cands.push({
+        q: '把 ' + perf.bestQuarter + ' 这一季（' + Number(perf.exBestQuarter).toFixed(2) + '%）单独拿掉，这套持仓还剩下多少超额？',
+        why: '砍掉最好的一季再看，是检验"收益是不是靠一段行情"的最快办法，也正好对上本文的推翻条件。',
+        ev: '证据：绩效节 · 最优季度与超额贡献；结论卡 · 推翻条件'
+      });
+    }
+    if (!cands.length) return null;
+    var picked = cands.slice(0, 3);
+    var h = ['<p>这三个问题是本文自己暴露出来的薄弱处，不是结论。带着它们去翻官方季报原文，比再看一遍结论更有用。</p>', '<ol>'];
+    picked.forEach(function (c) {
+      h.push('<li><p><b>' + c.q + '</b></p><p>' + c.why + '</p><p class="muted">' + c.ev + '</p></li>');
+    });
+    h.push('</ol>');
+    h.push('<p class="muted">生成方式：从本报告已有的数字与判定里按规则抽取，未调用大模型；每条都指回具体小节，可逐条核对。</p>');
+    return { title: '该追问的三个问题', html: h.join('') };
+  };
+
   FC.reportToMarkdown = function (analysis, extra) {
     extra = extra || {};
     var a = analysis;
