@@ -105,18 +105,30 @@ export function validateAnswer(answer, refs, digest) {
   const safeAnswer = String(answer || '').replace(/(沪深|中证|上证|创业板指?|科创|纳斯达克|标普|恒生|国证)\s*\d{2,4}/g, ' ');
   const nums = (safeAnswer.match(/-?\d+(?:\.\d+)?/g) || []).filter(t =>
     !/^(19|20)\d\d$/.test(t) && !/^\d{6}$/.test(t) && !/^-?\d$/.test(t));
-  const pool = new Set();
-  for (const r of (refsArr.length ? refsArr : Object.keys(digest))) {
-    const v = Number(digest[r].v);
-    const vals = [v, Math.abs(v), v * 100, Math.abs(v) * 100];
-    for (const x of vals) {
-      const n = Number(x);
-      if (isFinite(n)) { pool.add(n.toFixed(2)); pool.add(n.toFixed(1)); pool.add(String(Math.round(n))); }
+  /* 两级白名单(2026-11-01 线上第三次修): 先对被引用的字段, 对不上再去**全字段表**里找。
+     只认被引用字段会造成这种误杀 —— 回答写"最大回撤 -32.45%〔perf.maxDrawdown〕,
+     这是 24 个报告期里最差的", 其中 24 是 range.quarters, 而 refs 只列了两个字段,
+     于是 24 被判"找不到出处", 整条回答降级成"我不敢直接给你"。
+     用户的真实要求是"回答里的数字必须能在报告里找到", 不是"必须能被引用的字段覆盖",
+     所以两处都找不到才算编造。 */
+  const makePool = keys => {
+    const pool = new Set();
+    for (const r of keys) {
+      const v = Number(digest[r] && digest[r].v);
+      const vals = [v, Math.abs(v), v * 100, Math.abs(v) * 100];
+      for (const x of vals) {
+        const n = Number(x);
+        if (isFinite(n)) { pool.add(n.toFixed(2)); pool.add(n.toFixed(1)); pool.add(String(Math.round(n))); }
+      }
     }
-  }
+    return pool;
+  };
+  const poolCited = makePool(refsArr.length ? refsArr : Object.keys(digest));
+  const poolAll = refsArr.length ? makePool(Object.keys(digest)) : poolCited;
   const bad = nums.filter(n => {
     const f2 = Number(n).toFixed(2);
-    return !pool.has(f2) && !pool.has(String(Math.round(Number(n)))) ;
+    const hit = pool => pool.has(f2) || pool.has(String(Math.round(Number(n))));
+    return !hit(poolCited) && !hit(poolAll);
   });
   if (bad.length) problems.push('回答里有 ' + bad.length + ' 个数字找不到出处：' + bad.slice(0, 5).join('、'));
   if (refs && refs.length && !refsArr.length) problems.push('引用的字段 id 都不存在');
