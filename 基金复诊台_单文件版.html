@@ -63,6 +63,10 @@
   --warn:    #8a5a12;   --warn-bg: #faf3e5;
   --fail:    #96332b;   --fail-bg: #fbeeec;
 
+  /* 涨跌色: A 股习惯, 红涨绿跌(数字的方向色, 与上面的状态语义色分开用) */
+  --up:      #b3392f;
+  --down:    #2f6a4f;
+
   /* 几何 */
   --r:      10px;
   --r-sm:   6px;
@@ -388,6 +392,30 @@ table.tbl-compact th, table.tbl-compact td { padding: 6px 9px; font-size: 12.5px
 .ev-fact { color: var(--navy); border-bottom-color: var(--navy); border-bottom-style: solid; }
 .ev-infer { color: var(--brass); border-bottom-color: var(--brass); border-bottom-style: dashed; }
 .ev-hindsight { color: #6a4b7a; border-bottom-color: #6a4b7a; border-bottom-style: dotted; }
+
+/* ------------------------------------------------- 涨跌色: 红涨绿跌(A 股习惯)
+   只给"正负号本身有经济含义"的数字用: 收益 / 超额 / 涨跌 / 回撤。
+   零值既不是涨也不是跌, 保持原墨色 —— 所以 .up / .down 只在 > 0 / < 0 时才加
+   (判断集中在 app/engine.js 的 FC.dirCls, 前端三处渲染都用它)。
+   注意: .pos / .neg 是**状态标签**的语义色(逐行一致 / 未通过 / 本次采用…),
+   数字一律走 .up / .down, 两者不要混用, 否则状态文案会被染成涨跌色。 */
+.up { color: var(--up); }
+.down { color: var(--down); }
+/* 表格数字沿用 .pos / .neg 原来的"加粗 + 等宽对齐", 只换色, 字重与字号不动 */
+td.up, .num.up { color: var(--up); font-weight: 700; font-variant-numeric: tabular-nums; }
+td.down, .num.down { color: var(--down); font-weight: 700; font-variant-numeric: tabular-nums; }
+/* 证据分级: 下划线的**样式**继续表示证据级别(solid/dashed/dotted), 颜色跟数字方向走,
+   否则内层 .ev-fact/.ev-infer 的墨蓝/铜金会把红绿盖掉。字重仍按 600。 */
+td.up .ev, .ev.up { color: var(--up); border-bottom-color: currentColor; font-weight: 600; }
+td.down .ev, .ev.down { color: var(--down); border-bottom-color: currentColor; font-weight: 600; }
+
+/* 旧报表兜底(2026-11-01): 改色之前生成的 _runs/<代码>/analysis.json 里,
+   表格数字还是 <td class="pos"> / <td class="neg">。这些文件是历史产出, 不能回炉重写,
+   但主页面 index.html **不加载** variant.css, 缺了这两条它们会按状态语义色渲染
+   (绿涨红跌, 正好反) —— 于是同一份报告在变体页和主页面颜色不一样, 最容易被当成 bug 拍下来。
+   只作用于 td/.num(表格数字), span.pos / span.neg 这类状态标签完全不受影响。 */
+td.pos, .num.pos { color: var(--up); }
+td.neg, .num.neg { color: var(--down); }
 
 /* ---------------------------------------------------------------- 报告 */
 .report-layout { display: grid; grid-template-columns: 232px 1fr; gap: 26px; align-items: start; }
@@ -822,6 +850,106 @@ footer {
 }
 
 </style>
+<style>
+/* 投研工作台补充样式：横向对比 + 页面内问答。
+   只新增组件，不改原有变量与排版；配色沿用 styles.css 的纸感中性色。 */
+
+/* ---------------- 横向对比 ---------------- */
+.cmp-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 8px; }
+.cmp-form input {
+  width: 168px; padding: 9px 11px; border: 1px solid var(--line-strong); border-radius: var(--r-sm, 6px);
+  background: var(--surface, #fff); color: var(--ink, #151b23); font: inherit; font-variant-numeric: tabular-nums;
+}
+.cmp-form input:focus { outline: 2px solid var(--brass-soft, #f5efe4); border-color: var(--brass, #8f6231); }
+.cmp-msg { min-height: 18px; margin: 6px 0 0; color: var(--brass, #8f6231); font-size: 13px; }
+.cmp-tip { margin-top: 10px; font-size: 12px; }
+
+.cmp-head h3 { margin: 16px 0 4px; font-size: 15px; letter-spacing: .2px; }
+.cmp-warn { margin: 10px 0; padding: 8px 11px; border-left: 3px solid var(--warn, #8a5a12); background: var(--warn-bg, #faf3e5); border-radius: 4px; font-size: 12.5px; }
+.cmp-warn p { margin: 2px 0; }
+
+.cmp-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0 2px; font-size: 12px; }
+.cmp-lg { display: inline-flex; align-items: center; gap: 6px; color: var(--ink, #151b23); }
+.cmp-lg i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+.cmp-svg { width: 100%; height: auto; display: block; margin: 4px 0 12px; }
+.cmp-grid { stroke: var(--line, #e7e2d7); stroke-width: 1; }
+.cmp-base { stroke: var(--line-strong, #d5cec0); stroke-width: 1; stroke-dasharray: 3 4; }
+.cmp-axis { fill: #6b7280; font-size: 10px; font-variant-numeric: tabular-nums; }
+
+.cmp-tbl { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0 6px; }
+.cmp-tbl th, .cmp-tbl td { padding: 7px 8px; border-bottom: 1px solid var(--line, #e7e2d7); text-align: left; vertical-align: top; }
+.cmp-tbl th { font-weight: 600; color: var(--navy, #1b2a3a); background: rgba(27, 42, 58, .03); white-space: nowrap; }
+.cmp-tbl td.n, .cmp-tbl th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cmp-tbl .muted { font-size: 11.5px; }
+.cmp-dim { opacity: .58; }
+
+/* ---------------- 问一句（抽屉） ---------------- */
+.ask-fab {
+  position: fixed; right: 22px; bottom: 22px; z-index: 60;
+  padding: 11px 16px; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--navy, #1b2a3a); color: #fff; font: inherit; font-size: 13.5px;
+  box-shadow: 0 8px 22px rgba(21, 27, 35, .18);
+}
+.ask-fab:hover { background: #24384b; }
+
+.ask-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61; width: min(408px, 94vw);
+  display: flex; flex-direction: column; gap: 8px; padding: 16px 16px 12px;
+  background: var(--surface, #fff); border-left: 1px solid var(--line-strong, #d5cec0);
+  box-shadow: -10px 0 30px rgba(21, 27, 35, .12);
+  transform: translateX(102%); transition: transform .22s cubic-bezier(.32, .72, 0, 1);
+}
+.ask-drawer.open { transform: translateX(0); }
+.ask-hd { display: flex; align-items: baseline; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--line, #e7e2d7); }
+.ask-hd .muted { font-size: 11.5px; }
+.ask-x { margin-left: auto; border: 0; background: none; font-size: 20px; line-height: 1; color: #6b7280; cursor: pointer; }
+
+.ask-meta { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #4b5563; }
+.ask-meta input {
+  width: 92px; padding: 5px 8px; border: 1px solid var(--line-strong, #d5cec0);
+  border-radius: var(--r-sm, 6px); font: inherit; font-variant-numeric: tabular-nums;
+}
+.ask-hint { color: #8a8f98; }
+
+.ask-log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 6px 0; }
+.ask-b { max-width: 92%; padding: 9px 11px; border-radius: 10px; font-size: 13px; line-height: 1.62; }
+.ask-b p { margin: 0 0 6px; }
+.ask-b p:last-child { margin-bottom: 0; }
+.ask-b.me { align-self: flex-end; background: var(--brass-soft, #f5efe4); color: #3b2c1a; }
+.ask-b.bot { align-self: flex-start; background: #f5f6f8; color: var(--ink, #151b23); }
+.ask-b.sys { align-self: center; background: none; color: #8a8f98; font-size: 12px; }
+.ask-refs { font-size: 11px; color: #6b7280; font-family: var(--mono, monospace); }
+.ask-warn { font-size: 11.5px; color: var(--warn, #8a5a12); }
+.ask-cost { font-size: 11px; color: #9ca3af; font-variant-numeric: tabular-nums; }
+.ask-dots { color: #9ca3af; }
+
+.ask-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.ask-quick button {
+  padding: 5px 9px; border: 1px solid var(--line-strong, #d5cec0); background: #fff;
+  border-radius: 999px; font: inherit; font-size: 11.5px; color: #4b5563; cursor: pointer;
+}
+.ask-quick button:hover { border-color: var(--brass, #8f6231); color: var(--brass, #8f6231); }
+
+.ask-form { display: flex; gap: 8px; }
+.ask-form input {
+  flex: 1; padding: 9px 11px; border: 1px solid var(--line-strong, #d5cec0);
+  border-radius: var(--r-sm, 6px); font: inherit; font-size: 13px;
+}
+.ask-form input:focus { outline: 2px solid var(--brass-soft, #f5efe4); border-color: var(--brass, #8f6231); }
+.ask-form button {
+  padding: 9px 15px; border: 0; border-radius: var(--r-sm, 6px); cursor: pointer;
+  background: var(--navy, #1b2a3a); color: #fff; font: inherit; font-size: 13px;
+}
+.ask-foot { margin: 2px 0 0; font-size: 10.5px; color: #9ca3af; line-height: 1.5; }
+
+@media (max-width: 720px) {
+  .cmp-form input { width: 100%; }
+  .ask-drawer { width: 100vw; }
+  .ask-fab { right: 14px; bottom: 14px; }
+}
+
+</style>
 </head>
 <body>
 
@@ -832,6 +960,7 @@ footer {
     <button class="tab" data-view="report">② 复盘报告</button>
     <button class="tab" data-view="ledger">③ 数据底稿</button>
     <button class="tab" data-view="audit">④ 质检与 AI 记录</button>
+    <button class="tab" data-view="compare">⑥ 横向对比</button>
     <button class="tab" data-view="about">⑤ 这个网页做什么</button>
   </nav>
   <div class="topstatus" id="topstatus">就绪</div>
@@ -1044,6 +1173,22 @@ footer {
   </section>
 
   <!-- ================================================== ⑤ 这个网页做什么 -->
+  <!-- ================================================== ⑥ 横向对比 -->
+  <section class="view" id="view-compare">
+    <div class="panel">
+      <h3>横向对比 · 最多 3 只</h3>
+      <p class="panel-sub">输入基金代码，只抓净值、不跑完整复盘。口径统一为「分红再投总回报指数」，起点归一为 100，区间取几只基金的重叠部分。</p>
+      <div class="cmp-form">
+        <input id="cmp-code-1" inputmode="numeric" maxlength="6" placeholder="基金代码 1" autocomplete="off">
+        <input id="cmp-code-2" inputmode="numeric" maxlength="6" placeholder="基金代码 2（可选）" autocomplete="off">
+        <input id="cmp-code-3" inputmode="numeric" maxlength="6" placeholder="基金代码 3（可选）" autocomplete="off">
+        <button class="btn btn-primary" id="btn-compare-run" type="button">开始对比</button>
+      </div>
+      <p class="cmp-msg" id="cmp-msg"></p>
+      <div id="cmp-result" class="hidden"></div>
+      <p class="muted cmp-tip">提示：被动 ETF / 指数基金与主动基金的「形态标签」不可比，看曲线和回撤就行。样本不足的会在表里标出来。</p>
+    </div>
+  </section>
   <section class="view" id="view-about">
     <div class="panel">
       <h3>一句话</h3>
@@ -1197,6 +1342,25 @@ window.FC = window.FC || {};
   }
 
   FC.util = { n: n, fx: fx, mean: mean, sum: sum, slope: slope };
+
+  /* -------------------------------------------------------- 涨跌色(A 股习惯) */
+  /** 数字的方向类名: 涨/正数 -> up(红), 跌/负数 -> down(绿), 零与无效值 -> 不加类(保持原墨色)。
+   *  为什么单独一个函数: 项目里 .pos / .neg 已经被"状态标签"占用(逐行一致 / 未通过 / 本次采用…),
+   *  那两类的配色是状态语义, 不能拿去标涨跌; 数字一律用 up / down(样式见 app/styles.css)。
+   *  只给"正负号本身有经济含义"的量用(收益 / 超额 / 涨跌 / 回撤);
+   *  份额、期数、权重、费率、相关性这类"量"没有方向, 不要上色。 */
+  function dirCls(v) {
+    var x = (v === null || v === undefined || v === '') ? NaN : Number(v);
+    if (!isFinite(x) || x === 0) return '';
+    return x > 0 ? 'up' : 'down';
+  }
+  /** 把一段数字 HTML 包成方向色; 没有方向时原样返回 */
+  function dirSpan(html, v) {
+    var c = dirCls(v);
+    return c ? '<span class="' + c + '">' + html + '</span>' : html;
+  }
+  FC.dirCls = dirCls;
+  FC.dirSpan = dirSpan;
 
   /** 数据来源要显示成人能读的文本。
    *  爬取来的来源是对象 {type, url, fetchedAt}, 内置样例是字符串 —— 以前直接 join,
@@ -1648,8 +1812,12 @@ window.FC = window.FC || {};
       benchmarkDeclared: env.benchmarkDeclared, benchmarkVerified: env.benchmarkVerified
     });
 
-    function num(v, unit, level, src, d) {
-      var cls = 'ev ev-' + (level || 'fact');
+    /** 带"证据级别 + 来源"标注的数字。
+     *  第 5 个参数 dirVal 传"原始数值"时, 会给这个数字加上涨跌色 up / down(红涨绿跌);
+     *  不传就不上色 —— 只有方向性数字才该传(收益 / 超额 / 回撤), 份额与期数这类别传。 */
+    function num(v, unit, level, src, dirVal) {
+      var dir = dirCls(dirVal);
+      var cls = 'ev ev-' + (level || 'fact') + (dir ? ' ' + dir : '');
       return '<span class="' + cls + '" data-src="' + (src || '底稿') + '" title="证据级别: ' + levelName(level) + ' · 来源: ' + (src || '底稿') + '">' + v + (unit || '') + '</span>';
     }
     function levelName(l) { return l === 'infer' ? '合理推断' : l === 'hindsight' ? '事后解读' : '披露事实'; }
@@ -1719,10 +1887,10 @@ window.FC = window.FC || {};
       id: 'performance', title: '三、总成绩也看清代价',
       html: perf ?
         '<table class="tbl"><tbody>' +
-        row('区间复利收益', num(fx(perf.cumReturn), '%', 'fact', '官方季报')) +
-        row('剔除最好一季(' + esc(perf.bestQuarter) + ')后', num(fx(perf.exBestQuarter), '%', 'infer', '由区间收益与单季收益推算')) +
+        row('区间复利收益', num(fx(perf.cumReturn), '%', 'fact', '官方季报', perf.cumReturn)) +
+        row('剔除最好一季(' + esc(perf.bestQuarter) + ')后', num(fx(perf.exBestQuarter), '%', 'infer', '由区间收益与单季收益推算', perf.exBestQuarter)) +
         row('最好一季贡献占比', num(fx(perf.bestQuarterContribution), '%', 'infer', '推算') + (perf.concentratedInOneQuarter ? ' <span class="flag">收益高度集中于单一季度, 可持续性需单独论证</span>' : '')) +
-        row('区间最大回撤', num(fx(perf.maxDrawdown), '%', 'fact', '净值序列')) +
+        row('区间最大回撤', num(fx(perf.maxDrawdown), '%', 'fact', '净值序列', perf.maxDrawdown)) +
         row('规模', num(fx(perf.aumPeak), ' 亿元', 'fact', '规模序列') + ' → ' + num(fx(perf.aumEnd), ' 亿元', 'fact', '规模序列')) +
         '</tbody></table>' + '<p class="note">' + esc(perf.note) + '</p>' :
         '<p class="gap-block">本次输入未包含净值/收益序列, <strong>不判定绩效形态, 也不给出任何收益结论</strong>。' +
@@ -1920,8 +2088,9 @@ window.FC = window.FC || {};
     if (!list.length) return '<p class="note">无可用案例(需要至少两期披露持股数与市值)。</p>';
     return '<table class="tbl tbl-compact"><thead><tr><th>股票</th><th>进入前十</th><th>推算价</th><th>最后在榜</th><th>推算价</th><th>持有期变动</th><th>期数</th></tr></thead><tbody>' +
       list.map(function (c) {
-        var cls = c.change >= 0 ? 'pos' : 'neg';
-        return '<tr><td>' + esc(c.name) + '</td><td>' + c.entryPeriod + '</td><td>' + fx(c.entryPrice) + '</td><td>' + c.exitPeriod + (c.stillHeld ? '(仍在榜)' : '') + '</td><td>' + fx(c.exitPrice) + '</td><td class="' + cls + '">' + (c.change > 0 ? '+' : '') + fx(c.change) + '%</td><td>' + c.heldQuarters + '</td></tr>';
+        /* 持有期推算价变动: 有涨跌含义 -> 红涨绿跌(零值不上色) */
+        var cls = dirCls(c.change);
+        return '<tr><td>' + esc(c.name) + '</td><td>' + c.entryPeriod + '</td><td>' + fx(c.entryPrice) + '</td><td>' + c.exitPeriod + (c.stillHeld ? '(仍在榜)' : '') + '</td><td>' + fx(c.exitPrice) + '</td><td' + (cls ? ' class="' + cls + '"' : '') + '>' + (c.change > 0 ? '+' : '') + fx(c.change) + '%</td><td>' + c.heldQuarters + '</td></tr>';
       }).join('') + '</tbody></table>';
   }
 
@@ -1988,6 +2157,201 @@ window.FC = window.FC || {};
   };
 
   /** 把整份报告导出成 Markdown(含口径头与免责尾) */
+  /* 产品类型判定：主动 / 被动指数 / ETF / ETF 联接 / 跨境 / 货币 / 债券。
+   * 被动产品的"形态标签、轮动、调仓"这套话术不适用，报告要换一套读法。 */
+  FC.detectFundKind = function (fund) {
+    var name = String((fund && (fund.name || fund.fullName)) || '');
+    var type = String((fund && fund.type) || '');
+    var s = name + ' ' + type;
+    var isQDII = /QDII|海外|全球|美元|港股|纳斯达克|标普|恒生/i.test(s);
+    var isFeeder = /联接/.test(s);
+    var isETF = /ETF/i.test(s);
+    var isIndex = /指数/.test(s) || isETF || isFeeder;
+    var isBond = /债券|纯债|可转债/.test(s) && !/混合/.test(s);
+    var isMoney = /货币/.test(s);
+    var kind;
+    if (isMoney) kind = { code: 'money', label: '货币市场基金', isPassive: false, isCrossBorder: false };
+    else if (isBond) kind = { code: 'bond', label: '债券基金', isPassive: false, isCrossBorder: false };
+    else if (isFeeder) kind = { code: 'feeder', label: 'ETF 联接基金（被动）', isPassive: true, isCrossBorder: isQDII };
+    else if (isETF) kind = { code: 'etf', label: 'ETF（被动跟踪指数）', isPassive: true, isCrossBorder: isQDII };
+    else if (isIndex) kind = { code: 'index', label: '指数基金（被动）', isPassive: true, isCrossBorder: isQDII };
+    else kind = { code: 'active', label: '主动管理基金', isPassive: false, isCrossBorder: isQDII };
+    kind.notes = kind.isPassive ? [
+      '被动产品的持仓基本由标的指数决定，前十权重是"指数的样子"，不是基金经理的判断。',
+      '成分股变化主要来自指数定期调整与再平衡，不能按"主动调仓"解读。',
+      '形态标签（主题坚守 / 主题漂移 / 高频轮动）对被动产品不适用，本报告改为看跟踪偏离。',
+      '真正该关注的是：跟踪误差、日均偏离、费率、规模与流动性、场内折溢价（ETF）。'
+    ] : (kind.code === 'money' || kind.code === 'bond' ? [
+      '货币 / 债券基金不以股票前十大为主要持仓，本文的持仓轮动与形态标签适用性有限。',
+      '应当看久期、信用等级、杠杆与费用，而不是股票前十。'
+    ] : [
+      /* 主动产品同样要写明"这是什么、所以该看什么"。
+         早先这里给的是空数组, kindSection 于是直接返回 null —— 结果是**最常见的那一类基金
+         反而看不到产品类型判定**, "区分主动 / 被动"这件事在主动产品上等于没做。
+         2026-11-01 真跑一只主动基金才暴露: 报告里只有持仓拟合和追问, 没有产品类型。 */
+      '这是主动管理产品，不是被动跟踪指数的产品：前十权重与换手是基金经理的判断结果。',
+      '所以「主题坚守 / 逐步分散 / 主题漂移」这套形态标签对它适用，对被动产品不适用 —— 横向比较时两者不能直接比形态。',
+      '没有跟踪误差、跟踪偏离、场内折溢价这几个概念；判断重点是选股与择时的持续性、可重复性。'
+    ]);
+    return kind;
+  };
+
+  /* 产品类型：**所有类型都出一节** —— 主动产品同样需要这句"我是主动产品, 所以该看这些"。
+     早先只在被动产品推、主动产品直接返回 null, 结果读者看不出类型判定, 而"区分主动 / 被动"
+     恰恰在最常见的主动基金上失效(2026-11-01 端到端实跑发现)。 */
+  FC.kindSection = function (kind) {
+    if (!kind || !kind.label) return null;
+    var notes = kind.notes || [];
+    var h = [];
+    h.push('<p>本基金判定为 <b>' + kind.label + '</b>' + (kind.isCrossBorder ? '（跨境产品，还涉及汇率与境外市场交易日差异）' : '') + '。' +
+      (kind.isPassive
+        ? '被动产品的读法跟主动产品不一样，下面几条决定了本文哪些结论能直接用、哪些要换个读法。'
+        : '下面几条说明本文按什么读法来、哪些指标对它不适用。') + '</p>');
+    if (notes.length) {
+      h.push('<ul>');
+      notes.forEach(function (n) { h.push('<li>' + n + '</li>'); });
+      h.push('</ul>');
+    }
+    return { title: '产品类型：' + kind.label, html: h.join('') };
+  };
+
+  /* 持仓拟合小节：只出「信号 + 证伪条件」，不出归因结论。
+   * 数据来自 server/fit.mjs（季报前十权重 × 个股周线），失败时 pipeline 不会推这一节。 */
+  FC.fitSection = function (fit, kind) {
+    var passive = !!(kind && kind.isPassive);
+    if (!fit || !fit.ok) return null;
+    var f = fit.fit || {}, rg = fit.regression || {}, cv = fit.coverage || {}, w = fit.window || {};
+    var pct = function (v, d) {
+      return (v == null || !isFinite(v)) ? '—' : (v * 100).toFixed(d == null ? 2 : d) + '%';
+    };
+    var pp = function (v) {
+      if (v == null || !isFinite(v)) return '—';
+      return (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + 'pp';
+    };
+    /* 这一节里的方向性数字(实际/理论累计、年化 α、每周实际/理论/残差)按红涨绿跌上色;
+       相关性、跟踪误差、R²、β 是"量"不是"方向", 保持原墨色。 */
+    var pctDir = function (v, d) { return dirSpan(pct(v, d), v); };
+    var ppDir = function (v) { return dirSpan(pp(v), v); };
+    var h = [];
+    h.push('<h4>这一节在算什么</h4>');
+    h.push('<p>拿每个季度末的前十大权重，乘上这些股票下一季度的真实涨跌，得到「如果经理一直没动，这只基金应该怎么走」；再与它实际净值比，差出来的部分叫残差。'
+      + '前十合计平均占净值 ' + (cv.avgTop10Sum == null ? '—' : cv.avgTop10Sum + '%') + '，剩下那部分用沪深300代理。残差只能提示「可能发生了什么」，不构成证据。</p>');
+    h.push('<h4>拟合质量</h4>');
+    h.push('<table><thead><tr><th>项目</th><th>值</th></tr></thead><tbody>');
+    h.push('<tr><td>拟合窗口</td><td>' + (w.from || '—') + ' 至 ' + (w.to || '—') + '，共 ' + (w.weeks || 0) + ' 周</td></tr>');
+    h.push('<tr><td>覆盖报告期</td><td>' + (cv.quarters || 0) + ' 期</td></tr>');
+    h.push('<tr><td>成分股匹配</td><td>' + (cv.matched || 0) + ' / ' + (cv.stocks || 0) + ' 只</td></tr>');
+    h.push('<tr><td>实际累计 / 理论累计</td><td>' + pctDir((f.cumActual || 0) - 1) + ' / ' + pctDir((f.cumTheory || 0) - 1) + '</td></tr>');
+    h.push('<tr><td>周收益相关性</td><td>' + pct(f.corr, 1) + '</td></tr>');
+    h.push('<tr><td>年化跟踪误差（残差）</td><td>' + pct(f.trackingErrorAnnual) + '</td></tr>');
+    if (rg.r2 != null) {
+      h.push('<tr><td>回归 R² / 前十暴露 / 市场暴露</td><td>' + pct(rg.r2, 1) + ' / '
+        + rg.betaBasket.toFixed(2) + ' / ' + rg.betaMarket.toFixed(2) + '</td></tr>');
+      h.push('<tr><td>年化 α（前十与市场都解释不了的部分）</td><td>' + pctDir(rg.alphaAnnual) + '</td></tr>');
+    }
+    h.push('</tbody></table>');
+    h.push('<p>读法：相关性越高、跟踪误差越小，说明「前十张持仓」越能代表这只基金这一段时间的实际样子；'
+      + '反过来，如果相关性低，说明经理的动作或非前十持仓占比很大，这一节的参考价值就要打折。</p>');
+
+    if (fit.divergences && fit.divergences.length) {
+      h.push('<h4>残差最大的三周（值得回原文核一眼）</h4>');
+      h.push('<table><thead><tr><th>周</th><th>实际</th><th>理论</th><th>残差</th><th>当时披露期</th><th>可以怎么解释（都待核实）</th></tr></thead><tbody>');
+      fit.divergences.forEach(function (d) {
+        var why = passive
+          ? '被动产品：残差主要来自跟踪误差、费率、现金与申赎，不是调仓信号'
+          : (d.resid < 0
+            ? '实际弱于前十组合：可能前十之外有拖累、或已减仓、或当期非前十仓位更重'
+            : '实际强于前十组合：可能前十之外另有机会、打新贡献、或已加仓');
+        h.push('<tr><td>' + d.d + '</td><td>' + ppDir(d.fund) + '</td><td>' + ppDir(d.theory) + '</td><td>'
+          + ppDir(d.resid) + '</td><td>' + (d.period || '—') + '</td><td>' + why + '</td></tr>');
+      });
+      h.push('</tbody></table>');
+      h.push('<p>要证实这些解释，需要回官方季报看下一期的持仓变化与经理原话，或对比同期业绩基准。'
+        + '证伪条件：如果同期沪深300 与理论组合同向、幅度相当，那这一周的残差不能算到经理头上。</p>');
+    }
+
+    h.push('<h4>这一节的边界</h4>');
+    h.push('<ul>');
+    (fit.caveats || []).forEach(function (c) { h.push('<li>' + c + '</li>'); });
+    h.push('</ul>');
+    return { title: '持仓拟合：如果经理一直没动', html: h.join('') };
+  };
+
+  /* 持仓拟合没跑成时也留一节。
+   * 为什么必须留: 这一节是用户点名要的, 悄悄消失会让读者以为"报告本来就没有这块";
+   * 而实跑里一次行情源 501 就足以让它整节不见。如实写清"没跑成、为什么、怎么办"比留白诚实。 */
+  FC.fitSectionFailed = function (fit) {
+    var why = String((fit && fit.reason) || '原因未知').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return {
+      title: '持仓拟合：本次未完成',
+      html: '<p>这一节算的是「如果经理一直没动，这只基金应该怎么走」：拿每季末前十权重乘上这些股票下一季的真实涨跌，得到理论净值，再跟实际净值比。'
+        + '这次没能算出来，原因是：<b>' + why + '</b>。</p>'
+        + '<p class="note">其余各节不受影响。行情源偶尔会抽风（报 501 或超时），重跑一次通常就出来了；'
+        + '如果连续几次都失败，那多半是取数口径变了，该去修取数，而不是回头改结论。</p>'
+    };
+  };
+
+  /* 该追问的三个问题：不编，全部从本文已有的数字里挑，每条带证据行。
+   * 目前是规则抽取（确定性）；接上大模型后可换成模型生成 + 同样的证据校验。 */
+  FC.followupSection = function (analysis) {
+    if (!analysis) return null;
+    var perf = analysis.perf || {}, m = analysis.metrics || {}, fit = analysis.fit || null;
+    var conc = (m.conc && typeof m.conc === 'object') ? m.conc : {};
+    var card = analysis.card || {};
+    var cands = [];
+
+    if (fit && fit.ok && fit.divergences && fit.divergences.length) {
+      var d0 = fit.divergences[0];
+      cands.push({
+        q: (d0.d || '') + ' 这一周实际 ' + (d0.fund * 100).toFixed(2) + '%，前十组合理论 ' + (d0.theory * 100).toFixed(2) + '%，差了 '
+          + (d0.resid * 100).toFixed(2) + 'pp。那一周到底发生了什么？',
+        why: '前十解释不了的那一段，可能是加仓减仓，也可能是非前十持仓、打新、停牌估值。回原文核一眼再下结论。',
+        ev: '证据：持仓拟合节 · 残差最大的三周（' + d0.d + '，' + (d0.period || '') + '）'
+      });
+    }
+    if (perf.concentratedInOneQuarter && perf.bestQuarter && perf.bestQuarterContribution != null) {
+      cands.push({
+        q: '区间收益 ' + Number(perf.cumReturn).toFixed(2) + '% 里，有 ' + Number(perf.bestQuarterContribution).toFixed(1)
+          + '% 来自 ' + perf.bestQuarter + ' 这一个季度。这是选股能力，还是赶上了一波行业行情？',
+        why: '单季贡献过半，说明总收益高度依赖某一段时间。把那一季的持仓与同期行业指数并列看，才知道是能力还是运气。',
+        ev: '证据：绩效节 · 单季贡献（' + perf.bestQuarter + '，' + Number(perf.bestQuarterContribution).toFixed(1) + '%）；持仓节 · 该季前十'
+      });
+    }
+    if (conc.first != null && conc.latest != null) {
+      var up = Number(conc.latest) - Number(conc.first);
+      cands.push({
+        q: '前十合计占净值从 ' + Number(conc.first).toFixed(2) + '% 变成 ' + Number(conc.latest).toFixed(2)
+          + '%（' + (up >= 0 ? '上升 ' : '下降 ') + Math.abs(up).toFixed(2) + 'pp），'
+          + (up >= 0 ? '是主动集中，还是被涨上去的？' : '是主动减仓分散，还是别的持仓涨上来把它稀释了？'),
+        why: '集中度变化有两种来源：主动加减仓，或原有持仓涨得比别人快。看持股数有没有变，就能把两者分开。',
+        ev: '证据：底稿 · 逐报告期前十合计（首期 ' + Number(conc.first).toFixed(2) + '% / 末期 ' + Number(conc.latest).toFixed(2) + '%）'
+      });
+    }
+    if (card.formTag) {
+      cands.push({
+        q: '判定为「' + card.formTag + '」的关键依据是哪两条？换成相邻形态要满足什么条件？',
+        why: '形态标签是引擎按规则给的，说清"为什么不选另一个"，比只报答案更站得住。',
+        ev: '证据：结论卡 · 形态标签与置信度（' + card.formTag + (card.formConfidence != null ? '，置信度 ' + card.formConfidence : '') + '）'
+      });
+    }
+    if (perf.bestQuarter && perf.exBestQuarter != null) {
+      cands.push({
+        q: '把 ' + perf.bestQuarter + ' 这一季（' + Number(perf.exBestQuarter).toFixed(2) + '%）单独拿掉，这套持仓还剩下多少超额？',
+        why: '砍掉最好的一季再看，是检验"收益是不是靠一段行情"的最快办法，也正好对上本文的推翻条件。',
+        ev: '证据：绩效节 · 最优季度与超额贡献；结论卡 · 推翻条件'
+      });
+    }
+    if (!cands.length) return null;
+    var picked = cands.slice(0, 3);
+    var h = ['<p>这三个问题是本文自己暴露出来的薄弱处，不是结论。带着它们去翻官方季报原文，比再看一遍结论更有用。</p>', '<ol>'];
+    picked.forEach(function (c) {
+      h.push('<li><p><b>' + c.q + '</b></p><p>' + c.why + '</p><p class="muted">' + c.ev + '</p></li>');
+    });
+    h.push('</ol>');
+    h.push('<p class="muted">生成方式：从本报告已有的数字与判定里按规则抽取，未调用大模型；每条都指回具体小节，可逐条核对。</p>');
+    return { title: '该追问的三个问题', html: h.join('') };
+  };
+
   FC.reportToMarkdown = function (analysis, extra) {
     extra = extra || {};
     var a = analysis;
@@ -2910,7 +3274,11 @@ window.FC = window.FC || {};
       var vocab = FC.scanVocab(blob);
       if (vocab.length) issues.push({ level: 'fail', msg: '命中违禁词: ' + vocab.map(function (v) { return v.word; }).join('、') });
       var allowed = (ctx && ctx.allowedNumbers) || {};
-      var toks = (blob.match(/\d+(?:\.\d+)?/g) || []).filter(function (t) { return !/^\d{4}$/.test(t) && !/^[1-9]$/.test(t) && t !== '10'; });
+      var toks = (blob.match(/\d+(?:\.\d+)?/g) || []).filter(function (t) {
+        /* 年份、一位数、6 位基金代码都不是"论点里的数字", 不该进回查。
+           519191 被当成编造数字报出来过一次 —— 那只是它在正文里提到了基金代码。 */
+        return !/^(19|20)\d\d$/.test(t) && !/^\d{6}$/.test(t) && !/^[1-9]$/.test(t) && t !== '10';
+      });
       var bad = toks.filter(function (t) { return !allowed[t]; });
       if (bad.length) issues.push({ level: 'fail', msg: '数字回查失败, ' + bad.length + ' 个数字在指标包中不存在(疑似编造): ' + bad.slice(0, 8).join('、') });
       if (!/推翻|不成立|反之|若.*则/.test(String(parsed.falsifier || ''))) issues.push({ level: 'warn', msg: '推翻条件读起来不像可证伪条件, 建议改为"若 X 未达到, 则本判断降级"。' });
@@ -2988,7 +3356,9 @@ window.FC = window.FC || {};
       if (fwd) issues.push({ level: 'fail', msg: '出现收益预期或投资建议字样「' + fwd[0] + '」—— 复盘报告不许给前瞻' });
 
       var allowed = (ctx && ctx.allowedNumbers) || {};
-      var toks = (blob.match(/\d+(?:\.\d+)?/g) || []).filter(function (t) { return !/^\d{4}$/.test(t) && !/^[1-9]$/.test(t) && t !== '10' && t !== '100'; });
+      var toks = (blob.match(/\d+(?:\.\d+)?/g) || []).filter(function (t) {
+        return !/^(19|20)\d\d$/.test(t) && !/^\d{6}$/.test(t) && !/^[1-9]$/.test(t) && t !== '10' && t !== '100';
+      });
       var badNums = toks.filter(function (t) { return !allowed[t]; });
       if (badNums.length) issues.push({ level: 'fail', msg: '数字回查失败, ' + badNums.length + ' 个数字在本次指标包里不存在(疑似编造): ' + badNums.slice(0, 8).join('、') });
       else if (toks.length) issues.push({ level: 'pass', msg: '数字回查: ' + toks.length + ' 个数字全部命中指标包。' });
@@ -3207,7 +3577,7 @@ window.FC = window.FC || {};
   }
 
   /* ============================================================ 视图切换 */
-  var VIEWS = ['input', 'report', 'ledger', 'audit', 'about'];
+  var VIEWS = ['input', 'report', 'ledger', 'audit', 'compare', 'about'];
   function show(view) {
     if (VIEWS.indexOf(view) < 0) view = 'input';
     $$('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-' + view); });
@@ -3368,7 +3738,9 @@ window.FC = window.FC || {};
 
     var caseTbl = '<table class="tbl tbl-compact"><thead><tr><th>股票</th><th>进入前十</th><th>推算价</th><th>最后在榜</th><th>推算价</th><th>持有期推算价变动</th><th>期数</th><th>仍在前十</th></tr></thead><tbody>' +
       a.cases.wins.map(function (c) {
-        return '<tr><td>' + esc(c.name) + '</td><td>' + c.entryPeriod + '</td><td>' + FC.util.fx(c.entryPrice) + '</td><td>' + c.exitPeriod + '</td><td>' + FC.util.fx(c.exitPrice) + '</td><td class="' + (c.change >= 0 ? 'pos' : 'neg') + '">' + (c.change > 0 ? '+' : '') + FC.util.fx(c.change) + '%</td><td>' + c.heldQuarters + '</td><td>' + (c.stillHeld ? '是' : '否') + '</td></tr>';
+        /* 持有期推算价变动是"涨跌", 按 A 股习惯红涨绿跌(零值不上色); 用 FC.dirCls 统一判断 */
+        var dc = FC.dirCls(c.change);
+        return '<tr><td>' + esc(c.name) + '</td><td>' + c.entryPeriod + '</td><td>' + FC.util.fx(c.entryPrice) + '</td><td>' + c.exitPeriod + '</td><td>' + FC.util.fx(c.exitPrice) + '</td><td' + (dc ? ' class="' + dc + '"' : '') + '>' + (c.change > 0 ? '+' : '') + FC.util.fx(c.change) + '%</td><td>' + c.heldQuarters + '</td><td>' + (c.stillHeld ? '是' : '否') + '</td></tr>';
       }).join('') + '</tbody></table>';
 
     $('#ledger-body').innerHTML =
@@ -4559,6 +4931,12 @@ window.FC = window.FC || {};
   };
 
   /* ------------------------------------------------------------ 结果面板 */
+  /** KPI 里的方向性数字: 收益/回撤按 A 股习惯红涨绿跌(FC.dirCls), 零值不上色。
+   *  只给"正负号本身有经济含义"的数字用; 规模、期数这类"量"不要走这里。 */
+  function dirStrong(v, unit) {
+    var c = FC.dirCls(v);
+    return '<strong' + (c ? ' class="' + c + '"' : '') + '>' + v + unit + '</strong>';
+  }
   function renderResult(s) {
     var box = $('#online-result');
     var dl = function (key, label) {
@@ -4622,7 +5000,7 @@ window.FC = window.FC || {};
       '<div class="metric"><div class="metric-l">形态标签</div><div class="metric-v" style="font-size:16px">' + FC.esc(s.formTag) + '</div></div>' +
       '<div class="metric"><div class="metric-l">质检</div><div class="metric-v" style="font-size:16px">' + FC.esc(s.check.verdictText) + '</div></div>' +
       '</div>' +
-      (s.perf ? '<p class="note">绩效(' + FC.esc(s.perfMethod || '分红再投总回报指数') + '): 区间 <strong>' + s.perf.cumReturn + '%</strong> · 剔除最好一季 <strong>' + s.perf.exBestQuarter + '%</strong> · 最大回撤 <strong>' + s.perf.maxDrawdown + '%</strong></p>' : '') +
+      (s.perf ? '<p class="note">绩效(' + FC.esc(s.perfMethod || '分红再投总回报指数') + '): 区间 ' + dirStrong(s.perf.cumReturn, '%') + ' · 剔除最好一季 ' + dirStrong(s.perf.exBestQuarter, '%') + ' · 最大回撤 ' + dirStrong(s.perf.maxDrawdown, '%') + '</p>' : '') +
       '<p class="note"><strong>复盘区间怎么定的:</strong> ' + FC.esc(rangeBasis) + '</p>' +
       (cands.length ? '<details><summary style="cursor:pointer;font-size:13px">全部候选区间(可在服务端用 fromPeriod/toPeriod 指定后重跑)</summary><table class="tbl tbl-compact"><thead><tr><th>候选</th><th>区间</th><th>期数</th><th>说明</th></tr></thead><tbody>' +
         cands.map(function (c) {
@@ -4749,6 +5127,289 @@ window.FC = window.FC || {};
   };
 
 })(window.FC);
+
+</script>
+<script>
+/* 横向对比：用户输最多 3 个基金代码，抓净值（服务端 /api/compare）后画归一化曲线 + 对比表。
+ * 零依赖：曲线用原生 SVG 拼，不引图表库。 */
+(function (window) {
+  'use strict';
+  var FC = window.FC || (window.FC = {});
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var COLORS = ['#8f6231', '#1b2a3a', '#5b7a8c'];
+  var state = { running: false, last: null };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  var pct = function (v, d) { return (v == null || !isFinite(v)) ? '—' : (v * 100).toFixed(d == null ? 2 : d) + '%'; };
+
+  function svgChart(funds, windowInfo) {
+    var W = 760, H = 300, padL = 46, padR = 14, padT = 12, padB = 26;
+    var all = [];
+    funds.forEach(function (f) { (f.series || []).forEach(function (p) { all.push(p.v); }); });
+    if (!all.length) return '<p class="muted">没有可画的点</p>';
+    var min = Math.min.apply(null, all), max = Math.max.apply(null, all);
+    var span = Math.max(1e-6, max - min);
+    min = Math.floor(min - span * 0.06); max = Math.ceil(max + span * 0.06);
+    var t0 = new Date(windowInfo.from).getTime(), t1 = new Date(windowInfo.to).getTime();
+    var x = function (d) { return padL + (W - padL - padR) * ((new Date(d).getTime() - t0) / Math.max(1, t1 - t0)); };
+    var y = function (v) { return padT + (H - padT - padB) * (1 - (v - min) / Math.max(1e-6, max - min)); };
+
+    var s = ['<svg class="cmp-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="净值曲线对比">'];
+    /* 横向网格 + 纵轴刻度 */
+    for (var i = 0; i <= 4; i++) {
+      var vv = min + (max - min) * i / 4, yy = y(vv);
+      s.push('<line x1="' + padL + '" y1="' + yy.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + yy.toFixed(1) + '" class="cmp-grid"/>');
+      s.push('<text x="' + (padL - 6) + '" y="' + (yy + 3.5).toFixed(1) + '" class="cmp-axis" text-anchor="end">' + vv.toFixed(0) + '</text>');
+    }
+    /* 100 基准线 */
+    if (min <= 100 && max >= 100) {
+      s.push('<line x1="' + padL + '" y1="' + y(100).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y(100).toFixed(1) + '" class="cmp-base"/>');
+    }
+    funds.forEach(function (f, idx) {
+      var pts = (f.series || []).map(function (p) { return x(p.d).toFixed(1) + ',' + y(p.v).toFixed(1); }).join(' ');
+      s.push('<polyline points="' + pts + '" fill="none" stroke="' + COLORS[idx % COLORS.length] + '" stroke-width="1.8" stroke-linejoin="round"/>');
+    });
+    /* 横轴首末日期 */
+    s.push('<text x="' + padL + '" y="' + (H - 8) + '" class="cmp-axis">' + esc(windowInfo.from) + '</text>');
+    s.push('<text x="' + (W - padR) + '" y="' + (H - 8) + '" class="cmp-axis" text-anchor="end">' + esc(windowInfo.to) + '</text>');
+    s.push('</svg>');
+
+    var legend = funds.map(function (f, idx) {
+      return '<span class="cmp-lg"><i style="background:' + COLORS[idx % COLORS.length] + '"></i>' + esc(f.code) + ' ' + esc(f.name) + '</span>';
+    }).join('');
+    return '<div class="cmp-legend">' + legend + '</div>' + s.join('');
+  }
+
+  function table(funds) {
+    var head = '<thead><tr><th>基金</th><th>类型</th><th class="n">区间收益</th><th class="n">年化</th><th class="n">最大回撤</th><th class="n">年化波动</th><th>形态标签</th><th class="n">期数</th></tr></thead>';
+    var rows = funds.map(function (f) {
+      var m = f.metrics || {};
+      /* 收益/年化/回撤有方向 -> 红涨绿跌(A 股习惯); 年化波动与期数只是"量", 不上色。
+         方向判断统一走 FC.dirCls(<=0 记 green, 零值不上色)。 */
+      var dRet = FC.dirCls(m.cumReturn), dAnn = FC.dirCls(m.annualized), dMdd = FC.dirCls(m.maxDrawdown);
+      var cell = function (cls, v) { return '<td class="n' + (cls ? ' ' + cls : '') + '">' + v + '</td>'; };
+      return '<tr' + (f.insufficient ? ' class="cmp-dim"' : '') + '><td><b>' + esc(f.code) + '</b> ' + esc(f.name) +
+        (f.manager ? '<div class="muted">' + esc(f.manager) + '</div>' : '') + '</td>' +
+        '<td>' + esc(f.kind && f.kind.label || '—') + '</td>' +
+        cell('num' + (dRet ? ' ' + dRet : ''), pct(m.cumReturn)) +
+        cell('num' + (dAnn ? ' ' + dAnn : ''), pct(m.annualized)) +
+        cell(dMdd, pct(m.maxDrawdown)) +
+        cell('', pct(m.volAnnual)) +
+        '<td>' + esc(f.form || (f.insufficient ? '样本不足' : '未复盘')) + '</td>' +
+        '<td class="n">' + (f.quarters == null ? '—' : f.quarters) + '</td></tr>';
+    }).join('');
+    return '<table class="tbl cmp-tbl">' + head + '<tbody>' + rows + '</tbody></table>';
+  }
+
+  function render(r) {
+    var box = $('#cmp-result');
+    if (!box) return;
+    state.last = r;
+    var warns = (r.warnings || []).length
+      ? '<div class="cmp-warn">' + r.warnings.map(function (w) { return '<p>· ' + esc(w) + '</p>'; }).join('') + '</div>' : '';
+    box.innerHTML = '<div class="cmp-head"><h3>共同区间 ' + esc(r.window.from) + ' 至 ' + esc(r.window.to) +
+      '（' + r.window.days + ' 天）</h3><p class="muted">口径：' + esc(r.basis) + '。不同成立时间的基金只比重叠部分。</p></div>' +
+      warns + svgChart(r.funds, r.window) + table(r.funds) +
+      '<p class="muted">读法：曲线只说明同一起点下的相对走势；年化与回撤按共同区间计算。被动产品与主动产品的"形态标签"不可比，看曲线与回撤即可。</p>';
+    box.classList.remove('hidden');
+    if (window.FC && FC.show) FC.show('compare');
+  }
+
+  async function run() {
+    if (state.running) return;
+    var inputs = [$('#cmp-code-1'), $('#cmp-code-2'), $('#cmp-code-3')];
+    var codes = inputs.map(function (el) { return el ? el.value.trim() : ''; }).filter(Boolean);
+    var bad = codes.filter(function (c) { return !/^\d{6}$/.test(c); });
+    var msg = $('#cmp-msg');
+    if (!codes.length) { if (msg) msg.textContent = '至少输入一个 6 位基金代码'; return; }
+    if (bad.length) { if (msg) msg.textContent = '代码格式不对：' + bad.join('、'); return; }
+    if (msg) msg.textContent = '抓净值中（三只基金大约 2 到 6 秒）…';
+    state.running = true;
+    var btn = $('#btn-compare-run');
+    if (btn) { btn.disabled = true; btn.textContent = '对比中…'; }
+    try {
+      var res = await fetch('api/compare', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codes: codes })
+      });
+      var j = await res.json();
+      if (!res.ok || j.error) throw new Error(j.error || ('HTTP ' + res.status));
+      if (msg) msg.textContent = '';
+      render(j);
+    } catch (e) {
+      if (msg) msg.textContent = '对比失败：' + e.message;
+    } finally {
+      state.running = false;
+      if (btn) { btn.disabled = false; btn.textContent = '开始对比'; }
+    }
+  }
+
+  function init() {
+    var btn = $('#btn-compare-run');
+    if (btn) btn.addEventListener('click', run);
+    var inputs = [$('#cmp-code-1'), $('#cmp-code-2'), $('#cmp-code-3')];
+    inputs.forEach(function (el) {
+      if (!el) return;
+      el.addEventListener('keydown', function (e) { if (e.key === 'Enter') run(); });
+    });
+    /* 支持带参数直接对比：/?codes=519191,005827#compare —— 方便把某一组对比发给别人 */
+    try {
+      var m = /(?:^|[?&])codes=([^&#]+)/.exec(location.search + '&' + location.hash);
+      if (m) {
+        var list = decodeURIComponent(m[1]).split(/[,\s，、]+/).filter(Boolean).slice(0, 3);
+        list.forEach(function (c, i) { if (inputs[i]) inputs[i].value = c; });
+        if (list.length) run();
+      }
+    } catch (e) { /* 参数坏了就忽略 */ }
+  }
+  FC.initCompare = init;
+  FC.compareRun = run;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})(window);
+
+</script>
+<script>
+/* 页面内问答：右下角「问一句」抽屉。
+ * 只问已经复盘过的那只基金；服务端只喂字段摘要，回答里的数字会被校验，编的数字会被降级标注。 */
+(function (window) {
+  'use strict';
+  var FC = window.FC || (window.FC = {});
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var state = { open: false, busy: false, code: '' };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  /* 复用页面上已经填过的模型配置（online.js 存在 fundclinic.llm.v1），否则服务端没有 Key 就没法回答 */
+  function aiCfg() {
+    var cfg = { baseUrl: '', model: '', apiKey: '' };
+    try {
+      var saved = JSON.parse(localStorage.getItem('fundclinic.llm.v1') || '{}');
+      if (saved && saved.apiKey) { cfg.baseUrl = saved.baseUrl || ''; cfg.model = saved.model || ''; cfg.apiKey = saved.apiKey; }
+    } catch (e) {}
+    if (!cfg.apiKey) {
+      var k = document.getElementById('llm-key') || document.getElementById('ai-key');
+      var b = document.getElementById('llm-base') || document.getElementById('ai-base');
+      var m = document.getElementById('llm-model') || document.getElementById('ai-model');
+      if (k && k.value) { cfg.apiKey = k.value.trim(); cfg.baseUrl = (b && b.value || '').trim(); cfg.model = (m && m.value || '').trim(); }
+    }
+    return cfg;
+  }
+  function lastCode() {
+    try { return localStorage.getItem('fundclinic.lastCode') || ''; } catch (e) { return ''; }
+  }
+
+  function buildDom() {
+    var wrap = document.createElement('div');
+    wrap.className = 'ask';
+    wrap.innerHTML =
+      '<button class="ask-fab" id="ask-fab" type="button" title="问一句（只答报告里已有的事）">问一句</button>' +
+      '<aside class="ask-drawer" id="ask-drawer" aria-hidden="true">' +
+      '<header class="ask-hd"><b>问一句</b><span class="muted">只答这份报告里已有的事</span>' +
+      '<button class="ask-x" id="ask-x" type="button" aria-label="关闭">×</button></header>' +
+      '<div class="ask-meta"><label>基金代码 <input id="ask-code" inputmode="numeric" maxlength="6" placeholder="用最近复盘的那只"></label>' +
+      '<span class="ask-hint" id="ask-hint">先跑一次复盘，再问</span></div>' +
+      '<div class="ask-log" id="ask-log"></div>' +
+      '<div class="ask-quick" id="ask-quick">' +
+      '<button type="button" data-q="这只基金区间收益多少，最大回撤多大？">区间收益与回撤</button>' +
+      '<button type="button" data-q="为什么判成这个形态？依据是什么？">形态依据</button>' +
+      '<button type="button" data-q="前十持仓拟合和实际净值差多少？说明什么？">拟合残差</button>' +
+      '</div>' +
+      '<form class="ask-form" id="ask-form"><input id="ask-input" placeholder="问报告里的事，例如：单季贡献最大的是哪一季" autocomplete="off">' +
+      '<button type="submit" id="ask-send">发送</button></form>' +
+      '<p class="ask-foot">不预测涨跌、不推荐买卖、不评价基金经理个人。回答里的数字会被服务端校验，对不上的会被标出来。</p>' +
+      '</aside>';
+    document.body.appendChild(wrap);
+  }
+
+  function open() {
+    var d = $('#ask-drawer');
+    if (!d) return;
+    d.classList.add('open'); d.setAttribute('aria-hidden', 'false');
+    state.open = true;
+    var input = $('#ask-input');
+    if (input) setTimeout(function () { input.focus(); }, 120);
+    var hint = $('#ask-hint');
+    if (hint) hint.textContent = lastCode() ? '默认用最近一次复盘：' + lastCode() : '没找到最近复盘的代码，请手动填';
+  }
+  function close() {
+    var d = $('#ask-drawer');
+    if (!d) return;
+    d.classList.remove('open'); d.setAttribute('aria-hidden', 'true');
+    state.open = false;
+  }
+
+  function bubble(role, html) {
+    var log = $('#ask-log');
+    if (!log) return null;
+    var el = document.createElement('div');
+    el.className = 'ask-b ' + role;
+    el.innerHTML = html;
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+    return el;
+  }
+
+  async function ask(q) {
+    if (state.busy || !q) return;
+    var codeEl = $('#ask-code');
+    var code = (codeEl && codeEl.value.trim()) || lastCode();
+    if (!/^\d{6}$/.test(code)) { bubble('sys', '先填 6 位基金代码，或先跑一次复盘。'); return; }
+    state.busy = true;
+    bubble('me', esc(q));
+    var pending = bubble('bot', '<span class="ask-dots">…</span>');
+    try {
+      var res = await fetch('api/ask', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code, question: q, ai: aiCfg() })
+      });
+      var j = await res.json();
+      if (!res.ok || j.ok === false) throw new Error(j.error || ('HTTP ' + res.status));
+      var html = '<p>' + esc(j.answer).replace(/\n/g, '</p><p>') + '</p>';
+      if (j.refs && j.refs.length) html += '<p class="ask-refs">引用字段：' + j.refs.map(esc).join(' · ') + '</p>';
+      if (j.degraded) html += '<p class="ask-warn">⚠ 上面这条含有未通过校验的数字，仅作原文引用，别直接采信。</p>';
+      if (j.refused) html += '<p class="ask-warn">已按边界拒答。</p>';
+      if (j.usage && j.usage.total_tokens) html += '<p class="ask-cost">本次 ' + j.usage.total_tokens + ' tokens</p>';
+      pending.innerHTML = html;
+    } catch (e) {
+      pending.innerHTML = '<p class="ask-warn">问不了：' + esc(e.message) + '</p>';
+    } finally {
+      state.busy = false;
+    }
+  }
+
+  function init() {
+    buildDom();
+    $('#ask-fab') && $('#ask-fab').addEventListener('click', function () { state.open ? close() : open(); });
+    $('#ask-x') && $('#ask-x').addEventListener('click', close);
+    var codeEl = $('#ask-code');
+    if (codeEl) codeEl.value = lastCode();
+    $('#ask-quick') && $('#ask-quick').addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-q]');
+      if (b) ask(b.getAttribute('data-q'));
+    });
+    $('#ask-form') && $('#ask-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var input = $('#ask-input');
+      var q = input && input.value.trim();
+      if (input) input.value = '';
+      ask(q);
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && state.open) close(); });
+    if (/[?&]ask=1/.test(location.search)) open();
+  }
+
+  FC.initAsk = init;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})(window);
 
 </script>
 </body>
