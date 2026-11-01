@@ -1,0 +1,1090 @@
+{
+ "code": "510300",
+ "summary": {
+  "code": "510300",
+  "name": "沪深300ETF华泰柏瑞",
+  "manager": "柳军",
+  "range": "2017Q1–2026Q3",
+  "quarters": 39,
+  "formTag": "低换手长期持有型",
+  "perf": {
+   "cumReturn": 31.67,
+   "exBestQuarter": 4.57,
+   "maxDrawdown": -45.33
+  },
+  "check": {
+   "total": 18,
+   "pass": 17,
+   "warn": 1,
+   "fail": 0,
+   "verdict": "warn",
+   "verdictText": "通过, 有 1 项建议人工确认"
+  },
+  "official": {
+   "available": true,
+   "pdftotext": true,
+   "checks": [
+    {
+     "period": "2017Q1",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2017Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2017Q3",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2017Q4",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2018Q1",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2018Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2018Q3",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2018Q4",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2019Q1",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2019Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2019Q3",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2019Q4",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2020Q1",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2020Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2020Q3",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2020Q4",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2021Q1",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2021Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 1 处为时点名称差异(已按代码对齐)"
+    },
+    {
+     "period": "2022Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2023Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2023Q3",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2023Q4",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2024Q1",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2024Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2024Q3",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2024Q4",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2025Q1",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2025Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2025Q3",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2025Q4",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2026Q1",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2026Q2",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2026Q3",
+     "reason": "全量取原文",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    }
+   ],
+   "notes": [
+    "官方对账完成: 33/33 期逐行一致, 共解析 330 行官方持仓。"
+   ],
+   "talks": 33
+  },
+  "sources": [
+   {
+    "type": "基金概况",
+    "url": "https://fundf10.eastmoney.com/jbgk_510300.html",
+    "fetchedAt": "2026-11-01T05:00:44.669Z",
+    "fields": [
+     "全称",
+     "类型",
+     "管理公司",
+     "基金经理",
+     "业绩比较基准"
+    ]
+   },
+   {
+    "type": "净值序列(日频)",
+    "url": "https://fund.eastmoney.com/pingzhongdata/510300.js",
+    "fetchedAt": "2026-11-01T05:00:44.880Z",
+    "points": 3521
+   },
+   {
+    "type": "基金经理履历",
+    "url": "https://fundf10.eastmoney.com/jjjl_510300.html",
+    "fetchedAt": "2026-11-01T05:00:45.072Z",
+    "rows": 2
+   },
+   {
+    "type": "天天基金 F10 历史前十大",
+    "url": "https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code=510300",
+    "fetchedAt": "2026-11-01T05:00:50.493Z",
+    "quarters": 39
+   },
+   {
+    "type": "天天基金 资产配置",
+    "url": "https://fundf10.eastmoney.com/zcpz_510300.html",
+    "fetchedAt": "2026-11-01T05:00:50.676Z",
+    "periods": 58
+   },
+   {
+    "type": "天天基金 规模变动",
+    "url": "https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=gmbd&code=510300",
+    "fetchedAt": "2026-11-01T05:00:50.860Z",
+    "rows": 72
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201704240527576116_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2017Q1",
+    "bytes": 394846,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201707190729691821_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2017Q2",
+    "bytes": 230340,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201710250977442806_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2017Q3",
+    "bytes": 442583,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201801191079815093_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2017Q4",
+    "bytes": 228311,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201804201127440882_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2018Q1",
+    "bytes": 246938,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201807181167681711_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2018Q2",
+    "bytes": 449448,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201810251221826071_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2018Q3",
+    "bytes": 239808,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201901211287247398_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2018Q4",
+    "bytes": 333528,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201904201321030957_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2019Q1",
+    "bytes": 331864,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201907161339032721_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2019Q2",
+    "bytes": 396546,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN201910211369345145_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2019Q3",
+    "bytes": 432438,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202001201374397225_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2019Q4",
+    "bytes": 384500,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202004201378233894_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2020Q1",
+    "bytes": 887262,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202007201392955800_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2020Q2",
+    "bytes": 453971,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202010281424199595_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2020Q3",
+    "bytes": 417838,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202101221453115423_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2020Q4",
+    "bytes": 488255,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202104221486980029_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2021Q1",
+    "bytes": 482526,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202107211505152295_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2021Q2",
+    "bytes": 561937,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202208301577819081_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2022Q2",
+    "bytes": 871986,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202307211592524280_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2023Q2",
+    "bytes": 274634,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202310241602914231_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2023Q3",
+    "bytes": 275646,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202401211617887633_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2023Q4",
+    "bytes": 1153639,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202404211630922206_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2024Q1",
+    "bytes": 485044,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202407181638053774_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2024Q2",
+    "bytes": 476652,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202410251640502565_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2024Q3",
+    "bytes": 489794,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202501211642411993_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2024Q4",
+    "bytes": 525883,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202504211660027419_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2025Q1",
+    "bytes": 540621,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202507201712470921_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2025Q2",
+    "bytes": 526272,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202510271770088484_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2025Q3",
+    "bytes": 538029,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202601211818214780_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2025Q4",
+    "bytes": 533520,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202604211821390044_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2026Q1",
+    "bytes": 529500,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202607201827154145_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2026Q2",
+    "bytes": 524700,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202610261830938404_1.pdf",
+    "fetchedAt": "2026-11-01T05:01:03.566Z",
+    "period": "2026Q3",
+    "bytes": 517500,
+    "对账": "逐行一致"
+   }
+  ],
+  "rangeInfo": {
+   "auto": true,
+   "basis": "现任经理任期(柳军(2015-06-12 ~ 至今))共 39 个报告期, 足以判定形态",
+   "from": "2017Q1",
+   "to": "2026Q3",
+   "humanConfirmed": false,
+   "candidates": [
+    {
+     "id": "tenure0",
+     "label": "柳军(2015-06-12 ~ 至今)",
+     "from": "2017Q1",
+     "to": "2026Q3",
+     "n": 39,
+     "isCurrent": true,
+     "coManaged": false,
+     "recommended": true
+    },
+    {
+     "id": "all",
+     "label": "全部可取报告期",
+     "from": "2017Q1",
+     "to": "2026Q3",
+     "n": 39,
+     "isCurrent": false,
+     "coManaged": false,
+     "recommended": false
+    }
+   ],
+   "candidatesTotal": 39,
+   "selected": 39,
+   "excludedBefore": 0
+  },
+  "cleanLog": [],
+  "aiLog": [
+   {
+    "task": "T1 · 主题归类",
+    "ok": true,
+    "latencyMs": 2380,
+    "usage": {
+     "prompt_tokens": 802,
+     "completion_tokens": 507,
+     "total_tokens": 1309,
+     "prompt_tokens_details": {
+      "cached_tokens": 128
+     },
+     "completion_tokens_details": {
+      "reasoning_tokens": 0
+     },
+     "prompt_cache_hit_tokens": 128,
+     "prompt_cache_miss_tokens": 674
+    },
+    "issues": [
+     {
+      "level": "pass",
+      "msg": "覆盖率 100.0%, 映射 30 条, 超出清单 0 条。"
+     }
+    ]
+   },
+   {
+    "task": "T2 · 核心判断起草",
+    "ok": false,
+    "latencyMs": 11552,
+    "usage": {
+     "prompt_tokens": 800,
+     "completion_tokens": 1721,
+     "total_tokens": 2521,
+     "prompt_tokens_details": {
+      "cached_tokens": 256
+     },
+     "completion_tokens_details": {
+      "reasoning_tokens": 768
+     },
+     "prompt_cache_hit_tokens": 256,
+     "prompt_cache_miss_tokens": 544
+    },
+    "issues": [
+     {
+      "level": "fail",
+      "msg": "大模型返回的不是合法 JSON: Expected ',' or '}' after property value in JSON at position 349 (line 1 column 350)"
+     }
+    ]
+   },
+   {
+    "task": "T3 · 对外用词清洗",
+    "ok": true,
+    "latencyMs": 35706,
+    "usage": {
+     "prompt_tokens": 9907,
+     "completion_tokens": 10582,
+     "total_tokens": 20489,
+     "prompt_tokens_details": {
+      "cached_tokens": 128
+     },
+     "completion_tokens_details": {
+      "reasoning_tokens": 972
+     },
+     "prompt_cache_hit_tokens": 128,
+     "prompt_cache_miss_tokens": 9779
+    },
+    "issues": [
+     {
+      "level": "pass",
+      "msg": "数字守恒校验通过: 1124 个数字逐一比对, 清洗未改动任何数字。"
+     },
+     {
+      "level": "info",
+      "msg": "原文 14844 字符 → 清洗后 14844 字符, 替换 1 处。"
+     }
+    ]
+   },
+   {
+    "task": "T5 · 深度复盘报告成文(agent 主笔)",
+    "ok": false,
+    "latencyMs": 127285,
+    "usage": {
+     "prompt_tokens": 63152,
+     "completion_tokens": 27386,
+     "total_tokens": 90538,
+     "prompt_tokens_details": {
+      "cached_tokens": 768
+     },
+     "completion_tokens_details": {
+      "reasoning_tokens": 16660
+     },
+     "prompt_cache_hit_tokens": 768,
+     "prompt_cache_miss_tokens": 62384
+    },
+    "issues": [
+     {
+      "level": "pass",
+      "msg": "固定骨架 10 节齐全。"
+     },
+     {
+      "level": "fail",
+      "msg": "数字回查: 31 个数字未能在证据包中找到出处(超过 8 个, 判为疑似编造, 退回重写): 11.42、12.20、0.342、0.920、0.956、0.159、0.909、0.925、0.007、1.097、27.10、68.4"
+     },
+     {
+      "level": "info",
+      "msg": "正文 16205 字; 表格 112 行"
+     }
+    ]
+   },
+   {
+    "task": "T6 演示稿",
+    "ok": true,
+    "note": "8 页 / 9 次调用",
+    "issues": [
+     {
+      "level": "warn",
+      "msg": "第 4 页没有 .h2c 主张式标题"
+     },
+     {
+      "level": "warn",
+      "msg": "第 5 页没有 .h2c 主张式标题"
+     },
+     {
+      "level": "warn",
+      "msg": "第 6 页没有 .h2c 主张式标题"
+     },
+     {
+      "level": "warn",
+      "msg": "第 7 页没有 .h2c 主张式标题"
+     },
+     {
+      "level": "warn",
+      "msg": "以下数字未在证据包白名单中(可能被改写或臆造): 23.38%, 0.57pp, -0.52pp, 0.52pp, 0.50pp, 0.28pp"
+     }
+    ]
+   }
+  ],
+  "aiRequired": true,
+  "reportCleanGenerated": true,
+  "deepReportGenerated": false,
+  "deckT6": {
+   "ok": true,
+   "pages": 8,
+   "theme": "corporate-clean",
+   "calls": 9,
+   "slides": [
+    {
+     "kicker": "基金经理回溯复盘 · Fund Manager Review",
+     "title": "沪深300ETF华泰柏瑞(510300):名义上是一只指数基金,39 个报告期里前十张面孔却换了四轮主题",
+     "layout": "cover",
+     "section": "产品类型：ETF（被动跟踪指数）"
+    },
+    {
+     "kicker": "01 · 一页看全",
+     "title": "与其问它为什么换手这么低,不如问:一只被动产品本来就不该有换手",
+     "layout": "two-column",
+     "section": "一、先说结论"
+    },
+    {
+     "kicker": "02 · 成绩与代价",
+     "title": "31.67% 的区间收益里,85.57% 压在一个季度上",
+     "layout": "kpi-grid",
+     "section": "三、总成绩也看清代价"
+    },
+    {
+     "kicker": "03 · 持仓结构演变",
+     "title": "四次主题换挡,换掉的是指数成分,不是基金经理的判断",
+     "layout": "timeline",
+     "section": "五、持仓轮动主线"
+    },
+    {
+     "kicker": "04 · 方法论拆解",
+     "title": "标签写着低换手长期持有,产品类型却写着被动跟踪指数——名与实从一开始就没对上",
+     "layout": "mindmap",
+     "section": "六、方法论拆解"
+    },
+    {
+     "kicker": "05 · 关键调仓案例",
+     "title": "拿住 39 期的茅台和腰斩的隆基,是同一套机制的两面",
+     "layout": "comparison",
+     "section": "七、关键调仓案例审计"
+    },
+    {
+     "kicker": "06 · 最新一期结构",
+     "title": "2026Q3:光模块两只被减,茅台、银行与长江电力回补",
+     "layout": "diff",
+     "section": "八、最新一期结构与变化"
+    },
+    {
+     "kicker": "07 · 结论与跟踪",
+     "title": "下一期只看五行,就能判定这份复盘站不站得住",
+     "layout": "todo-checklist",
+     "section": "九、跟踪清单与证伪方式"
+    }
+   ],
+   "check": {
+    "ok": true,
+    "issues": [
+     {
+      "level": "warn",
+      "msg": "第 4 页没有 .h2c 主张式标题"
+     },
+     {
+      "level": "warn",
+      "msg": "第 5 页没有 .h2c 主张式标题"
+     },
+     {
+      "level": "warn",
+      "msg": "第 6 页没有 .h2c 主张式标题"
+     },
+     {
+      "level": "warn",
+      "msg": "第 7 页没有 .h2c 主张式标题"
+     },
+     {
+      "level": "warn",
+      "msg": "以下数字未在证据包白名单中(可能被改写或臆造): 23.38%, 0.57pp, -0.52pp, 0.52pp, 0.50pp, 0.28pp"
+     }
+    ],
+    "fails": 0,
+    "warns": 5,
+    "distinctPrints": 7,
+    "kinds": [
+     0,
+     3,
+     3,
+     2,
+     3,
+     2,
+     4,
+     3
+    ],
+    "metrics": {
+     "pages": 8,
+     "textChars": 5962,
+     "avgChars": 745,
+     "cards": 18,
+     "cardMax": 5,
+     "stats": 6,
+     "statMax": 4,
+     "bolds": 49,
+     "boldMax": 9,
+     "tables": 3,
+     "tableRows": 24,
+     "badTables": 0,
+     "longProsePages": 6,
+     "plainPages": [],
+     "noNotes": [],
+     "longNotes": [],
+     "noSecNote": [],
+     "distinctRecipes": 7
+    }
+   },
+   "error": null
+  },
+  "deepEvidence": {
+   "nav": 31.67,
+   "exBestQuarter": 4.57,
+   "maxDrawdown": -45.33,
+   "annualRows": 3,
+   "quarterlyRows": 22,
+   "talkPairs": 32,
+   "phases": 6,
+   "allowedNumbers": 2409,
+   "chainedGapPp": -24.47
+  },
+  "files": {
+   "dataset": {
+    "path": "_runs/510300/底稿_沪深300ETF华泰柏瑞_510300.json",
+    "rel": "_runs/510300/底稿_沪深300ETF华泰柏瑞_510300.json",
+    "bytes": 278316
+   },
+   "report": {
+    "path": "_runs/510300/复盘报告_沪深300ETF华泰柏瑞_510300.md",
+    "rel": "_runs/510300/复盘报告_沪深300ETF华泰柏瑞_510300.md",
+    "bytes": 33962
+   },
+   "check": {
+    "path": "_runs/510300/错误检查记录_沪深300ETF华泰柏瑞_510300.md",
+    "rel": "_runs/510300/错误检查记录_沪深300ETF华泰柏瑞_510300.md",
+    "bytes": 9734
+   },
+   "card": {
+    "path": "_runs/510300/结论卡_沪深300ETF华泰柏瑞_510300.json",
+    "rel": "_runs/510300/结论卡_沪深300ETF华泰柏瑞_510300.json",
+    "bytes": 11246
+   },
+   "deck": {
+    "path": "_runs/510300/演示稿_沪深300ETF华泰柏瑞_510300.html",
+    "rel": "_runs/510300/演示稿_沪深300ETF华泰柏瑞_510300.html",
+    "bytes": 56268
+   },
+   "sources": {
+    "path": "_runs/510300/来源清单_沪深300ETF华泰柏瑞_510300.md",
+    "rel": "_runs/510300/来源清单_沪深300ETF华泰柏瑞_510300.md",
+    "bytes": 80604
+   },
+   "reportClean": {
+    "path": "_runs/510300/复盘报告_沪深300ETF华泰柏瑞_510300_对外版.md",
+    "rel": "_runs/510300/复盘报告_沪深300ETF华泰柏瑞_510300_对外版.md",
+    "bytes": 31810
+   },
+   "deckT6": {
+    "path": "_runs/510300/演示稿_沪深300ETF华泰柏瑞_510300_深度版.html",
+    "rel": "_runs/510300/演示稿_沪深300ETF华泰柏瑞_510300_深度版.html",
+    "bytes": 131418
+   }
+  },
+  "pdf": {
+   "path": "_runs/510300/演示稿_沪深300ETF华泰柏瑞_510300_深度版.pdf",
+   "rel": "_runs/510300/演示稿_沪深300ETF华泰柏瑞_510300_深度版.pdf",
+   "bytes": 2011144
+  },
+  "steps": [
+   {
+    "name": "数据采集",
+    "detail": "按六类公开来源抓取(含全量官方报告原文)",
+    "at": "2026-11-01T05:00:44.376Z"
+   },
+   {
+    "name": "官方窗口校准",
+    "detail": "22 期可比, 最大偏差 2.44pp ⚠ 需人工复核",
+    "at": "2026-11-01T05:01:03.566Z"
+   },
+   {
+    "name": "采集完成",
+    "detail": "39 期 · 净值 3521 点 · 来源 39 类 · 19.2s",
+    "at": "2026-11-01T05:01:03.566Z"
+   },
+   {
+    "name": "规则引擎",
+    "detail": "指标 / 形态 / 结论卡 / 报告 / 质检",
+    "at": "2026-11-01T05:01:03.566Z"
+   },
+   {
+    "name": "AI 模块",
+    "detail": "T1 主题归类 / T2 判断起草 / T3 用词清洗(用户自带 API Key)",
+    "at": "2026-11-01T05:01:03.580Z"
+   },
+   {
+    "name": "T1 主题归类",
+    "detail": "已应用 39 期主题, 形态库的主题类规则现在可以参与判定",
+    "at": "2026-11-01T05:01:05.963Z"
+   },
+   {
+    "name": "T2 判断起草",
+    "detail": "输出未通过校验, 已拦截, 沿用规则引擎的结论卡",
+    "at": "2026-11-01T05:01:17.537Z"
+   },
+   {
+    "name": "持仓拟合",
+    "detail": "取周线行情，按季报前十权重拟合\"经理不动\"的理论净值",
+    "at": "2026-11-01T05:01:17.537Z"
+   },
+   {
+    "name": "持仓拟合",
+    "detail": "抓净值序列",
+    "at": "2026-11-01T05:01:17.537Z"
+   },
+   {
+    "name": "持仓拟合",
+    "detail": "抓沪深300周线（当周网格与市场代理）",
+    "at": "2026-11-01T05:01:17.749Z"
+   },
+   {
+    "name": "持仓拟合",
+    "detail": "调用失败：HTTP 501",
+    "at": "2026-11-01T05:01:17.865Z"
+   },
+   {
+    "name": "T3 用词清洗",
+    "detail": "输出通过校验(数字守恒 / 无违禁词 / 未删减), 已生成对外版报告",
+    "at": "2026-11-01T05:01:53.578Z"
+   },
+   {
+    "name": "生成交付物",
+    "detail": "报告 / 结论卡 / 演示稿 / 深度复盘报告",
+    "at": "2026-11-01T05:01:53.578Z"
+   },
+   {
+    "name": "深度复盘报告",
+    "detail": "整理证据包(官方逐季绩效/基准·规模申赎·轮动·经理原话×下期动作·成败案例)",
+    "at": "2026-11-01T05:01:53.581Z"
+   },
+   {
+    "name": "深度复盘报告",
+    "detail": "未通过校验, 已拦截 —— 详见\"错误检查记录\"里的 T5 明细",
+    "at": "2026-11-01T05:04:00.878Z"
+   },
+   {
+    "name": "T6 演示稿",
+    "detail": "按 html-ppt 技能编排: 分镜 → 逐页成文 → 内联单文件",
+    "at": "2026-11-01T05:04:00.879Z"
+   },
+   {
+    "name": "T6 演示稿",
+    "detail": "8 页 · 主题 corporate-clean · 116 KB · 校验通过(警告 5)",
+    "at": "2026-11-01T05:06:47.695Z"
+   },
+   {
+    "name": "导出 PDF",
+    "detail": "演示稿_沪深300ETF华泰柏瑞_510300_深度版.pdf",
+    "at": "2026-11-01T05:06:49.870Z"
+   }
+  ],
+  "totalMs": 365494
+ },
+ "files": {
+  "dataset": "_runs/510300/底稿_沪深300ETF华泰柏瑞_510300.json",
+  "report": "_runs/510300/复盘报告_沪深300ETF华泰柏瑞_510300.md",
+  "check": "_runs/510300/错误检查记录_沪深300ETF华泰柏瑞_510300.md",
+  "card": "_runs/510300/结论卡_沪深300ETF华泰柏瑞_510300.json",
+  "deck": "_runs/510300/演示稿_沪深300ETF华泰柏瑞_510300.html",
+  "sources": "_runs/510300/来源清单_沪深300ETF华泰柏瑞_510300.md",
+  "reportClean": "_runs/510300/复盘报告_沪深300ETF华泰柏瑞_510300_对外版.md",
+  "deckT6": "_runs/510300/演示稿_沪深300ETF华泰柏瑞_510300_深度版.html"
+ },
+ "pdf": "_runs/510300/演示稿_沪深300ETF华泰柏瑞_510300_深度版.pdf",
+ "at": "2026-11-01T05:06:49.876Z"
+}

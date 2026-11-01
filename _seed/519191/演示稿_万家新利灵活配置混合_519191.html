@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="corporate-clean"><head><meta charset="utf-8">
+<title>万家新利灵活配置混合(519191) 持仓回溯复盘 · 演示稿</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+[data-theme="corporate-clean"]{--slide-bg:#ffffff;
+      --bg:#ffffff;--bg-soft:#f5f7fa;--surface:#ffffff;--surface-2:#f0f3f7;
+      --border:rgba(10,37,64,.12);--border-strong:rgba(10,37,64,.28);
+      --text-1:#0a2540;--text-2:#425466;--text-3:#8898aa;
+      --accent:#0a2540;--accent-2:#1d4ed8;--accent-3:#64748b;
+      --good:#0e9f6e;--warn:#d97706;--bad:#dc2626;
+      --grad:linear-gradient(135deg,#0a2540,#1d4ed8);
+      --grad-soft:linear-gradient(135deg,#f0f4fb,#e4ecf7);
+      --radius:6px;--radius-sm:4px;--radius-lg:10px;
+      --shadow:0 1px 3px rgba(10,37,64,.08),0 4px 12px rgba(10,37,64,.05);
+      --shadow-lg:0 4px 12px rgba(10,37,64,.1),0 16px 40px rgba(10,37,64,.08);
+      --font-sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;--font-display:"Microsoft YaHei","Segoe UI","PingFang SC",sans-serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+.card{border:1px solid var(--border)}
+      h2{border-bottom-color:var(--accent-2)}}
+[data-theme="minimal-white"]{--slide-bg:#ffffff;
+      --bg:#ffffff;--bg-soft:#fafafa;--surface:#ffffff;--surface-2:#f5f5f6;
+      --border:rgba(17,18,22,.08);--border-strong:rgba(17,18,22,.16);
+      --text-1:#0c0d10;--text-2:#55596a;--text-3:#9ca1b0;
+      --accent:#111216;--accent-2:#3b3f4a;--accent-3:#6b6f7a;
+      --good:#1aaf6c;--warn:#c98500;--bad:#c13a3a;
+      --grad:linear-gradient(135deg,#111216,#3b3f4a);
+      --grad-soft:linear-gradient(135deg,#f5f5f6,#ffffff);
+      --radius:14px;--radius-sm:8px;--radius-lg:22px;
+      --shadow:0 1px 2px rgba(17,18,22,.04),0 8px 24px rgba(17,18,22,.06);
+      --shadow-lg:0 20px 60px rgba(17,18,22,.1);
+      --font-sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;--font-display:"Microsoft YaHei","Segoe UI","PingFang SC",sans-serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+      --letter-tight:-.035em;
+.card{background:var(--surface);border:1px solid var(--border)}
+      h2{border-bottom-width:1px;border-bottom-color:var(--border-strong)}}
+[data-theme="swiss-grid"]{--slide-bg:#ffffff;
+      --bg:#ffffff;--bg-soft:#f4f4f4;--surface:#ffffff;--surface-2:#f4f4f4;
+      --border:#111111;--border-strong:#111111;
+      --text-1:#111111;--text-2:#444444;--text-3:#888888;
+      --accent:#d6001c;--accent-2:#111111;--accent-3:#888888;
+      --good:#0f8a2f;--warn:#d38a00;--bad:#d6001c;
+      --grad:linear-gradient(135deg,#d6001c,#111111);
+      --grad-soft:linear-gradient(135deg,#f4f4f4,#ffffff);
+      --radius:0px;--radius-sm:0px;--radius-lg:0px;
+      --shadow:none;--shadow-lg:none;
+      --font-sans:"Microsoft YaHei","PingFang SC",sans-serif;--font-display:"Microsoft YaHei","PingFang SC",sans-serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+      --letter-tight:-.04em;
+.card{border:none;border-top:2px solid var(--text-1);border-bottom:1px solid var(--text-1);background:var(--surface)}
+      .slide{background-image:linear-gradient(90deg,rgba(0,0,0,.045) 1px,transparent 1px);background-size:calc(100%/12) 100%}
+      .slide>*{position:relative;z-index:2}
+      h2{border-bottom:3px solid var(--accent)}}
+[data-theme="editorial-serif"]{--slide-bg:#faf7f2;
+      --bg:#faf7f2;--bg-soft:#f3efe6;--surface:#ffffff;--surface-2:#f7f2e8;
+      --border:rgba(40,28,18,.12);--border-strong:rgba(40,28,18,.24);
+      --text-1:#1b1410;--text-2:#5c4a3e;--text-3:#8a7868;
+      --accent:#8a2a1c;--accent-2:#c97a4a;--accent-3:#1b1410;
+      --good:#3f7d4f;--warn:#b07a1f;--bad:#8a2a1c;
+      --grad:linear-gradient(135deg,#8a2a1c,#c97a4a);
+      --grad-soft:linear-gradient(135deg,#faf7f2,#f3efe6);
+      --radius:4px;--radius-sm:2px;--radius-lg:8px;
+      --shadow:0 2px 12px rgba(40,28,18,.06);
+      --shadow-lg:0 20px 50px rgba(40,28,18,.14);
+      --font-sans:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;--font-display:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+      --letter-tight:-.02em;
+body{font-family:var(--font-serif)}
+      h1,h2{font-style:italic;font-weight:600}
+      h2{border-bottom:2px solid var(--accent-2)}}
+[data-theme="academic-paper"]{--slide-bg:#fdfcf8;
+      --bg:#fdfcf8;--bg-soft:#f7f5ed;--surface:#ffffff;--surface-2:#f5f3ea;
+      --border:rgba(20,20,20,.14);--border-strong:rgba(20,20,20,.35);
+      --text-1:#0a0a0a;--text-2:#333333;--text-3:#707070;
+      --accent:#1a3a7a;--accent-2:#0a0a0a;--accent-3:#8a1a1a;
+      --good:#1a5a2a;--warn:#8a6a1a;--bad:#8a1a1a;
+      --grad:linear-gradient(135deg,#1a3a7a,#0a0a0a);
+      --grad-soft:linear-gradient(135deg,#e8edf8,#f5f3ea);
+      --radius:0px;--radius-sm:0px;--radius-lg:0px;
+      --shadow:none;--shadow-lg:0 1px 2px rgba(0,0,0,.1);
+      --font-sans:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;--font-display:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+body{font-family:var(--font-serif)}
+      h1,h2{font-family:var(--font-serif);font-weight:700}
+      .card{border:1px solid var(--border);box-shadow:none}
+      h2{border-bottom:2px solid var(--text-1)}
+      .kicker{font-style:italic;letter-spacing:.02em}}
+[data-theme="sharp-mono"]{--slide-bg:#ffffff;
+      --bg:#ffffff;--bg-soft:#ffffff;--surface:#ffffff;--surface-2:#000000;
+      --border:#000000;--border-strong:#000000;
+      --text-1:#000000;--text-2:#1a1a1a;--text-3:#4a4a4a;
+      --accent:#000000;--accent-2:#000000;--accent-3:#ff2200;
+      --good:#008800;--warn:#ff9900;--bad:#ff0000;
+      --grad:linear-gradient(135deg,#000000,#222222);
+      --grad-soft:linear-gradient(135deg,#ffffff,#eeeeee);
+      --radius:0;--radius-sm:0;--radius-lg:0;
+      --shadow:4px 4px 0 #000000;--shadow-lg:8px 8px 0 #000000;
+      --font-sans:"Microsoft YaHei","PingFang SC",sans-serif;--font-display:"Microsoft YaHei","PingFang SC",sans-serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+      --letter-tight:-.04em;
+h1,h2{text-transform:uppercase;letter-spacing:var(--letter-tight)}
+      .card{border:2px solid #000;box-shadow:var(--shadow)}
+      h2{border-bottom:3px solid #000}}
+[data-theme="magazine-bold"]{--slide-bg:#f5efe2;
+      --bg:#f5efe2;--bg-soft:#ebe4d2;--surface:#fbf6e8;--surface-2:#ede5d0;
+      --border:rgba(10,10,10,.16);--border-strong:#0a0a0a;
+      --text-1:#0a0a0a;--text-2:#2a2a2a;--text-3:#6a6458;
+      --accent:#ea5a1a;--accent-2:#0a0a0a;--accent-3:#c42a10;
+      --good:#2a6a2a;--warn:#ea5a1a;--bad:#c42a10;
+      --grad:linear-gradient(135deg,#ea5a1a,#c42a10);
+      --grad-soft:linear-gradient(135deg,#fbe4d0,#f5d6c0);
+      --radius:0px;--radius-sm:0px;--radius-lg:2px;
+      --shadow:none;--shadow-lg:6px 6px 0 var(--accent);
+      --font-sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;--font-display:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+h1,h2{font-family:var(--font-serif);font-weight:900;letter-spacing:-.03em}
+      h2{border-bottom:6px solid var(--accent)}
+      .card{border:1.5px solid var(--text-1)}
+      .kicker{text-transform:uppercase;letter-spacing:.22em;font-weight:700}}
+[data-theme="japanese-minimal"]{--slide-bg:#fafaf5;
+      --bg:#fafaf5;--bg-soft:#f2f0e6;--surface:#ffffff;--surface-2:#f5f3ea;
+      --border:rgba(40,30,20,.1);--border-strong:rgba(40,30,20,.3);
+      --text-1:#1a1a18;--text-2:#5c564c;--text-3:#9c958a;
+      --accent:#d93a2a;--accent-2:#1a1a18;--accent-3:#c9a961;
+      --good:#4a6b3e;--warn:#c9a961;--bad:#d93a2a;
+      --grad:linear-gradient(135deg,#d93a2a,#1a1a18);
+      --grad-soft:linear-gradient(135deg,#faeae6,#f5f3ea);
+      --radius:0px;--radius-sm:0px;--radius-lg:2px;
+      --shadow:none;--shadow-lg:0 1px 0 rgba(40,30,20,.12);
+      --font-sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;--font-display:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+h2{border-bottom:2px solid var(--accent);font-weight:500;letter-spacing:.04em}
+      .card{border:1px solid var(--border);box-shadow:none;padding:20px 22px}
+      .kicker{letter-spacing:.2em}}
+[data-theme="neo-brutalism"]{--slide-bg:#fffef0;
+      --bg:#fffef0;--bg-soft:#fffbd0;--surface:#ffffff;--surface-2:#fff38a;
+      --border:#000000;--border-strong:#000000;
+      --text-1:#000000;--text-2:#222222;--text-3:#555555;
+      --accent:#ffd400;--accent-2:#ff5ca8;--accent-3:#3a7cff;
+      --good:#00b36b;--warn:#ff9900;--bad:#ff3a30;
+      --grad:linear-gradient(135deg,#ffd400,#ff5ca8);
+      --grad-soft:linear-gradient(135deg,#fffbd0,#ffffff);
+      --radius:6px;--radius-sm:4px;--radius-lg:10px;
+      --shadow:6px 6px 0 #000000;--shadow-lg:10px 10px 0 #000000;
+      --font-sans:"Microsoft YaHei","PingFang SC",sans-serif;--font-display:"Microsoft YaHei","PingFang SC",sans-serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+      --letter-tight:-.03em;
+h2{border-bottom:4px solid #000;background:var(--accent);color:#000;padding:6px 12px;border:3px solid #000}
+      .card{border:3px solid #000;box-shadow:var(--shadow)}
+      .tag{border:2px solid #000;background:var(--accent);color:#000;font-weight:700}
+      th{background:var(--accent);color:#000}}
+[data-theme="pitch-deck-vc"]{--slide-bg:#ffffff;
+      --bg:#ffffff;--bg-soft:#fafbfc;--surface:#ffffff;--surface-2:#f5f7fa;
+      --border:rgba(20,30,50,.1);--border-strong:rgba(20,30,50,.22);
+      --text-1:#0b0d12;--text-2:#4a5270;--text-3:#8b93a8;
+      --accent:#0070f3;--accent-2:#7928ca;--accent-3:#ff4ecb;
+      --good:#0cce6b;--warn:#f5a524;--bad:#ee0000;
+      --grad:linear-gradient(135deg,#0070f3,#7928ca);
+      --grad-soft:linear-gradient(135deg,#e8f0ff,#f3e8ff);
+      --radius:14px;--radius-sm:8px;--radius-lg:22px;
+      --shadow:0 2px 8px rgba(20,30,50,.06),0 12px 32px rgba(20,30,50,.06);
+      --shadow-lg:0 8px 24px rgba(20,30,50,.1),0 30px 80px rgba(20,30,50,.1);
+      --font-sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;--font-display:"Microsoft YaHei","Segoe UI","PingFang SC",sans-serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+h1,h2{font-weight:800;letter-spacing:-.03em}
+      h2{border-bottom:4px solid var(--accent);border-image:var(--grad) 1}
+      .card{box-shadow:var(--shadow);border:1px solid var(--border)}
+      .kicker{color:var(--accent-2);font-weight:800}}
+[data-theme="news-broadcast"]{--slide-bg:#ffffff;
+      --bg:#ffffff;--bg-soft:#f4f4f4;--surface:#ffffff;--surface-2:#ececec;
+      --border:rgba(0,0,0,.14);--border-strong:#0a0a0a;
+      --text-1:#0a0a0a;--text-2:#3a3a3a;--text-3:#7a7a7a;
+      --accent:#e11d2d;--accent-2:#0a0a0a;--accent-3:#ffd100;
+      --good:#0e7c3a;--warn:#ffd100;--bad:#e11d2d;
+      --grad:linear-gradient(90deg,#e11d2d,#e11d2d);
+      --grad-soft:linear-gradient(135deg,#fde5e7,#f4f4f4);
+      --radius:0px;--radius-sm:0px;--radius-lg:2px;
+      --shadow:none;--shadow-lg:0 4px 0 var(--accent);
+      --font-sans:"Microsoft YaHei","PingFang SC",sans-serif;--font-display:"Microsoft YaHei","PingFang SC",sans-serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+h1,h2{text-transform:uppercase;letter-spacing:-.01em;font-weight:700}
+      h2{border-bottom:6px solid var(--accent)}
+      .card{border:2px solid var(--text-1);box-shadow:6px 6px 0 var(--accent)}
+      .kicker{background:var(--accent);color:#fff;padding:4px 12px;display:inline-block;letter-spacing:.15em}
+      .slide::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--accent);z-index:3}}
+[data-theme="xiaohongshu-white"]{--slide-bg:#fffdfb;
+      --bg:#fffdfb;--bg-soft:#fff6f1;--surface:#ffffff;--surface-2:#fff1ea;
+      --border:rgba(60,30,20,.1);--border-strong:rgba(60,30,20,.22);
+      --text-1:#1a1210;--text-2:#4f3a32;--text-3:#a08d85;
+      --accent:#ff2742;--accent-2:#ff7a90;--accent-3:#ffb38a;
+      --good:#3ba55c;--warn:#f5a524;--bad:#ff2742;
+      --grad:linear-gradient(135deg,#ff2742,#ff7a90 55%,#ffb38a);
+      --grad-soft:linear-gradient(135deg,#fff6f1,#ffeae0);
+      --radius:20px;--radius-sm:14px;--radius-lg:28px;
+      --shadow:0 12px 30px rgba(255,39,66,.08);
+      --shadow-lg:0 24px 60px rgba(255,39,66,.14);
+      --font-sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;--font-display:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;--font-serif:Georgia,"Times New Roman","Songti SC",SimSun,"Noto Serif SC",serif;
+      --letter-tight:-.02em;
+h2{border-bottom:none;border-left:6px solid var(--accent);padding-left:14px;border-radius:0}
+      .card{box-shadow:var(--shadow);border:1px solid var(--border)}
+      .kicker{color:var(--accent)}}
+
+/* === VIEW-CSS-BELOW: 以下为视图样式, 不许出现写死的颜色 === */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg-soft);font-family:var(--font-sans);color:var(--text-1);-webkit-font-smoothing:antialiased}
+.slide{position:relative;width:1280px;height:720px;background:var(--slide-bg,var(--surface));margin:26px auto;padding:40px 54px;
+  overflow:hidden;box-shadow:var(--shadow-lg);border-radius:var(--radius-lg);display:flex;flex-direction:column}
+/* 分页用"第二张起在前面分页", 不用"每张后面分页" ——
+   后者会在最后一张之后多出一个分页点, 打印时凭空多一页空白(实测踩过)。 */
+.slide + .slide{page-break-before:always;break-before:page}
+.slide::after{content:attr(data-page);position:absolute;right:30px;bottom:18px;font-size:13px;color:var(--text-3);font-family:Consolas,ui-monospace,monospace}
+
+.kicker{font-size:13px;letter-spacing:.28em;color:var(--accent-2);font-weight:700;margin-bottom:10px;text-transform:uppercase}
+h1{font-size:52px;line-height:1.18;color:var(--text-1);font-family:var(--font-display);letter-spacing:var(--letter-tight,normal)}
+h2{font-size:31px;line-height:1.32;color:var(--text-1);font-family:var(--font-display);letter-spacing:var(--letter-tight,normal);margin-bottom:16px}
+h3{font-size:15px;color:var(--text-2);margin-bottom:9px;font-weight:600}
+h4{font-size:14px;color:var(--text-2);margin-bottom:8px}
+p{font-size:15px;line-height:1.78;color:var(--text-2)}
+.lede{font-size:17px;line-height:1.75;color:var(--text-2);max-width:74ch}
+.rule{height:4px;width:96px;background:var(--grad);border-radius:2px;margin:18px 0 10px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.pill{border:1px solid var(--border);border-radius:999px;padding:6px 15px;font-size:13px;color:var(--text-2);background:var(--bg-soft)}
+.pill.accent{border-color:var(--accent);color:var(--accent);font-weight:700}
+.sec-note{font-size:12.5px;color:var(--text-3);line-height:1.7;margin-top:auto;padding-top:12px;border-top:1px solid var(--border)}
+.kb{display:inline-block;border:1px solid var(--border);border-radius:4px;padding:0 5px;font-family:Consolas,monospace;font-size:11px}
+
+/* 数据卡 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:6px 0 14px}
+.stats.c5{grid-template-columns:repeat(5,1fr)}
+.stat{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;background:var(--surface);box-shadow:var(--shadow)}
+.stat .lab{font-size:12px;color:var(--text-3);margin-bottom:5px}
+.stat .val{font-size:26px;font-weight:700;color:var(--text-1);font-family:Consolas,ui-monospace,monospace;line-height:1.15;letter-spacing:-.5px}
+.stat .sub{font-size:11.5px;color:var(--text-3);margin-top:4px;line-height:1.5}
+.up{color:var(--good);font-weight:700}.dn{color:var(--bad);font-weight:700}
+.big-num{font-size:19px;font-weight:700;font-family:Consolas,ui-monospace,monospace;color:var(--accent)}
+
+/* 两栏 */
+.cols{display:flex;gap:22px;flex:1;min-height:0}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;gap:11px}
+.card{border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;background:var(--surface);box-shadow:var(--shadow)}
+.card.ok{border-color:var(--good)}
+.card.bad{border-color:var(--bad)}
+.card.warn{border-color:var(--warn)}
+.card h4{font-size:13px;letter-spacing:.02em}
+ul{margin:0;padding-left:18px}
+li{font-size:14px;line-height:1.72;color:var(--text-2);margin-bottom:4px}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+th{background:var(--bg-soft);color:var(--text-2);font-weight:600;font-size:12px;white-space:nowrap}
+td.num{font-family:Consolas,ui-monospace,monospace;text-align:right;white-space:nowrap}
+
+/* 柱状图: 带纵坐标轴 + 悬停显示数值 */
+.chart{border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px 10px;background:var(--surface);box-shadow:var(--shadow)}
+.chart-h{font-size:12.5px;color:var(--text-3);margin-bottom:10px;display:flex;justify-content:space-between}
+.chart-plot{display:flex;gap:8px;height:186px}
+.yaxis{width:52px;flex:none;display:flex;flex-direction:column;justify-content:space-between;text-align:right;
+  font-family:Consolas,ui-monospace,monospace;font-size:10.5px;color:var(--text-3);padding-bottom:18px}
+.plot{flex:1;position:relative;display:flex;align-items:flex-end;gap:3px;border-left:1px solid var(--border);border-bottom:1px solid var(--border);padding:0 2px}
+.grid{position:absolute;left:0;right:0;border-top:1px dashed var(--border);opacity:.7}
+.bar{flex:1;position:relative;background:var(--grad);border-radius:2px 2px 0 0;min-height:2px;transition:none;cursor:default}
+.bar.neg{background:var(--bad)}
+.bar:hover{outline:2px solid var(--accent);outline-offset:1px}
+.bar .bv{position:absolute;left:50%;transform:translateX(-50%);bottom:100%;margin-bottom:3px;white-space:nowrap;
+  background:var(--accent);color:var(--slide-bg,#fff);font-size:10.5px;padding:2px 6px;border-radius:4px;opacity:0;pointer-events:none;font-family:Consolas,monospace}
+.bar:hover .bv{opacity:1}
+.xaxis{display:flex;gap:3px;padding-left:60px;padding-top:5px}
+.xaxis span{flex:1;text-align:center;font-size:9.5px;color:var(--text-3);font-family:Consolas,ui-monospace,monospace}
+
+/* 主题阶段链 */
+.chain{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.chip{background:var(--grad-soft);color:var(--text-1);border:1px solid var(--border);border-radius:999px;padding:5px 14px;font-size:14px;font-weight:600}
+.chip i{font-style:normal;opacity:.65;font-size:12px;margin-left:5px}
+.arrow{color:var(--text-3)}
+
+/* 导航 */
+.nav{position:fixed;right:20px;bottom:20px;z-index:9;display:flex;gap:8px;align-items:center;background:var(--accent);color:var(--slide-bg,#fff);
+  padding:8px 14px;border-radius:24px;font-size:13px;font-family:Consolas,ui-monospace,monospace;box-shadow:var(--shadow-lg)}
+.nav button{background:rgba(255,255,255,.22);border:0;color:inherit;height:28px;min-width:28px;border-radius:14px;cursor:pointer;font-size:13px;font-family:inherit;padding:0 8px}
+.nav button:hover{background:rgba(255,255,255,.4)}
+.themes{position:fixed;right:20px;bottom:74px;z-index:10;font-family:var(--font-sans)}
+.th-toggle{background:var(--accent);color:var(--slide-bg,#fff);border:0;border-radius:24px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:var(--shadow-lg)}
+.th-panel{display:none;position:absolute;right:0;bottom:46px;width:330px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:14px}
+.th-panel.open{display:block}
+.th-panel h4{font-size:13px;color:var(--text-2);margin:0 0 10px}
+.th-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.th-btn{border:1px solid var(--border);background:var(--bg-soft);color:var(--text-1);border-radius:var(--radius-sm);padding:8px 10px;font-size:12.5px;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:7px}
+.th-btn:hover{border-color:var(--accent)}
+.th-btn.active{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);font-weight:700}
+.th-dot{width:12px;height:12px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.15)}
+
+/* 概览模式: 把全部幻灯片缩成网格 */
+body.overview{background:var(--bg-soft)}
+body.overview .slide{transform:scale(.24);transform-origin:top left;margin:0}
+body.overview .ov-wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px}
+body.overview .ov-cell{position:relative;width:calc(1280px * .24);height:calc(720px * .24);cursor:pointer;border:1px solid var(--border);overflow:hidden;background:var(--slide-bg,#fff)}
+.ov-wrap{display:none}
+body.overview .nav,body.overview .themes{opacity:.35}
+
+@media print{
+  html,body{background:#fff}
+  .nav,.themes,.ov-wrap{display:none!important}
+  .slide{margin:0;box-shadow:none;border-radius:0;break-inside:avoid;page-break-inside:avoid}
+  .bar .bv{display:none}
+  @page{size:1280px 720px;margin:0}
+}
+</style></head>
+<body>
+<section class="slide" data-page="1" style="justify-content:center">
+    <p class="kicker">基金经理回溯复盘 · Fund Manager Review</p>
+    <h1>万家新利灵活配置混合 519191<br><span style="color:var(--accent-2)">2020Q4–2026Q3 · 回溯复盘</span></h1>
+    <div class="rule"></div>
+    <p class="lede">黄海 任期内的 24 个报告期: 收益的顺风含量、持仓轮动的真实动作、季报言论与下一期操作是否对得上, 以及规模与容量的边界。</p>
+    <div class="row" style="margin-top:26px">
+      <span class="pill accent">复盘区间 2020Q4–2026Q3 · 24 个报告期</span>
+      <span class="pill">数据截止 2026-09-30(官方最新季报)</span>
+      <span class="pill">形态 个股稳定 + 主题切换型</span>
+      <span class="pill">质检 通过, 有 2 项建议人工确认</span>
+    </div>
+    <p class="sec-note">基于公开季报 / 年报数据的回溯分析(证据分级: 披露事实 / 合理推断 / 事后解读), 不构成投资建议; 过往业绩不代表未来收益。
+      <span style="float:right"><span class="kb">← →</span> 翻页 · <span class="kb">O</span> 概览 · <span class="kb">F</span> 全屏 · <span class="kb">T</span> 换主题</span></p>
+  </section>
+<section class="slide" data-page="2"><p class="kicker">01 · 先说结论</p><h2>个股稳定 + 主题切换型:在2020Q4–2026Q3的24个季报期末快照中, 该基金是“主题坚守”还是“个股稳定下的</h2><div class="cols">
+      <div class="col">
+        <div class="card"><h4>形态标签与判定依据</h4><ul><li>报告期数:24</li><li>前十合计权重_均值:72.77%</li><li>前十合计权重_区间:[58.37%,86.42%]</li></ul></div>
+        <div class="card warn"><h4>推翻条件(可证伪)</h4><p style="font-size:13.5px">出现以下任一情形即可推翻上述归类: (1) 后续季报相邻期留存只数持续显著低于7.48只, 或单季新进≥5只成为常态(即不再是个股稳定); (2) 主导主题序列出现第二次及以上切换, 且切换前后无重合个股贯穿(即不再是个股稳定下的单次切换); (3) 前十合计权重回升并稳定在接近86.42%区间上沿(即不再是集中度下移); (4) 第一大重仓权重长期显著高于9.86%的历史最高值(即转向单一重仓依赖)。</p></div>
+      </div>
+      <div class="col">
+        <div class="card ok"><h4>核心判断(一句话, 可证伪)</h4><p style="font-size:14px">【披露事实】24个报告期的前十大合计权重均值为72.77%, 区间为[58.37%, 86.42%], 最新一期为61.91%; 集中度斜率为-0.45pp/期; 第一大重仓均值9.25%、最高9.86%; 全期出现过的个股47只, 最长连续在榜19期; 主导主题序列为房地产/房地产开发5期、煤炭/煤炭开采19期, 主题切换次数为1。 【合理推断】相邻期平均留存7.48只、平均新进2.52只、平均Jaccard 0.61, 与“个股层面存在较强延续、主题层面发生一次整体迁移(房地产→煤炭)”的形态相容; 第一大重仓均值不足10%, 说明组合并非单一重仓依赖型; 集中度斜率-0.45pp/期, 且最新值61.91%低于均值72.77%, 与“逐步分散”方向一致, 但幅度温和, 未改变前十占七成左右的基本结构。 【事后解读, 仅作回溯复盘口径】区间复利119.36%, 剔除最好一季后降至68.10%, 最大回撤-32.45%; 该差异仅说明区间收益对个别季度贡献较敏感, 属事后统计特征, 不构成任何对未来收益的判断或暗示。</p></div>
+        <div class="stats" style="grid-template-columns:repeat(3,1fr);margin:0">
+          <div class="stat"><div class="lab">区间复利</div><div class="val ">+119.36%</div><div class="sub">分红再投口径</div></div>
+          <div class="stat"><div class="lab">剔除最好一季</div><div class="val ">+68.10%</div><div class="sub">2022Q1</div></div>
+          <div class="stat"><div class="lab">最大回撤</div><div class="val ">-32.45%</div></div>
+        </div>
+      </div>
+    </div><p class="sec-note">证据级别: 公开季报 + 天天基金 F10(已对账) · 结论由规则引擎给出, 观点由大模型起草并逐条回查数字</p></section>
+<section class="slide" data-page="3"><p class="kicker">02 · 绩效总览</p><h2>区间 +119.36%, 但最大单季贡献 42.95% —— 复利能力存疑</h2>
+    <div class="stats c5">
+      <div class="stat"><div class="lab">区间复利收益</div><div class="val ">+119.36%</div><div class="sub">分红再投总回报指数</div></div>
+      <div class="stat"><div class="lab">剔除最好一季</div><div class="val dn">+68.10%</div><div class="sub">2022Q1 单季 +30.49%</div></div>
+      <div class="stat"><div class="lab">最好一季贡献</div><div class="val ">42.95%</div><div class="sub">⚠ 高度集中</div></div>
+      <div class="stat"><div class="lab">最大回撤</div><div class="val ">-32.45%</div></div>
+      <div class="stat"><div class="lab">规模</div><div class="val ">16.72→3.62</div><div class="sub">亿元(峰值→期末)</div></div>
+    </div>
+    <div class="chart"><div class="chart-h"><span>逐季收益(%, 与官方季报&quot;过去三个月&quot;逐期校准, 偏差 ≤0.01pp)</span><span>-18.49% – 34.12%</span></div><div class="chart-plot"><div class="yaxis"><span>34.1%</span><span>21.0%</span><span>7.8%</span><span>-5.3%</span><span>-18.5%</span></div><div class="plot"><div class="grid" style="bottom:25%;left:0;right:0"></div><div class="grid" style="bottom:50%;left:0;right:0"></div><div class="grid" style="bottom:75%;left:0;right:0"></div><div class="grid" style="bottom:100%;left:0;right:0"></div><div class="bar neg" style="height:25.8%" title="2020Q4 -4.93%"><span class="bv">-4.93%</span></div><div class="bar neg" style="height:33.0%" title="2021Q1 -1.12%"><span class="bv">-1.12%</span></div><div class="bar neg" style="height:30.2%" title="2021Q2 -2.59%"><span class="bv">-2.59%</span></div><div class="bar" style="height:54.8%" title="2021Q3 10.33%"><span class="bv">10.33%</span></div><div class="bar neg" style="height:18.2%" title="2021Q4 -8.90%"><span class="bv">-8.90%</span></div><div class="bar" style="height:93.1%" title="2022Q1 30.49%"><span class="bv">30.49%</span></div><div class="bar" style="height:58.9%" title="2022Q2 12.50%"><span class="bv">12.50%</span></div><div class="bar" style="height:54.7%" title="2022Q3 10.30%"><span class="bv">10.30%</span></div><div class="bar neg" style="height:13.7%" title="2022Q4 -11.28%"><span class="bv">-11.28%</span></div><div class="bar" style="height:43.2%" title="2023Q1 4.24%"><span class="bv">4.24%</span></div><div class="bar neg" style="height:25.5%" title="2023Q2 -5.06%"><span class="bv">-5.06%</span></div><div class="bar" style="height:63.6%" title="2023Q3 14.96%"><span class="bv">14.96%</span></div><div class="bar" style="height:46.8%" title="2023Q4 6.12%"><span class="bv">6.12%</span></div><div class="bar" style="height:53.4%" title="2024Q1 9.61%"><span class="bv">9.61%</span></div><div class="bar" style="height:39.4%" title="2024Q2 2.26%"><span class="bv">2.26%</span></div><div class="bar" style="height:44.2%" title="2024Q3 4.74%"><span class="bv">4.74%</span></div><div class="bar neg" style="height:6.9%" title="2024Q4 -14.86%"><span class="bv">-14.86%</span></div><div class="bar neg" style="height:19.3%" title="2025Q1 -8.33%"><span class="bv">-8.33%</span></div><div class="bar neg" style="height:26.7%" title="2025Q2 -4.44%"><span class="bv">-4.44%</span></div><div class="bar" style="height:69.3%" title="2025Q3 17.95%"><span class="bv">17.95%</span></div><div class="bar neg" style="height:32.1%" title="2025Q4 -1.60%"><span class="bv">-1.60%</span></div><div class="bar" style="height:66.3%" title="2026Q1 16.39%"><span class="bv">16.39%</span></div><div class="bar neg" style="height:23.0%" title="2026Q2 -6.38%"><span class="bv">-6.38%</span></div><div class="bar" style="height:80.9%" title="2026Q3 24.07%"><span class="bv">24.07%</span></div></div></div><div class="xaxis"><span>20Q4</span><span>21Q1</span><span>21Q2</span><span>21Q3</span><span>21Q4</span><span>22Q1</span><span>22Q2</span><span>22Q3</span><span>22Q4</span><span>23Q1</span><span>23Q2</span><span>23Q3</span><span>23Q4</span><span>24Q1</span><span>24Q2</span><span>24Q3</span><span>24Q4</span><span>25Q1</span><span>25Q2</span><span>25Q3</span><span>25Q4</span><span>26Q1</span><span>26Q2</span><span>26Q3</span></div></div>
+    <p class="sec-note">分红再投总回报指数(单位净值 + 除息日分红回加, 链式相乘); 区间自第一个报告期的期初(2020-09-30)起算; 最大回撤按区间内日频指数计算。已与官方季报披露的「过去三个月」净值增长率逐期校准 23 期, 最大偏差 0.01pp(口径一致)。</p></section>
+<section class="slide" data-page="4"><p class="kicker">03 · 持仓集中度与骨架</p><h2>前十合计均值 72.77%(逐步分散), 全期出现过 47 只个股</h2><div class="stats">
+      <div class="stat"><div class="lab">前十合计均值</div><div class="val ">72.77%</div><div class="sub">区间 58.37–86.42%</div></div>
+      <div class="stat"><div class="lab">集中度趋势</div><div class="val ">逐步分散</div><div class="sub">斜率 -0.45pp/期</div></div>
+      <div class="stat"><div class="lab">第一大重仓</div><div class="val ">9.25%</div><div class="sub">最高 9.86%(上限 10%)</div></div>
+      <div class="stat"><div class="lab">出现过的个股</div><div class="val ">47 只</div><div class="sub">前十共 240 个席位</div></div>
+    </div>
+    <div class="chart"><div class="chart-h"><span>前十合计权重逐季变化(%)</span><span>56.13% – 88.66%</span></div><div class="chart-plot"><div class="yaxis"><span>88.7%</span><span>80.5%</span><span>72.4%</span><span>64.3%</span><span>56.1%</span></div><div class="plot"><div class="grid" style="bottom:25%;left:0;right:0"></div><div class="grid" style="bottom:50%;left:0;right:0"></div><div class="grid" style="bottom:75%;left:0;right:0"></div><div class="grid" style="bottom:100%;left:0;right:0"></div><div class="bar" style="height:52.6%" title="2020Q4 73.24%"><span class="bv">73.24%</span></div><div class="bar" style="height:54.3%" title="2021Q1 73.81%"><span class="bv">73.81%</span></div><div class="bar" style="height:56.7%" title="2021Q2 74.58%"><span class="bv">74.58%</span></div><div class="bar" style="height:67.1%" title="2021Q3 77.97%"><span class="bv">77.97%</span></div><div class="bar" style="height:60.9%" title="2021Q4 75.95%"><span class="bv">75.95%</span></div><div class="bar" style="height:58.5%" title="2022Q1 75.17%"><span class="bv">75.17%</span></div><div class="bar" style="height:66.4%" title="2022Q2 77.72%"><span class="bv">77.72%</span></div><div class="bar" style="height:26.9%" title="2022Q3 64.88%"><span class="bv">64.88%</span></div><div class="bar" style="height:51.7%" title="2022Q4 72.95%"><span class="bv">72.95%</span></div><div class="bar" style="height:65.8%" title="2023Q1 77.52%"><span class="bv">77.52%</span></div><div class="bar" style="height:93.1%" title="2023Q2 86.42%"><span class="bv">86.42%</span></div><div class="bar" style="height:82.1%" title="2023Q3 82.85%"><span class="bv">82.85%</span></div><div class="bar" style="height:56.7%" title="2023Q4 74.58%"><span class="bv">74.58%</span></div><div class="bar" style="height:51.9%" title="2024Q1 73.02%"><span class="bv">73.02%</span></div><div class="bar" style="height:30.6%" title="2024Q2 66.07%"><span class="bv">66.07%</span></div><div class="bar" style="height:44.5%" title="2024Q3 70.60%"><span class="bv">70.60%</span></div><div class="bar" style="height:74.4%" title="2024Q4 80.35%"><span class="bv">80.35%</span></div><div class="bar" style="height:41.7%" title="2025Q1 69.71%"><span class="bv">69.71%</span></div><div class="bar" style="height:41.7%" title="2025Q2 69.69%"><span class="bv">69.69%</span></div><div class="bar" style="height:21.9%" title="2025Q3 63.26%"><span class="bv">63.26%</span></div><div class="bar" style="height:49.2%" title="2025Q4 72.14%"><span class="bv">72.14%</span></div><div class="bar" style="height:53.8%" title="2026Q1 73.64%"><span class="bv">73.64%</span></div><div class="bar" style="height:6.9%" title="2026Q2 58.37%"><span class="bv">58.37%</span></div><div class="bar" style="height:17.8%" title="2026Q3 61.91%"><span class="bv">61.91%</span></div></div></div><div class="xaxis"><span>20Q4</span><span>21Q1</span><span>21Q2</span><span>21Q3</span><span>21Q4</span><span>22Q1</span><span>22Q2</span><span>22Q3</span><span>22Q4</span><span>23Q1</span><span>23Q2</span><span>23Q3</span><span>23Q4</span><span>24Q1</span><span>24Q2</span><span>24Q3</span><span>24Q4</span><span>25Q1</span><span>25Q2</span><span>25Q3</span><span>25Q4</span><span>26Q1</span><span>26Q2</span><span>26Q3</span></div></div><p class="sec-note">集中度 = 前十只股票合计占基金资产净值比例; 数据来源: 公开季报前十大明细独立求和, 已与官方报告逐行对账。</p></section>
+<section class="slide" data-page="5"><p class="kicker">04 · 持仓结构演变</p><h2>24 个季度 = 2 段主题主线(前十口径), 平均留存 7.5/10</h2><div class="cols">
+      <div class="col" style="flex:1.05">
+        <h3>主导主题演进</h3>
+        <div class="chain"><span class="chip">房地产/房地产开发<i>5 期</i></span><span class="arrow">→</span><span class="chip">煤炭/煤炭开采<i>19 期</i></span></div>
+        <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-top:4px">
+          <div class="stat"><div class="lab">平均留存</div><div class="val ">7.5/10</div><div class="sub">换手强度代理</div></div>
+          <div class="stat"><div class="lab">平均新进</div><div class="val ">2.5 只</div><div class="sub">每期</div></div>
+          <div class="stat"><div class="lab">最长连续在榜</div><div class="val ">19 期</div><div class="sub">601699(连续 19 期)</div></div>
+        </div>
+        <div class="card"><h4>是否每季推倒重来?</h4><p style="font-size:13.5px">相邻期名单相似度(Jaccard)均值 0.61;
+        整体稳定, 但在换挡期会出现成批更替。</p></div>
+      </div>
+      <div class="col">
+        <h3>逐季留存与新进</h3>
+        <table><thead><tr><th>报告期</th><th class="num">前十合计</th><th class="num">留存</th><th>新进</th></tr></thead><tbody>
+        <tr><td>2024Q2</td><td class="num">66.07%</td><td class="num">9/10</td><td class="up">晋控煤业</td></tr><tr><td>2024Q3</td><td class="num">70.60%</td><td class="num">8/10</td><td class="up">平煤股份、中远海控</td></tr><tr><td>2024Q4</td><td class="num">80.35%</td><td class="num">9/10</td><td class="up">钧达股份</td></tr><tr><td>2025Q1</td><td class="num">69.71%</td><td class="num">8/10</td><td class="up">仕净科技、中国神华</td></tr><tr><td>2025Q2</td><td class="num">69.69%</td><td class="num">8/10</td><td class="up">昊华能源、宏创控股</td></tr><tr><td>2025Q3</td><td class="num">63.26%</td><td class="num">6/10</td><td class="up">中金黄金、赤峰黄金、平煤股份、中煤能源</td></tr><tr><td>2025Q4</td><td class="num">72.14%</td><td class="num">8/10</td><td class="up">恒源煤电、聚和材料</td></tr><tr><td>2026Q1</td><td class="num">73.64%</td><td class="num">8/10</td><td class="up">山西焦煤、盐津铺子</td></tr><tr><td>2026Q2</td><td class="num">58.37%</td><td class="num">5/10</td><td class="up">广汇能源、华阳股份、宝丰能源、新集能源、宏桥控股</td></tr><tr><td>2026Q3</td><td class="num">61.91%</td><td class="num">6/10</td><td class="up">中国巨石、淮北矿业、完美世界、世纪华通</td></tr>
+        </tbody></table>
+      </div>
+    </div><p class="sec-note">留存率只看前十, 不等于全部持仓的真实换手率。</p></section>
+<section class="slide" data-page="6"><p class="kicker">05 · 关键调仓案例审计</p><h2>成功与失误成对看, 每条都标证据级别</h2><div class="cols">
+      <div class="col"><div class="card ok"><h4>持有期推算价表现靠前</h4><table><thead><tr><th>股票</th><th>进入</th><th class="num">推算价</th><th>最后在榜</th><th class="num">推算价</th><th class="num">持有期变动</th></tr></thead><tbody><tr><td>晋控煤业</td><td>2021Q4</td><td class="num">9.61</td><td>2026Q3</td><td class="num">17.21</td><td class="num up">+79.08%</td></tr><tr><td>兖矿能源</td><td>2021Q4</td><td class="num">23.53</td><td>2022Q2</td><td class="num">39.48</td><td class="num up">+67.79%</td></tr><tr><td>聚和材料</td><td>2025Q4</td><td class="num">61.00</td><td>2026Q1</td><td class="num">82.74</td><td class="num up">+35.64%</td></tr><tr><td>中国海油</td><td>2022Q3</td><td class="num">15.83</td><td>2023Q3</td><td class="num">21.14</td><td class="num up">+33.54%</td></tr></tbody></table></div></div>
+      <div class="col"><div class="card bad"><h4>持有期推算价表现靠后</h4><table><thead><tr><th>股票</th><th>进入</th><th class="num">推算价</th><th>最后在榜</th><th class="num">推算价</th><th class="num">持有期变动</th></tr></thead><tbody><tr><td>华阳股份</td><td>2022Q3</td><td class="num">18.27</td><td>2026Q3</td><td class="num">8.88</td><td class="num dn">-51.40%</td></tr><tr><td>ST中南</td><td>2020Q4</td><td class="num">8.83</td><td>2021Q3</td><td class="num">4.45</td><td class="num dn">-49.60%</td></tr><tr><td>平煤股份</td><td>2021Q3</td><td class="num">12.76</td><td>2026Q2</td><td class="num">7.15</td><td class="num dn">-43.96%</td></tr><tr><td>牧原股份</td><td>2021Q1</td><td class="num">100.05</td><td>2021Q2</td><td class="num">60.81</td><td class="num dn">-39.22%</td></tr></tbody></table></div></div>
+    </div><p class="sec-note">推算价 = 期末公允价值 ÷ 期末持股数, 未复权、不含分红; 证据级别: 合理推断 —— 它反映事后可观测的价格结果, 不等于经理当时的买卖价格, 也不等于投资者收益。</p></section>
+<section class="slide" data-page="7"><p class="kicker">06 · 最新一期结构与变化</p><h2>2026Q3 前十合计 61.91%, 主导主题 煤炭/煤炭开采</h2><div class="cols">
+      <div class="col"><h3>2026Q3 前十大</h3>
+        <table><thead><tr><th>#</th><th>股票</th><th>代码</th><th class="num">权重</th><th class="num">推算价</th></tr></thead><tbody>
+        <tr><td>1</td><td>潞安环能</td><td style="font-family:Consolas,monospace;font-size:11.5px">601699</td><td class="num">8.64%</td><td class="num">15.09</td></tr><tr><td>2</td><td>晋控煤业</td><td style="font-family:Consolas,monospace;font-size:11.5px">601001</td><td class="num">8.37%</td><td class="num">17.21</td></tr><tr><td>3</td><td>广汇能源</td><td style="font-family:Consolas,monospace;font-size:11.5px">600256</td><td class="num">7.30%</td><td class="num">6.67</td></tr><tr><td>4</td><td>完美世界</td><td style="font-family:Consolas,monospace;font-size:11.5px">002624</td><td class="num">6.49%</td><td class="num">9.71</td></tr><tr><td>5</td><td>世纪华通</td><td style="font-family:Consolas,monospace;font-size:11.5px">002602</td><td class="num">6.20%</td><td class="num">13.80</td></tr><tr><td>6</td><td>新集能源</td><td style="font-family:Consolas,monospace;font-size:11.5px">601918</td><td class="num">5.52%</td><td class="num">11.29</td></tr><tr><td>7</td><td>山煤国际</td><td style="font-family:Consolas,monospace;font-size:11.5px">600546</td><td class="num">5.20%</td><td class="num">13.12</td></tr><tr><td>8</td><td>淮北矿业</td><td style="font-family:Consolas,monospace;font-size:11.5px">600985</td><td class="num">4.76%</td><td class="num">15.87</td></tr><tr><td>9</td><td>华阳股份</td><td style="font-family:Consolas,monospace;font-size:11.5px">600348</td><td class="num">4.73%</td><td class="num">8.88</td></tr><tr><td>10</td><td>中国巨石</td><td style="font-family:Consolas,monospace;font-size:11.5px">600176</td><td class="num">4.70%</td><td class="num">39.41</td></tr>
+        </tbody></table></div>
+      <div class="col"><h3>2026Q2 → 2026Q3 变动</h3>
+        <table><thead><tr><th>股票</th><th class="num">上期</th><th class="num">本期</th><th class="num">变化</th><th>状态</th></tr></thead><tbody>
+        <tr><td>中国巨石</td><td class="num">—</td><td class="num">4.70%</td><td class="num">—</td><td><span class="up">新进</span></td></tr><tr><td>广汇能源</td><td class="num">5.35%</td><td class="num">7.30%</td><td class="num">+1.95pp</td><td>加仓</td></tr><tr><td>华阳股份</td><td class="num">4.68%</td><td class="num">4.73%</td><td class="num">+0.05pp</td><td>加仓</td></tr><tr><td>山煤国际</td><td class="num">4.63%</td><td class="num">5.20%</td><td class="num">+0.57pp</td><td>加仓</td></tr><tr><td>淮北矿业</td><td class="num">—</td><td class="num">4.76%</td><td class="num">—</td><td><span class="up">新进</span></td></tr><tr><td>晋控煤业</td><td class="num">7.07%</td><td class="num">8.37%</td><td class="num">+1.30pp</td><td>加仓</td></tr><tr><td>潞安环能</td><td class="num">7.52%</td><td class="num">8.64%</td><td class="num">+1.12pp</td><td>加仓</td></tr><tr><td>新集能源</td><td class="num">4.91%</td><td class="num">5.52%</td><td class="num">+0.61pp</td><td>加仓</td></tr><tr><td>完美世界</td><td class="num">—</td><td class="num">6.49%</td><td class="num">—</td><td><span class="up">新进</span></td></tr><tr><td>世纪华通</td><td class="num">—</td><td class="num">6.20%</td><td class="num">—</td><td><span class="up">新进</span></td></tr><tr><td>宝丰能源</td><td class="num">6.14%</td><td class="num">—</td><td class="num">—</td><td><span class="dn">退出</span></td></tr><tr><td>陕西煤业</td><td class="num">5.58%</td><td class="num">—</td><td class="num">—</td><td><span class="dn">退出</span></td></tr><tr><td>平煤股份</td><td class="num">5.11%</td><td class="num">—</td><td class="num">—</td><td><span class="dn">退出</span></td></tr><tr><td>宏桥控股</td><td class="num">7.38%</td><td class="num">—</td><td class="num">—</td><td><span class="dn">退出</span></td></tr>
+        </tbody></table></div>
+    </div><p class="sec-note">口径禁区: "新进前十大"≠"本季度刚买入"(可能自第 11 名升入); "退出前十大"≠"清仓或最高点卖出"(季报只有期末快照)。</p></section>
+<section class="slide" data-page="8"><p class="kicker">08 · 结论与跟踪</p><h2>怎么证明&quot;纠错有效&quot;, 怎么证明&quot;判断错了&quot;</h2><table><thead><tr><th style="width:20%">观察项</th><th style="width:36%">当前基线</th><th>触发条件</th></tr></thead><tbody>
+      <tr><td><strong>前十名单稳定性</strong></td><td>历史平均留存 7.5/10</td><td>下一期留存数低于 5 只即视为结构变化</td></tr><tr><td><strong>集中度</strong></td><td>58.37–86.42%(均值 72.77%)</td><td>连续两期落在区间外</td></tr><tr><td><strong>第一大重仓</strong></td><td>均值 9.25%, 最高 9.86%</td><td>接近 10% 上限需说明理由</td></tr><tr><td><strong>主导主题</strong></td><td>当前 煤炭/煤炭开采, 历史切换 1 次</td><td>再次切换时须能列出切换时点可得证据</td></tr><tr><td><strong>规模</strong></td><td>1.80 → 3.62 亿元(峰值 16.72)</td><td>规模继续下降会改变策略容量与操作空间</td></tr><tr><td><strong>收益集中度</strong></td><td>单季(2022Q1)贡献约占区间收益 42.95%</td><td>剔除该季后的收益 68.10% 才是可持续性的更保守口径</td></tr>
+    </tbody></table>
+    <p style="margin-top:14px;font-size:13.5px">下一期只需核对这几行, 就能说清"判断被证实还是被推翻", 而不是每次重新讲故事。</p><p class="sec-note">核心判断的推翻条件见第 2 页; 判断方向由人确认后才成文(门禁 2)。</p></section>
+<section class="slide" data-page="9"><p class="kicker">09 · 数据来源与质检</p><h2>可核验, 是这个项目的立身之本</h2><div class="cols">
+      <div class="col">
+        <div class="stats" style="grid-template-columns:repeat(2,1fr)">
+          <div class="stat"><div class="lab">官方对账</div><div class="val up">23/23 期</div><div class="sub">逐行一致</div></div>
+          <div class="stat"><div class="lab">权重最大差</div><div class="val ">0.000pp</div><div class="sub">容差 0.011pp</div></div>
+        </div>
+        <div class="card"><h4>来源清单</h4><ul style="font-size:12.5px">
+          <li>基金概况 · <span style="color:var(--text-3)">fundf10.eastmoney.com/jbgk_519191.html</span></li><li>净值序列(日频) · <span style="color:var(--text-3)">fund.eastmoney.com/pingzhongdata/519191.js</span></li><li>基金经理履历 · <span style="color:var(--text-3)">fundf10.eastmoney.com/jjjl_519191.html</span></li><li>天天基金 F10 历史前十大 · <span style="color:var(--text-3)">fundf10.eastmoney.com/FundArchivesDatas.aspx?t</span></li><li>天天基金 资产配置 · <span style="color:var(--text-3)">fundf10.eastmoney.com/zcpz_519191.html</span></li><li>天天基金 规模变动 · <span style="color:var(--text-3)">fundf10.eastmoney.com/FundArchivesDatas.aspx?t</span></li>
+          <li>…共 29 条, 完整清单见同名"来源清单"文件</li>
+        </ul></div>
+      </div>
+      <div class="col">
+        <div class="card warn">
+          <h4>质检结论</h4><div class="big-num" style="font-size:17px">通过, 有 2 项建议人工确认</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:5px">通过 16 · 提示 2 · 阻断 0(共 18 条规则)</div></div>
+        <div class="card"><h4>边界与免责</h4><ul style="font-size:12.5px">
+          <li>只看前十大持仓(季报口径), 期末快照, 期间买卖不可见</li>
+          <li>推算价未复权、不含分红, 不代表投资者实际收益</li>
+          <li>数据仅来自公开渠道, 不含任何机构内部数据</li>
+          <li>不构成投资建议, 不评价基金经理个人, 不推荐任何基金</li>
+        </ul></div>
+      </div>
+    </div><p class="sec-note">生成工具: 基金复诊台 FundClinic · 自动采集 + 规则引擎 + 大模型(输出经校验)</p></section>
+<div class="ov-wrap" id="ovWrap"></div>
+<div class="themes">
+  <button class="th-toggle" id="thToggle">换主题</button>
+  <div class="th-panel" id="thPanel">
+    <h4>选择配色风格(12 套, 选择会记住)</h4>
+    <div class="th-grid"><button class="th-btn" data-th="corporate-clean"><span class="th-dot" style="background:#0a2540;box-shadow:inset -6px 0 0 #1d4ed8"></span>企业商务</button><button class="th-btn" data-th="minimal-white"><span class="th-dot" style="background:#111216;box-shadow:inset -6px 0 0 #f5f5f6"></span>极简白</button><button class="th-btn" data-th="swiss-grid"><span class="th-dot" style="background:#d6001c;box-shadow:inset -6px 0 0 #111111"></span>瑞士网格</button><button class="th-btn" data-th="editorial-serif"><span class="th-dot" style="background:#8a2a1c;box-shadow:inset -6px 0 0 #faf7f2"></span>杂志衬线</button><button class="th-btn" data-th="academic-paper"><span class="th-dot" style="background:#1a3a7a;box-shadow:inset -6px 0 0 #fdfcf8"></span>学术论文</button><button class="th-btn" data-th="sharp-mono"><span class="th-dot" style="background:#000000;box-shadow:inset -6px 0 0 #ffffff"></span>锐利黑白</button><button class="th-btn" data-th="magazine-bold"><span class="th-dot" style="background:#ea5a1a;box-shadow:inset -6px 0 0 #f5efe2"></span>杂志大标题</button><button class="th-btn" data-th="japanese-minimal"><span class="th-dot" style="background:#d93a2a;box-shadow:inset -6px 0 0 #fafaf5"></span>和风极简</button><button class="th-btn" data-th="neo-brutalism"><span class="th-dot" style="background:#ffd400;box-shadow:inset -6px 0 0 #ff5ca8"></span>新粗野</button><button class="th-btn" data-th="pitch-deck-vc"><span class="th-dot" style="background:#0070f3;box-shadow:inset -6px 0 0 #7928ca"></span>路演风</button><button class="th-btn" data-th="news-broadcast"><span class="th-dot" style="background:#e11d2d;box-shadow:inset -6px 0 0 #ffffff"></span>新闻播报</button><button class="th-btn" data-th="xiaohongshu-white"><span class="th-dot" style="background:#ff2742;box-shadow:inset -6px 0 0 #fff6f1"></span>小红书白</button></div>
+    <div style="margin-top:11px;font-size:11.5px;color:var(--text-3);line-height:1.6">全部样式内联在本文件里, 不联网、不依赖任何字体或图片文件 —— 直接发给别人也能正常换肤与打印。</div>
+  </div>
+</div>
+<div class="nav">
+  <button id="pv" title="上一页">‹</button><span id="pg">1 / 9</span><button id="nx" title="下一页">›</button>
+  <button id="ov" title="概览(O)">概览</button><button id="fs" title="全屏(F)">全屏</button>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide')),i=0;
+  function go(n){i=Math.max(0,Math.min(slides.length-1,n));document.getElementById('pg').textContent=(i+1)+' / '+slides.length;
+    if(!document.body.classList.contains('overview')) slides[i].scrollIntoView({block:'start'});}
+  document.getElementById('nx').onclick=function(){go(i+1)};
+  document.getElementById('pv').onclick=function(){go(i-1)};
+  document.getElementById('fs').onclick=function(){toggleFs()};
+  document.getElementById('ov').onclick=function(){toggleOv()};
+
+  /* 概览模式: 全部幻灯片缩略成网格, 点哪张跳哪张 */
+  var wrap=document.getElementById('ovWrap');
+  function toggleOv(){
+    var on=document.body.classList.toggle('overview');
+    if(on){
+      if(!wrap.dataset.built){
+        slides.forEach(function(s,k){
+          var cell=document.createElement('div');cell.className='ov-cell';
+          var clone=s.cloneNode(true);clone.style.margin='0';cell.appendChild(clone);
+          cell.onclick=function(){toggleOv();go(k);};
+          wrap.appendChild(cell);
+        });
+        wrap.dataset.built='1';
+      }
+      wrap.style.display='grid';
+    } else { wrap.style.display='none'; go(i); }
+  }
+  function toggleFs(){ if(document.fullscreenElement){document.exitFullscreen&&document.exitFullscreen();}
+    else { document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); } }
+
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')  {e.preventDefault();go(i+1);}
+    if(e.key==='ArrowLeft'||e.key==='PageUp')                  {e.preventDefault();go(i-1);}
+    if(e.key==='Home'){go(0);} if(e.key==='End'){go(slides.length-1);}
+    if(e.key==='p'||e.key==='P'){window.print();}
+    if(e.key==='o'||e.key==='O'){toggleOv();}
+    if(e.key==='f'||e.key==='F'){toggleFs();}
+    if(e.key==='t'||e.key==='T'){document.getElementById('thPanel').classList.toggle('open');}
+    if(e.key==='Escape'){document.getElementById('thPanel').classList.remove('open');}
+  });
+  var obs=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){i=slides.indexOf(en.target);
+    document.getElementById('pg').textContent=(i+1)+' / '+slides.length;}});},{threshold:.5});
+  slides.forEach(function(s){obs.observe(s)});
+
+  var KEY='fundclinic.deck.theme';
+  function apply(id){
+    document.documentElement.setAttribute('data-theme',id);
+    document.querySelectorAll('.th-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-th')===id);});
+    try{localStorage.setItem(KEY,id);}catch(e){}
+  }
+  document.getElementById('thToggle').onclick=function(){document.getElementById('thPanel').classList.toggle('open');};
+  document.querySelectorAll('.th-btn').forEach(function(b){ b.onclick=function(){apply(b.getAttribute('data-th'));}; });
+  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
+  apply(saved&&document.querySelector('.th-btn[data-th="'+saved+'"]')?saved:'corporate-clean');
+  document.addEventListener('click',function(e){ if(!e.target.closest('.themes')) document.getElementById('thPanel').classList.remove('open'); });
+})();
+</script>
+</body></html>

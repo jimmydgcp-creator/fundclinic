@@ -168,6 +168,9 @@ function persistRun(code, result) {
     fs.writeFileSync(path.join(dir, 'run.json'), JSON.stringify({
       code, summary: result.summary, files: result.files, pdf: result.pdf, at: new Date().toISOString()
     }, null, 1), 'utf8');
+    /* 这一目录的结果刚被**真跑**覆盖, 它就不再是"种子"了 —— 把 seedRuns() 落的标记删掉,
+       否则 /api/history 会一直把一份真跑出来的结果标成演示数据(标记只是说明, 删不掉也不影响任何主流程)。 */
+    try { fs.rmSync(path.join(dir, '_seeded.json'), { force: true }); } catch (e) { /* ignore */ }
     return true;
   } catch (e) {
     console.error('落盘运行结果失败: ' + e.message);
@@ -205,7 +208,11 @@ function listHistory() {
           code: run.code || name, name: s.name || name, manager: s.manager || '',
           range: s.range || '', quarters: s.quarters || 0, formTag: s.formTag || '',
           at: run.at, check: s.check ? s.check.verdictText : '',
-          hasPdf: !!run.pdf, files: Object.keys(run.files || {}).length
+          hasPdf: !!run.pdf, files: Object.keys(run.files || {}).length,
+          /* 这份结果是"从 _seed/ 种下来的"还是"真跑出来的": 看 seedRuns() 落的标记文件。
+             读不到标记就是 false —— 前端现在还不区分(那是别人手上的活), 但接口先把字段如实给出来,
+             以后要加"演示数据"角标时不用再回来改服务端。 */
+          seeded: fs.existsSync(path.join(dir, '_seeded.json'))
         });
         const mtime = Date.parse(run.at) || st.mtimeMs;
         out[out.length - 1]._mtime = mtime;
@@ -224,6 +231,128 @@ function restoreAll() {
     if (r) { lastRun.set(h.code, r); n++; }
   });
   return n;
+}
+
+/* ---------------- 预置跑批(种子): 让云端部署一起来就有东西可看 ----------------
+ *
+ * 要解决的问题(2026-11-01 一天内撞到两次): 每次运行的产出落在 _runs/<代码>/, 而 _runs/ 是 .gitignore 的
+ * 本地过程产物; Render 免费档的容器磁盘是临时的 —— 每次重新部署、或休眠后重启, _runs/ 就清空。
+ * 表现是: 演示时打开公网地址, 报告页是空的, 问一句答"这只基金还没有跑过复盘", 必须现场真跑 6–7 分钟
+ * (还花 token)才有内容 —— 而这件事本该在按下"部署"的那一刻就解决。
+ *
+ * 解法: 仓库里放一份**只读种子** _seed/<代码>/(内容是真跑批的产物, 来龙去脉见 _seed/README.md)。
+ * Dockerfile 是 COPY . ., 所以它天然会被烤进镜像; 服务起来时, 只要 _runs/<代码>/ 还不存在, 就复制一份过去。
+ *
+ * 为什么**只有云端(或显式开启)才种**: 本机模式下组员会突然多出两只不是自己跑的基金, 还得猜它们哪来的;
+ * 而云端不种就等于每次演示都要现场烧 6–7 分钟。两边都得照顾, 所以做成开关而不是"永远种"。
+ * FUNDCLINIC_SEED=0 是"云端也强制不种"的逃生阀(例如想验证全新容器到底有多空)。
+ */
+const SEED_DIR = path.join(ROOT, '_seed');
+const SEED_ON = process.env.FUNDCLINIC_SEED === '0'
+  ? false
+  : (CLOUD || process.env.FUNDCLINIC_SEED === '1');
+
+/** 把 _seed/<代码>/ 下平铺的文件复制过去。只复制一层, 不递归 —— 种子目录里就是一堆交付物,
+ *  没有子目录(真有就是放错了, 跳过即可, 不该为它写一套递归逻辑)。 */
+function copySeedDir(from, to) {
+  fs.mkdirSync(to, { recursive: true });
+  for (const e of fs.readdirSync(from, { withFileTypes: true })) {
+    if (!e.isFile()) continue;
+    try {
+      fs.copyFileSync(path.join(from, e.name), path.join(to, e.name));
+    } catch (err) {
+      /* 单个文件复制失败不该让整只基金失败 —— 缺哪个, 下面的 rebase 会把它从 run.json 里摘掉 */
+    }
+  }
+}
+
+/** 把复制过来的 run.json 里的路径改写成"实际落地的位置"。
+ *
+ *  为什么必须改: run.json 里存的是**生成那台机器上的绝对路径**(C:\Users\...\_runs\519191\xxx.md)。
+ *  原样搬进 Linux 容器, 文件明明都在, 但每个路径都指不到 —— 结果是在线看报告 / 看演示稿 500、
+ *  下载 404。数据在、链接全死, 比没有数据更糟, 因为看起来像"程序坏了"。
+ *
+ *  做法: 只认文件名, 拼到 _runs/<代码>/ 下面; 找不到对应文件(种子故意没带 PDF)就把这一项置空/摘掉,
+ *  而不是留一条死链 —— 留死链的话页面还会画一个点了没反应的下载按钮。
+ *
+ *  为什么不在种子里就把路径改好: 种子是"真跑批的产物", 原样保留才有复现价值(能看出它是哪台机器、哪个目录
+ *  跑出来的)。改写只发生在落地出来的副本上, 种子本身一个字都不动。 */
+function rebaseSeedPaths(dir, code) {
+  const rp = path.join(dir, 'run.json');
+  const run = JSON.parse(fs.readFileSync(rp, 'utf8'));
+  const relink = v => {
+    const p = typeof v === 'string' ? v : (v && v.path);
+    if (!p) return null;
+    const base = path.basename(String(p));
+    const dest = path.join(dir, base);
+    if (!fs.existsSync(dest)) return null;   // 种子没带这个文件(例如 PDF) → 置空
+    if (typeof v === 'string') return dest;
+    return { ...v, path: dest, rel: path.join('_runs', code, base) };
+  };
+  const relinkMap = src => {
+    const out = {};
+    for (const [k, v] of Object.entries(src || {})) {
+      const nv = relink(v);
+      if (nv) out[k] = nv;
+    }
+    return out;
+  };
+  run.files = relinkMap(run.files);
+  run.pdf = relink(run.pdf);
+  /* summary 是 /api/result 直接回给页面的那一坨: 页面上的"PDF 下载按钮"看的是 summary.pdf,
+     所以它也得跟着清, 只清顶层 run.pdf 的话按钮还在、点了必然 404。 */
+  if (run.summary) {
+    if (run.summary.files) run.summary.files = relinkMap(run.summary.files);
+    run.summary.pdf = relink(run.summary.pdf);
+  }
+  fs.writeFileSync(rp, JSON.stringify(run, null, 1), 'utf8');
+}
+
+/** 启动时补种。返回 { enabled, added:[代码], existing:[代码], failed:[说明], error }。
+ *  **绝不覆盖**: 目标已有 run.json 就跳过 —— 用户真跑出来的结果永远比种子重要。 */
+function seedRuns() {
+  const info = { enabled: SEED_ON, added: [], existing: [], failed: [], error: '' };
+  if (!SEED_ON) return info;
+  try {
+    if (!fs.existsSync(SEED_DIR)) { info.error = '_seed/ 不存在'; return info; }
+    for (const name of fs.readdirSync(SEED_DIR)) {
+      if (!/^\d{6}$/.test(name)) continue;                    // README.md 之类直接跳过: 种子目录名必须是 6 位代码
+      const from = path.join(SEED_DIR, name);
+      const to = path.join(RUNS_DIR, name);
+      try { if (!fs.statSync(from).isDirectory()) continue; } catch (e) { continue; }
+      if (fs.existsSync(path.join(to, 'run.json'))) { info.existing.push(name); continue; }
+      try {
+        copySeedDir(from, to);
+        rebaseSeedPaths(to, name);
+        fs.writeFileSync(path.join(to, '_seeded.json'), JSON.stringify({
+          seeded: true, from: '_seed/' + name, at: new Date().toISOString()
+        }, null, 1), 'utf8');
+        info.added.push(name);
+      } catch (e) {
+        /* 单只失败只记一行, 不影响另一只, 也不影响启动 */
+        info.failed.push(name + ': ' + e.message);
+      }
+    }
+  } catch (e) { info.error = e.message; }
+  return info;
+}
+
+/** 启动横幅里的那一行。为什么非打不可: 种没种上, 只有在演示当天打开页面才会发现,
+ *  而那时候已经没时间看日志了 —— 所以在启动的那一秒就说清楚。 */
+function seedLine(info) {
+  if (!info || !info.enabled) return '预置:   未启用(本机模式; 想种一份演示数据就 FUNDCLINIC_SEED=1)';
+  const all = info.added.concat(info.existing);
+  const failed = info.failed.length ? ' · 失败: ' + info.failed.join('; ') : '';
+  if (!all.length) {
+    if (info.failed.length) return '预置:   失败 —— ' + info.failed.join('; ');
+    return '预置:   无可用种子(' + (info.error || '_seed/ 下没有 6 位数字目录') + ')';
+  }
+  const names = all.join(', ');
+  if (!info.added.length) return '预置:   ' + all.length + ' 只已在位(' + names + '), 不覆盖' + failed;
+  /* 有新增也有"已在位"时要说清这次到底种了几只 —— 只报总数会让人以为全是这次复制过来的,
+     排查"为什么重启后还是旧数据"时正好指错方向。 */
+  const mix = info.existing.length ? ', 本次新种 ' + info.added.length + ' 只' : '';
+  return '预置:   已就位 ' + all.length + ' 只(' + names + mix + ') —— 重新部署后秒开, 不用现场跑' + failed;
 }
 
 const MIME = {
@@ -589,8 +718,8 @@ code{background:#eef2f8;padding:1px 5px;border-radius:4px}</style></head>
     /* ---------------- 静态文件 ---------------- */
     if (req.method === 'GET' || req.method === 'HEAD') {
       let rel = pathname === '/' ? '/index.html' : pathname;
-      // _runs 目录不对外暴露(交付物走 /api/download)
-      if (rel.startsWith('/_runs') || rel.startsWith('/server') || rel.startsWith('/tools')) return json(res, 403, { error: '禁止访问' });
+      // _runs 目录不对外暴露(交付物走 /api/download); _seed 是同源的种子, 一视同仁挡掉
+      if (rel.startsWith('/_runs') || rel.startsWith('/_seed') || rel.startsWith('/server') || rel.startsWith('/tools')) return json(res, 403, { error: '禁止访问' });
       const fp = safeJoin(ROOT, rel);
       if (!fp || !fs.existsSync(fp) || fs.statSync(fp).isDirectory()) return json(res, 404, { error: '不存在: ' + rel });
       const ext = path.extname(fp).toLowerCase();
@@ -605,7 +734,7 @@ code{background:#eef2f8;padding:1px 5px;border-radius:4px}</style></head>
 
 /* stripDataset 已移到 server/pipeline.mjs 并导出, 这里直接 import —— 避免两处形状走偏 */
 
-function announce(port) {
+function announce(port, seedInfo) {
   const hasPdf = !!findPdftotext(), hasEdge = !!findEdge();
   const restored = restoreAll();
   const hist = listHistory();
@@ -620,6 +749,7 @@ function announce(port) {
   if (!hasPdf) console.log('          ' + popplerInstallNote());
   console.log('          Edge/Chrome ' + (hasEdge ? '✓ 可用(可一键导出演示稿 PDF)' : '✗ 未找到(可在浏览器打开演示稿按 P 打印为 PDF)'));
   console.log('  历史:   ' + (hist.length ? `已恢复 ${restored} 份过往复盘(${hist.slice(0, 4).map(h => h.code + ' ' + h.name).join('、')}${hist.length > 4 ? ' 等' : ''})` : '暂无历史记录'));
+  console.log('  ' + seedLine(seedInfo));
   /* 公网模式必须在启动横幅里说清额度, 否则"今天怎么跑不了"要到被拦住才发现 */
   if (QUOTA.enabled) {
     const L = QUOTA.limits;
@@ -673,4 +803,9 @@ server.on('error', e => {
   console.error('启动失败: ' + e.message);
   process.exit(1);
 });
-server.listen(PORT, HOST, () => announce(PORT));
+server.listen(PORT, HOST, () => {
+  /* 补种必须在 announce() 之前: announce() 里会 restoreAll() 把 _runs/ 恢复进内存,
+     种子晚一步落地的话, 第一屏的"最近的复盘记录"还是空的(要等下次重启才出现)。
+     种子是几十个文件的小复制(种子总量 ~2MB), 同步做掉, 不值得为它引入异步时序。 */
+  announce(PORT, seedRuns());
+});
