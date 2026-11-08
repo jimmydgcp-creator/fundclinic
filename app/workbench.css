@@ -95,3 +95,9 @@
   .ask-drawer { width: 100vw; }
   .ask-fab { right: 14px; bottom: 14px; }
 }
+
+/* 对比样例（预置曲线）：index.html 里由 tools/make_compare_sample.mjs 生成，样式在这里兜住 */
+.cmp-chart { margin: 14px 0 16px; padding: 10px 10px 2px; background: var(--surface, #fff); border: 1px solid var(--line, #e3e0d8); border-radius: 10px; }
+.cmp-chart svg { display: block; max-width: 100%; height: auto; }
+#cmp-sample .note { margin: 10px 0 6px; }
+#cmp-sample table.tbl td:first-child { white-space: nowrap; }
