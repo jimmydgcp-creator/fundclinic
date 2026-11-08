@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>大成策略回报混合A(090007) 持仓回溯复盘 · 演示稿</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0a2540;--navy2:#14395f;--accent:#1d4ed8;--ink:#16202e;--ink2:#46586e;--line:#dbe3ee;--bg:#eef1f7;--ok:#0f7b52;--warn:#b06a00;--fail:#b3261e}
+html,body{background:var(--bg);font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.slide{position:relative;width:1280px;height:720px;background:#fff;margin:26px auto;padding:44px 56px;overflow:hidden;box-shadow:0 6px 30px rgba(10,37,64,.13);page-break-after:always;break-after:page;display:flex;flex-direction:column}
+.slide:last-child{page-break-after:auto;break-after:auto}
+.slide::after{content:attr(data-page);position:absolute;right:30px;bottom:20px;font-size:13px;color:#9aa8bb;font-family:ui-monospace,Consolas,monospace}
+h1{font-size:40px;line-height:1.25;color:var(--navy);letter-spacing:-.5px}
+h2{font-size:27px;color:var(--navy);padding-bottom:12px;border-bottom:3px solid var(--accent);margin-bottom:22px;display:flex;align-items:baseline;gap:12px}
+h2 small{font-size:14px;font-weight:400;color:var(--ink2);letter-spacing:.4px}
+h3{font-size:17px;color:var(--navy2);margin-bottom:10px}
+p{font-size:16px;line-height:1.75;color:var(--ink2)}
+.lead{font-size:17px}
+strong{color:var(--ink)}
+.kicker{font-size:15px;letter-spacing:3px;color:var(--accent);font-weight:700;margin-bottom:16px}
+.meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+.tag{border:1px solid var(--line);border-radius:24px;padding:7px 16px;font-size:14px;color:var(--ink2);background:#f7f9fc}
+.tag b{color:var(--navy)}
+.cols{display:flex;gap:26px;flex:1;min-height:0}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px}
+.card{border:1px solid var(--line);border-radius:12px;padding:18px 20px;background:#fbfcfe}
+.card.warn{border-color:#f0c98a;background:#fffaf0}
+.card.ok{border-color:#9ed3b8;background:#f2fbf7}
+.card.bad{border-color:#efb3ae;background:#fdf5f4}
+.card .big{font-size:32px;font-weight:700;color:var(--navy);font-family:ui-monospace,Consolas,monospace;line-height:1.2}
+.card .lbl{font-size:13px;color:var(--ink2);margin-bottom:4px}
+.card .sub{font-size:13px;color:var(--ink2);margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#f2f5fa;color:var(--ink2);font-weight:600;font-size:13px}
+td.num{font-family:ui-monospace,Consolas,monospace;text-align:right;white-space:nowrap}
+.pos{color:var(--ok);font-weight:700}.neg{color:var(--fail);font-weight:700}
+ul{margin:0;padding-left:20px}li{font-size:15px;line-height:1.8;color:var(--ink2);margin-bottom:5px}
+.bars{display:flex;align-items:flex-end;gap:5px;height:190px;padding:10px 4px 0;border-bottom:2px solid var(--line)}
+.bar{flex:1;background:linear-gradient(180deg,var(--accent),var(--navy2));border-radius:3px 3px 0 0;min-height:2px;position:relative}
+.bar.neg{background:linear-gradient(180deg,#e06a5f,#a8281f)}
+.barlbl{display:flex;gap:5px;padding-top:6px}
+.barlbl span{flex:1;text-align:center;font-size:10px;color:#93a1b5;font-family:ui-monospace,Consolas,monospace;writing-mode:horizontal-tb}
+.chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{background:#e8efff;color:var(--accent);border-radius:20px;padding:6px 16px;font-size:16px;font-weight:600}
+.chip i{font-style:normal;opacity:.65;font-size:13px;margin-left:6px}
+.arrow{color:#9aa8bb;font-size:18px}
+.quote{border-left:4px solid var(--accent);background:#f7f9fc;padding:14px 18px;border-radius:0 8px 8px 0;font-size:15px;line-height:1.85;color:var(--ink2);max-height:190px;overflow:hidden}
+.foot{margin-top:auto;padding-top:14px;font-size:12.5px;color:#93a1b5;border-top:1px solid var(--line)}
+.boundary{font-size:14px;line-height:1.8;color:var(--ink2)}
+.boundary li{font-size:14px}
+.nav{position:fixed;right:20px;bottom:20px;z-index:9;display:flex;gap:8px;align-items:center;background:rgba(10,37,64,.9);color:#fff;padding:8px 14px;border-radius:24px;font-size:13px;font-family:ui-monospace,Consolas,monospace}
+.nav button{background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;font-family:inherit}
+.nav button:hover{background:rgba(255,255,255,.32)}
+.hint{position:fixed;left:20px;bottom:20px;z-index:9;background:rgba(10,37,64,.9);color:#fff;padding:8px 14px;border-radius:24px;font-size:12.5px}
+@media print{
+  html,body{background:#fff}
+  .nav,.hint{display:none!important}
+  .slide{margin:0;box-shadow:none;break-inside:avoid;page-break-inside:avoid}
+  @page{size:1280px 720px;margin:0}
+}
+</style></head>
+<body>
+<section class="slide" data-page="1">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div class="kicker">基金持仓回溯复盘</div>
+      <h1>大成策略回报混合A<br><span style="font-size:28px;color:#46586e">090007 · 徐彦(2020-03-23 起)</span></h1>
+      <p class="lead" style="margin-top:22px;max-width:900px">复盘区间 <strong>2020Q1–2026Q2</strong>, 共 <strong>26</strong> 个报告期。只陈述已发生的持仓行为与可验证推断: 绩效看清代价, 轮动看清动作, 每个数字可指回公开季报。</p>
+      <div class="meta">
+        <span class="tag">数据来源 <b>10</b> 类(含官方季报 PDF)</span>
+        <span class="tag">官方逐行对账 <b>4/4</b></span>
+        <span class="tag">形态标签 <b>主题漂移型</b></span>
+        <span class="tag">生成 2026-09-16 11:16</span>
+      </div>
+    </div>
+  </section>
+<section class="slide" data-page="2"><h2>先说结论<small>结论卡是跨基金对比的最小单元</small></h2>
+    <div class="cols">
+      <div class="col">
+        <div class="card"><div class="lbl">形态标签</div><div class="big" style="font-size:26px">主题漂移型</div>
+          <div class="sub">置信度 中 · 次优解释: 逐步分散型 / 均衡分散型 / 单一重仓依赖型</div></div>
+        <div class="card"><div class="lbl">主线问题</div><p style="font-size:15px">换赛道是能力圈扩张, 还是被行情推着走? 每一次切换发生时, 前一个赛道的退出理由能否写成当时可得的证据?</p></div>
+        <div class="card warn"><div class="lbl">推翻条件(可证伪)</div><p style="font-size:14px">若下一期出现以下任一情况, 本判断需推翻或降级: ① 下一期(2026Q3)前十留存数 ≥ 5 只未达到; ② 主导主题在无公开逻辑变化的情况下再次切换; ③ 集中度突破历史区间(33.21–58.81%)之外并连续两期不回。</p></div>
+      </div>
+      <div class="col">
+        <h3>支撑证据</h3>
+        <ul><li>主导主题切换 9 次: 食品饮料/乳品 → 化学制品 → 煤炭开采 → 航运港口 → 通信设备 → 汽车零部件 → 通信设备 → 汽车零部件 → 通信设备 → 医药生物/化学制药</li><li>主题更换伴随前十名单更替(平均新进 2.6 只/期), 属于赛道级调仓而非个股微调</li></ul>
+        <div class="card ok" style="margin-top:auto"><div class="lbl">一句话判断(可证伪)</div><p style="font-size:15px">本基金在 2020Q1–2026Q2(26 个报告期)的持仓结构特征为「主题漂移型」:前十合计权重均值 42.74%(区间 33.21–58.81%),相邻期平均留存 7.4/10、平均新进 2.6 只,主导主题由 食品饮料/乳品 演进到 医药生物/化学制药(切换 9 次)。该结论仅描述已发生的持仓行为, 不含对未来收益的判断。</p></div>
+      </div>
+    </div><div class="foot">证据级别: 公开季报 + 天天基金 F10(已对账)</div></section>
+<section class="slide" data-page="3"><h2>口径与证据边界<small>先划边界, 再谈结论</small></h2>
+    <div class="cols">
+      <div class="col">
+        <div class="card"><h3>复盘区间怎么定的</h3>
+          <p style="font-size:15px">现任经理任期(徐彦(2020-03-23 ~ 至今))共 26 个报告期, 足以判定形态<br>
+          最终区间 <strong>2020Q1–2026Q2</strong>, 共 26 期(区间前另有 12 期作为接手前对照)</p></div>
+        <div class="card"><h3>本次能算 / 算不了</h3>
+          <ul><li>能算: 集中度、留存换手、主题演进、个体持仓期限、披露口径推算价、分红再投口径的区间收益与回撤</li>
+          <li>算不了: 全部持仓(仅前十)、期间买卖时点(期末快照)、投资者实际收益</li></ul></div>
+      </div>
+      <div class="col">
+        <div class="card"><h3>证据分级</h3>
+          <ul><li><strong>披露事实</strong>: 季报原文与官方数字</li>
+          <li><strong>合理推断</strong>: 由披露值推算(推算价、斜率、分红再投指数)</li>
+          <li><strong>事后解读</strong>: 事后才成立的叙述, 必须标注</li></ul></div>
+        <div class="card ok"><h3>官方对账</h3>
+          <p style="font-size:14px">2020Q1: 逐行一致(10 行, 最大差 0.000pp)<br>2021Q1: 逐行一致(10 行, 最大差 0.000pp)<br>2022Q1: 逐行一致(10 行, 最大差 0.000pp)<br>2023Q1: 逐行一致(10 行, 最大差 0.000pp)</p></div>
+      </div>
+    </div><div class="foot">只看前十大持仓(季报口径)、期末快照; 推算价未复权、不含分红; 本文不构成投资建议。</div></section>
+<section class="slide" data-page="4"><h2>总成绩也看清代价<small>口径: 分红再投总回报指数</small></h2>
+    
+    <div style="display:flex;gap:14px;margin-bottom:18px">
+      <div class="card"><div class="lbl">区间复利收益</div><div class="big">+112.52<span style="font-size:16px;color:#46586e">%</span></div><div class="sub">分红再投总回报口径</div></div>
+      <div class="card"><div class="lbl">剔除最好一季(2020Q2)</div><div class="big">+85.54<span style="font-size:16px;color:#46586e">%</span></div><div class="sub">可持续性的更保守口径</div></div>
+      <div class="card"><div class="lbl">最好一季贡献占比</div><div class="big">23.98<span style="font-size:16px;color:#46586e">%</span></div></div>
+      <div class="card"><div class="lbl">区间最大回撤</div><div class="big">-16.68<span style="font-size:16px;color:#46586e">%</span></div></div>
+      <div class="card"><div class="lbl">规模</div><div class="big">38.32→21.85<span style="font-size:16px;color:#46586e"> 亿</span></div><div class="sub">峰值 → 期末</div></div>
+    </div>
+    <h3 style="margin-bottom:6px">逐季收益(分红再投口径, %)</h3><div class="bars"><div class="bar" style="height:100.0%" title="2020Q2 14.54%"></div><div class="bar" style="height:84.8%" title="2020Q3 11.42%"></div><div class="bar" style="height:51.6%" title="2020Q4 4.59%"></div><div class="bar" style="height:62.7%" title="2021Q1 6.87%"></div><div class="bar" style="height:51.4%" title="2021Q2 4.53%"></div><div class="bar" style="height:59.0%" title="2021Q3 6.10%"></div><div class="bar" style="height:48.1%" title="2021Q4 3.86%"></div><div class="bar neg" style="height:2.0%" title="2022Q1 -6.03%"></div><div class="bar neg" style="height:27.5%" title="2022Q2 -0.37%"></div><div class="bar neg" style="height:2.0%" title="2022Q3 -5.93%"></div><div class="bar" style="height:76.7%" title="2022Q4 9.75%"></div><div class="bar" style="height:66.5%" title="2023Q1 7.64%"></div><div class="bar" style="height:48.2%" title="2023Q2 3.89%"></div><div class="bar neg" style="height:21.9%" title="2023Q3 -1.53%"></div><div class="bar neg" style="height:13.8%" title="2023Q4 -3.20%"></div><div class="bar" style="height:35.3%" title="2024Q1 1.23%"></div><div class="bar neg" style="height:26.5%" title="2024Q2 -0.58%"></div><div class="bar" style="height:80.9%" title="2024Q3 10.60%"></div><div class="bar" style="height:47.3%" title="2024Q4 3.70%"></div><div class="bar" style="height:35.7%" title="2025Q1 1.32%"></div><div class="bar" style="height:41.8%" title="2025Q2 2.56%"></div><div class="bar" style="height:78.9%" title="2025Q3 10.19%"></div><div class="bar neg" style="height:18.1%" title="2025Q4 -2.31%"></div><div class="bar" style="height:39.7%" title="2026Q1 2.13%"></div><div class="bar neg" style="height:5.9%" title="2026Q2 -4.81%"></div></div><div class="barlbl"><span>20Q2</span><span>20Q3</span><span>20Q4</span><span>21Q1</span><span>21Q2</span><span>21Q3</span><span>21Q4</span><span>22Q1</span><span>22Q2</span><span>22Q3</span><span>22Q4</span><span>23Q1</span><span>23Q2</span><span>23Q3</span><span>23Q4</span><span>24Q1</span><span>24Q2</span><span>24Q3</span><span>24Q4</span><span>25Q1</span><span>25Q2</span><span>25Q3</span><span>25Q4</span><span>26Q1</span><span>26Q2</span></div>
+    
+    <div class="foot">分红再投总回报指数(单位净值 + 除息日分红回加, 链式相乘); 季末对季末; 最大回撤按区间内日频指数计算; 已用官方季报披露的&quot;过去三个月/一年/三年/五年&quot;净值增长率反向校准(tools/calibrate_perf.mjs)</div></section>
+<section class="slide" data-page="5"><h2>持仓集中度与骨架<small>集中度决定这是&quot;配置&quot;还是&quot;押注&quot;</small></h2>
+    <div style="display:flex;gap:14px;margin-bottom:16px">
+      <div class="card"><div class="lbl">前十合计(均值)</div><div class="big">42.74<span style="font-size:16px;color:#46586e">%</span></div><div class="sub">区间 33.21–58.81%</div></div>
+      <div class="card"><div class="lbl">趋势</div><div class="big">逐步分散</div><div class="sub">斜率 -0.49pp/期</div></div>
+      <div class="card"><div class="lbl">第一大重仓(均值/最高)</div><div class="big">7.74 / 10.06<span style="font-size:16px;color:#46586e">%</span></div><div class="sub">公募单票上限 10%</div></div>
+      <div class="card"><div class="lbl">出现过的个股</div><div class="big">66<span style="font-size:16px;color:#46586e"> 只</span></div><div class="sub">前十共 260 个席位</div></div>
+    </div>
+    <h3>前十合计权重逐季变化(%)</h3>
+    <div class="bars"><div class="bar" style="height:96.0%" title="2020Q1 58.81%"></div><div class="bar" style="height:52.1%" title="2020Q2 45.43%"></div><div class="bar" style="height:59.8%" title="2020Q3 47.79%"></div><div class="bar" style="height:58.4%" title="2020Q4 47.35%"></div><div class="bar" style="height:66.6%" title="2021Q1 49.84%"></div><div class="bar" style="height:80.7%" title="2021Q2 54.14%"></div><div class="bar" style="height:68.0%" title="2021Q3 50.27%"></div><div class="bar" style="height:29.5%" title="2021Q4 38.54%"></div><div class="bar" style="height:51.6%" title="2022Q1 45.29%"></div><div class="bar" style="height:61.8%" title="2022Q2 48.40%"></div><div class="bar" style="height:28.8%" title="2022Q3 38.33%"></div><div class="bar" style="height:21.7%" title="2022Q4 36.18%"></div><div class="bar" style="height:46.4%" title="2023Q1 43.70%"></div><div class="bar" style="height:34.1%" title="2023Q2 39.94%"></div><div class="bar" style="height:30.9%" title="2023Q3 38.96%"></div><div class="bar" style="height:25.1%" title="2023Q4 37.19%"></div><div class="bar" style="height:23.5%" title="2024Q1 36.73%"></div><div class="bar" style="height:16.8%" title="2024Q2 34.67%"></div><div class="bar" style="height:12.0%" title="2024Q3 33.21%"></div><div class="bar" style="height:24.3%" title="2024Q4 36.97%"></div><div class="bar" style="height:25.3%" title="2025Q1 37.25%"></div><div class="bar" style="height:24.7%" title="2025Q2 37.09%"></div><div class="bar" style="height:44.8%" title="2025Q3 43.21%"></div><div class="bar" style="height:50.9%" title="2025Q4 45.08%"></div><div class="bar" style="height:39.2%" title="2026Q1 41.50%"></div><div class="bar" style="height:51.7%" title="2026Q2 45.31%"></div></div><div class="barlbl"><span>20Q1</span><span>20Q2</span><span>20Q3</span><span>20Q4</span><span>21Q1</span><span>21Q2</span><span>21Q3</span><span>21Q4</span><span>22Q1</span><span>22Q2</span><span>22Q3</span><span>22Q4</span><span>23Q1</span><span>23Q2</span><span>23Q3</span><span>23Q4</span><span>24Q1</span><span>24Q2</span><span>24Q3</span><span>24Q4</span><span>25Q1</span><span>25Q2</span><span>25Q3</span><span>25Q4</span><span>26Q1</span><span>26Q2</span></div>
+    <div class="foot">集中度 = 前十只股票占基金资产净值的合计比例; 数据来源: 公开季报前十大明细独立求和, 已与官方 PDF 逐行对账。</div></section>
+<section class="slide" data-page="6"><h2>持仓轮动主线<small>用四个可计算指标替代主观描述</small></h2>
+    <div class="cols">
+      <div class="col">
+        <h3>主导主题演进</h3>
+        <div class="chain"><span class="chip">食品饮料/乳品<i>1 期</i></span><span class="arrow">→</span><span class="chip">化学制品<i>1 期</i></span><span class="arrow">→</span><span class="chip">煤炭开采<i>6 期</i></span><span class="arrow">→</span><span class="chip">航运港口<i>3 期</i></span><span class="arrow">→</span><span class="chip">通信设备<i>1 期</i></span><span class="arrow">→</span><span class="chip">汽车零部件<i>1 期</i></span><span class="arrow">→</span><span class="chip">通信设备<i>1 期</i></span><span class="arrow">→</span><span class="chip">汽车零部件<i>1 期</i></span><span class="arrow">→</span><span class="chip">通信设备<i>5 期</i></span><span class="arrow">→</span><span class="chip">医药生物/化学制药<i>6 期</i></span></div>
+        <div style="display:flex;gap:12px;margin-top:6px">
+          <div class="card"><div class="lbl">相邻期平均留存</div><div class="big">7.4<span style="font-size:16px;color:#46586e">/10</span></div><div class="sub">换手强度代理指标</div></div>
+          <div class="card"><div class="lbl">平均新进</div><div class="big">2.6<span style="font-size:16px;color:#46586e"> 只/期</span></div></div>
+          <div class="card"><div class="lbl">平均 Jaccard</div><div class="big">0.61</div><div class="sub">名单相似度</div></div>
+        </div>
+        <div class="card"><h3>最长连续在榜</h3><p style="font-size:15px">000063(连续 20 期)</p></div>
+      </div>
+      <div class="col">
+        <h3>逐期前十合计与留存</h3>
+        <table><thead><tr><th>报告期</th><th class="num">前十合计</th><th class="num">留存</th><th>新进</th></tr></thead><tbody>
+        <tr><td>2023Q3</td><td class="num">38.96%</td><td class="num">7/10</td><td style="color:#0f7b52">骆驼股份、广深铁路、华勤技术</td></tr><tr><td>2023Q4</td><td class="num">37.19%</td><td class="num">8/10</td><td style="color:#0f7b52">陕鼓动力、普洛药业</td></tr><tr><td>2024Q1</td><td class="num">36.73%</td><td class="num">8/10</td><td style="color:#0f7b52">圆通速递、九州通</td></tr><tr><td>2024Q2</td><td class="num">34.67%</td><td class="num">8/10</td><td style="color:#0f7b52">五芳斋、视源股份</td></tr><tr><td>2024Q3</td><td class="num">33.21%</td><td class="num">8/10</td><td style="color:#0f7b52">东方明珠、睿创微纳</td></tr><tr><td>2024Q4</td><td class="num">36.97%</td><td class="num">7/10</td><td style="color:#0f7b52">华域汽车、中国移动、康弘药业</td></tr><tr><td>2025Q1</td><td class="num">37.25%</td><td class="num">9/10</td><td style="color:#0f7b52">长春高新</td></tr><tr><td>2025Q2</td><td class="num">37.09%</td><td class="num">9/10</td><td style="color:#0f7b52">圆通速递</td></tr><tr><td>2025Q3</td><td class="num">43.21%</td><td class="num">8/10</td><td style="color:#0f7b52">中国海油、久立特材</td></tr><tr><td>2025Q4</td><td class="num">45.08%</td><td class="num">9/10</td><td style="color:#0f7b52">中国出版</td></tr><tr><td>2026Q1</td><td class="num">41.50%</td><td class="num">8/10</td><td style="color:#0f7b52">安图生物、晨光股份</td></tr><tr><td>2026Q2</td><td class="num">45.31%</td><td class="num">9/10</td><td style="color:#0f7b52">TCL科技</td></tr>
+        </tbody></table>
+      </div>
+    </div><div class="foot">留存率只看前十, 不等于全部持仓的真实换手率。</div></section>
+<section class="slide" data-page="7"><h2>关键调仓案例审计<small>至少一成一败, 且标明证据级别</small></h2>
+    <div class="cols">
+      <div class="col">
+        <div class="card ok"><h3>持有期推算价表现靠前</h3>
+        <table><thead><tr><th>股票</th><th>进入</th><th class="num">推算价</th><th>最后在榜</th><th class="num">推算价</th><th class="num">持有期变动</th></tr></thead><tbody>
+        <tr><td>睿创微纳</td><td>2024Q3</td><td class="num">39.43</td><td>2025Q2</td><td class="num">69.72</td><td class="num pos">+76.82%</td></tr><tr><td>陕西煤业</td><td>2020Q2</td><td class="num">7.21</td><td>2021Q4</td><td class="num">12.20</td><td class="num pos">+69.21%</td></tr><tr><td>长缆科技</td><td>2021Q2</td><td class="num">15.05</td><td>2021Q4</td><td class="num">23.60</td><td class="num pos">+56.81%</td></tr><tr><td>三环集团</td><td>2020Q1</td><td class="num">18.24</td><td>2020Q2</td><td class="num">27.70</td><td class="num pos">+51.86%</td></tr>
+        </tbody></table></div>
+      </div>
+      <div class="col">
+        <div class="card bad"><h3>持有期推算价表现靠后</h3>
+        <table><thead><tr><th>股票</th><th>进入</th><th class="num">推算价</th><th>最后在榜</th><th class="num">推算价</th><th class="num">持有期变动</th></tr></thead><tbody>
+        <tr><td>九州通</td><td>2020Q4</td><td class="num">18.16</td><td>2024Q3</td><td class="num">5.74</td><td class="num neg">-68.39%</td></tr><tr><td>佳士科技</td><td>2021Q2</td><td class="num">15.92</td><td>2023Q4</td><td class="num">7.77</td><td class="num neg">-51.19%</td></tr><tr><td>神州数码</td><td>2020Q3</td><td class="num">25.25</td><td>2021Q3</td><td class="num">15.38</td><td class="num neg">-39.09%</td></tr><tr><td>长春高新</td><td>2025Q1</td><td class="num">97.80</td><td>2026Q2</td><td class="num">66.60</td><td class="num neg">-31.90%</td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+    <p style="margin-top:14px;font-size:13.5px">推算价 = 期末公允价值 ÷ 期末持股数, 未做除权除息复权、不含分红, <strong>证据级别: 合理推断</strong>; 它反映的是"事后可观测的价格结果", 不等于经理当时的买卖价格, 也不等于投资者收益。</p>
+    </section>
+<section class="slide" data-page="8"><h2>最新一期结构与变化<small>2026Q2 vs 2026Q1</small></h2>
+    <div class="cols">
+      <div class="col">
+        <h3>2026Q2 前十大</h3>
+        <table><thead><tr><th>#</th><th>股票</th><th>代码</th><th class="num">权重</th><th class="num">推算价</th></tr></thead><tbody>
+        <tr><td>1</td><td>中国移动</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">600941</td><td class="num">9.26%</td><td class="num">86.13</td></tr><tr><td>2</td><td>普洛药业</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">000739</td><td class="num">7.29%</td><td class="num">16.66</td></tr><tr><td>3</td><td>晨光股份</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">603899</td><td class="num">4.89%</td><td class="num">20.63</td></tr><tr><td>4</td><td>广深铁路</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">601333</td><td class="num">4.87%</td><td class="num">2.75</td></tr><tr><td>5</td><td>中兴通讯</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">000063</td><td class="num">4.21%</td><td class="num">36.19</td></tr><tr><td>6</td><td>中国海油</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">600938</td><td class="num">3.91%</td><td class="num">27.15</td></tr><tr><td>7</td><td>康弘药业</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">002773</td><td class="num">2.92%</td><td class="num">20.45</td></tr><tr><td>8</td><td>安图生物</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">603658</td><td class="num">2.80%</td><td class="num">29.02</td></tr><tr><td>9</td><td>TCL科技</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">000100</td><td class="num">2.70%</td><td class="num">5.82</td></tr><tr><td>10</td><td>长春高新</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">000661</td><td class="num">2.46%</td><td class="num">66.60</td></tr>
+        </tbody></table>
+      </div>
+      <div class="col">
+        <h3>2026Q1 → 2026Q2 变动</h3>
+        <table><thead><tr><th>股票</th><th>代码</th><th class="num">上期</th><th class="num">本期</th><th class="num">变化</th><th>状态</th></tr></thead><tbody>
+        <tr><td>中国海油</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">600938</td><td class="num">4.62%</td><td class="num">3.91%</td><td class="num">-0.71pp</td><td>减仓</td></tr><tr><td>中国移动</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">600941</td><td class="num">8.23%</td><td class="num">9.26%</td><td class="num">+1.03pp</td><td>加仓</td></tr><tr><td>广深铁路</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">601333</td><td class="num">4.65%</td><td class="num">4.87%</td><td class="num">+0.22pp</td><td>加仓</td></tr><tr><td>安图生物</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">603658</td><td class="num">2.27%</td><td class="num">2.80%</td><td class="num">+0.53pp</td><td>加仓</td></tr><tr><td>晨光股份</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">603899</td><td class="num">2.51%</td><td class="num">4.89%</td><td class="num">+2.38pp</td><td>加仓</td></tr><tr><td>普洛药业</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">000739</td><td class="num">6.42%</td><td class="num">7.29%</td><td class="num">+0.87pp</td><td>加仓</td></tr><tr><td>中兴通讯</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">000063</td><td class="num">3.21%</td><td class="num">4.21%</td><td class="num">+1.00pp</td><td>加仓</td></tr><tr><td>康弘药业</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">002773</td><td class="num">4.71%</td><td class="num">2.92%</td><td class="num">-1.79pp</td><td>减仓</td></tr><tr><td>TCL科技</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">000100</td><td class="num">—</td><td class="num">2.70%</td><td class="num">—</td><td><span class="pos">新进</span></td></tr><tr><td>长春高新</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">000661</td><td class="num">2.40%</td><td class="num">2.46%</td><td class="num">+0.06pp</td><td>加仓</td></tr><tr><td>久立特材</td><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">002318</td><td class="num">2.48%</td><td class="num">—</td><td class="num">—</td><td><span class="neg">退出</span></td></tr>
+        </tbody></table>
+      </div>
+    </div></section>
+<section class="slide" data-page="9"><h2>最优秀的可复制 × 不能被神化<small>成对写, 避免只讲好话</small></h2>
+    <div class="cols">
+      <div class="col"><div class="card ok"><h3>可复制的部分(方法)</h3><ul>
+        <li>以季报为唯一事实来源, 每个数字可指回原文 —— 任何团队都能照做。</li>
+        <li>用"留存数 / Jaccard / 集中度斜率 / 主题切换次数"四个可计算指标描述调仓。</li>
+        <li>所有案例审计都标注证据级别与推翻条件, 把"事后讲故事"降级。</li>
+        <li>收益口径用分红再投总回报指数, 并与官方季报披露的净值增长率反向校准。</li>
+      </ul></div></div>
+      <div class="col"><div class="card bad"><h3>不能被神化的部分(风险)</h3><ul>
+        <li>单一区间、单一经理、单一风格的样本, 无法证明方法可迁移。</li>
+        <li>只看前十大, 完整组合的行业暴露与风险敞口不可见。</li>
+        <li>若收益集中在少数季度, 剔除后结论强度会显著下降 —— 必须成对报告。</li>
+        <li>本复盘全部为回溯描述, <strong>不含对未来收益的任何判断</strong>。</li>
+      </ul></div></div>
+    </div></section>
+<section class="slide" data-page="10"><h2>跟踪清单与证伪方式<small>下一期只需核对这几行</small></h2>
+    <table><thead><tr><th style="width:22%">观察项</th><th style="width:34%">当前基线</th><th>触发条件</th></tr></thead><tbody>
+    <tr><td><strong>前十名单稳定性</strong></td><td>历史平均留存 7.4/10</td><td>下一期留存数低于 5 只即视为结构变化</td></tr><tr><td><strong>集中度</strong></td><td>33.21–58.81%(均值 42.74%)</td><td>连续两期落在区间外</td></tr><tr><td><strong>第一大重仓</strong></td><td>均值 7.74%, 最高 10.06%</td><td>接近 10% 上限需说明理由</td></tr><tr><td><strong>主导主题</strong></td><td>当前 医药生物/化学制药, 历史切换 9 次</td><td>再次切换时须能列出切换时点可得证据</td></tr><tr><td><strong>规模</strong></td><td>9.75 → 21.85 亿元(峰值 38.32)</td><td>规模继续下降会改变策略容量与操作空间</td></tr><tr><td><strong>收益集中度</strong></td><td>单季(2020Q2)贡献约占区间收益 23.98%</td><td>剔除该季后的收益 85.54% 才是可持续性的更保守口径</td></tr>
+    </tbody></table>
+    <p style="margin-top:18px">跟踪清单的作用: 下一期报告只需核对这几行, 就能说清"判断被证实还是被推翻", 而不是每次重新讲故事。</p>
+    </section>
+<section class="slide" data-page="11"><h2>数据来源与质检<small>可核验, 是这个项目的立身之本</small></h2>
+    <div class="cols">
+      <div class="col">
+        <h3>来源清单(10 类, 均记抓取日期与 URL)</h3>
+        <table><thead><tr><th>类型</th><th>URL</th></tr></thead><tbody>
+        <tr><td style="white-space:nowrap">基金概况</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://fundf10.eastmoney.com/jbgk_090007.html</td></tr><tr><td style="white-space:nowrap">净值序列(日频)</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://fund.eastmoney.com/pingzhongdata/090007.js</td></tr><tr><td style="white-space:nowrap">基金经理履历</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://fundf10.eastmoney.com/jjjl_090007.html</td></tr><tr><td style="white-space:nowrap">天天基金 F10 历史前十大</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&amp;code=090007</td></tr><tr><td style="white-space:nowrap">天天基金 资产配置</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://fundf10.eastmoney.com/zcpz_090007.html</td></tr><tr><td style="white-space:nowrap">天天基金 规模变动</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=gmbd&amp;code=090007</td></tr><tr><td style="white-space:nowrap">官方定期报告 PDF</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://pdf.dfcfw.com/pdf/H2_AN202004211378351663_1.pdf</td></tr><tr><td style="white-space:nowrap">官方定期报告 PDF</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://pdf.dfcfw.com/pdf/H2_AN202104221486973565_1.pdf</td></tr><tr><td style="white-space:nowrap">官方定期报告 PDF</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://pdf.dfcfw.com/pdf/H2_AN202204221560785083_1.pdf</td></tr><tr><td style="white-space:nowrap">官方定期报告 PDF</td><td style="word-break:break-all;font-size:12px;color:#46586e">https://pdf.dfcfw.com/pdf/H2_AN202304211585660389_1.pdf</td></tr>
+        </tbody></table>
+      </div>
+      <div class="col">
+        <h3>质检结论</h3>
+        <div class="card warn">
+          <div class="lbl">总体</div><div class="big" style="font-size:20px">通过, 有 1 项建议人工确认</div>
+          <div class="sub">通过 17 · 提示 1 · 阻断 0(共 18 条规则)</div></div>
+        <div class="card"><h3>边界与免责</h3><ul>
+          <li>只看前十大持仓(季报口径), 期末快照, 期间买卖不可见</li>
+          <li>推算价未复权、不含分红, 不代表投资者实际收益</li>
+          <li>数据仅来自公开渠道, <strong>不含任何机构内部数据</strong></li>
+          <li>不构成投资建议, 不评价基金经理个人, 不推荐任何基金</li>
+        </ul></div>
+      </div>
+    </div><div class="foot">生成工具: 基金复诊台 FundClinic · 规则引擎(离线确定性计算) · 2026-09-16 11:16</div></section>
+<div class="nav"><button id="pv">‹</button><span id="pg">1 / 11</span><button id="nx">›</button></div>
+<div class="hint">← → 翻页 · P 打印/导出 PDF</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide')),i=0;
+  function go(n){i=Math.max(0,Math.min(slides.length-1,n));document.getElementById('pg').textContent=(i+1)+' / '+slides.length;slides[i].scrollIntoView({block:'start'});}
+  document.getElementById('nx').onclick=function(){go(i+1)};
+  document.getElementById('pv').onclick=function(){go(i-1)};
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')  {e.preventDefault();go(i+1);}
+    if(e.key==='ArrowLeft'||e.key==='PageUp')                  {e.preventDefault();go(i-1);}
+    if(e.key==='Home'){go(0);} if(e.key==='End'){go(slides.length-1);}
+    if(e.key==='p'||e.key==='P'){window.print();}
+  });
+  var obs=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){i=slides.indexOf(en.target);document.getElementById('pg').textContent=(i+1)+' / '+slides.length;}});},{threshold:.5});
+  slides.forEach(function(s){obs.observe(s)});
+})();
+</script>
+</body></html>

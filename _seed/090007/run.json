@@ -1,0 +1,301 @@
+{
+ "code": "090007",
+ "summary": {
+  "code": "090007",
+  "name": "大成策略回报混合A",
+  "manager": "徐彦",
+  "range": "2020Q1–2026Q2",
+  "quarters": 26,
+  "formTag": "主题漂移型",
+  "perf": {
+   "cumReturn": 112.52,
+   "exBestQuarter": 85.54,
+   "maxDrawdown": -16.68
+  },
+  "check": {
+   "total": 18,
+   "pass": 16,
+   "warn": 2,
+   "fail": 0,
+   "verdict": "warn",
+   "verdictText": "通过, 有 2 项建议人工确认"
+  },
+  "official": {
+   "available": true,
+   "pdftotext": true,
+   "checks": [
+    {
+     "period": "2020Q1",
+     "reason": "首季",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2021Q1",
+     "reason": "每 4 季抽样",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2022Q1",
+     "reason": "每 4 季抽样",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    },
+    {
+     "period": "2023Q1",
+     "reason": "每 4 季抽样",
+     "parsedRows": 10,
+     "ok": true,
+     "maxDiff": 0,
+     "diffs": [],
+     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+    }
+   ],
+   "notes": [
+    "官方对账完成: 4/4 期逐行一致, 共解析 40 行官方持仓。"
+   ],
+   "talks": 4
+  },
+  "sources": [
+   {
+    "type": "基金概况",
+    "url": "https://fundf10.eastmoney.com/jbgk_090007.html",
+    "fetchedAt": "2026-09-16T11:15:51.072Z",
+    "fields": [
+     "全称",
+     "类型",
+     "管理公司",
+     "基金经理",
+     "业绩比较基准"
+    ]
+   },
+   {
+    "type": "净值序列(日频)",
+    "url": "https://fund.eastmoney.com/pingzhongdata/090007.js",
+    "fetchedAt": "2026-09-16T11:15:51.361Z",
+    "points": 4326
+   },
+   {
+    "type": "基金经理履历",
+    "url": "https://fundf10.eastmoney.com/jjjl_090007.html",
+    "fetchedAt": "2026-09-16T11:15:51.503Z",
+    "rows": 9
+   },
+   {
+    "type": "天天基金 F10 历史前十大",
+    "url": "https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code=090007",
+    "fetchedAt": "2026-09-16T11:15:55.731Z",
+    "quarters": 38
+   },
+   {
+    "type": "天天基金 资产配置",
+    "url": "https://fundf10.eastmoney.com/zcpz_090007.html",
+    "fetchedAt": "2026-09-16T11:15:55.956Z",
+    "periods": 70
+   },
+   {
+    "type": "天天基金 规模变动",
+    "url": "https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=gmbd&code=090007",
+    "fetchedAt": "2026-09-16T11:15:56.456Z",
+    "rows": 75
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202004211378351663_1.pdf",
+    "fetchedAt": "2026-09-16T11:15:58.590Z",
+    "period": "2020Q1",
+    "bytes": 362615,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202104221486973565_1.pdf",
+    "fetchedAt": "2026-09-16T11:15:58.590Z",
+    "period": "2021Q1",
+    "bytes": 420543,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202204221560785083_1.pdf",
+    "fetchedAt": "2026-09-16T11:15:58.590Z",
+    "period": "2022Q1",
+    "bytes": 466881,
+    "对账": "逐行一致"
+   },
+   {
+    "type": "官方定期报告 PDF",
+    "url": "https://pdf.dfcfw.com/pdf/H2_AN202304211585660389_1.pdf",
+    "fetchedAt": "2026-09-16T11:15:58.590Z",
+    "period": "2023Q1",
+    "bytes": 555576,
+    "对账": "逐行一致"
+   }
+  ],
+  "rangeInfo": {
+   "auto": true,
+   "basis": "现任经理任期(徐彦(2020-03-23 ~ 至今))共 26 个报告期, 足以判定形态",
+   "from": "2020Q1",
+   "to": "2026Q2",
+   "candidates": [
+    {
+     "id": "tenure0",
+     "label": "徐彦(2020-03-23 ~ 至今)",
+     "from": "2020Q1",
+     "to": "2026Q2",
+     "n": 26,
+     "isCurrent": true,
+     "coManaged": false,
+     "recommended": true
+    },
+    {
+     "id": "tenure2",
+     "label": "侯春燕(2018-09-11 ~ 2020-03-19)",
+     "from": "2018Q3",
+     "to": "2019Q4",
+     "n": 6,
+     "isCurrent": false,
+     "coManaged": false,
+     "recommended": false
+    },
+    {
+     "id": "tenure4",
+     "label": "徐彦(2012-12-31 ~ 2018-09-06)",
+     "from": "2017Q1",
+     "to": "2018Q2",
+     "n": 6,
+     "isCurrent": false,
+     "coManaged": false,
+     "recommended": false
+    },
+    {
+     "id": "all",
+     "label": "全部可取报告期",
+     "from": "2017Q1",
+     "to": "2026Q2",
+     "n": 38,
+     "isCurrent": false,
+     "coManaged": false,
+     "recommended": false
+    }
+   ],
+   "candidatesTotal": 38,
+   "selected": 26,
+   "excludedBefore": 12
+  },
+  "cleanLog": [],
+  "aiLog": [
+   {
+    "task": "T3 · 对外用词清洗",
+    "ok": true,
+    "issues": [
+     {
+      "level": "pass",
+      "msg": "检测到 _对外版.md, 说明该次运行的用词清洗已通过校验(具体校验明细在补建前的运行日志里)"
+     }
+    ]
+   }
+  ],
+  "files": {
+   "dataset": {
+    "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\底稿_大成策略回报混合A_090007.json",
+    "rel": "_runs\\090007\\底稿_大成策略回报混合A_090007.json",
+    "bytes": 94376
+   },
+   "report": {
+    "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\复盘报告_大成策略回报混合A_090007.md",
+    "rel": "_runs\\090007\\复盘报告_大成策略回报混合A_090007.md",
+    "bytes": 17818
+   },
+   "check": {
+    "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\错误检查记录_大成策略回报混合A_090007.md",
+    "rel": "_runs\\090007\\错误检查记录_大成策略回报混合A_090007.md",
+    "bytes": 5229
+   },
+   "card": {
+    "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\结论卡_大成策略回报混合A_090007.json",
+    "rel": "_runs\\090007\\结论卡_大成策略回报混合A_090007.json",
+    "bytes": 5242
+   },
+   "deck": {
+    "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\演示稿_大成策略回报混合A_090007.html",
+    "rel": "_runs\\090007\\演示稿_大成策略回报混合A_090007.html",
+    "bytes": 34298
+   },
+   "sources": {
+    "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\来源清单_大成策略回报混合A_090007.md",
+    "rel": "_runs\\090007\\来源清单_大成策略回报混合A_090007.md",
+    "bytes": 6407
+   },
+   "reportClean": {
+    "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\复盘报告_大成策略回报混合A_090007_对外版.md",
+    "rel": "_runs\\090007\\复盘报告_大成策略回报混合A_090007_对外版.md",
+    "bytes": 15866
+   }
+  },
+  "pdf": {
+   "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\复盘报告_大成策略回报混合A_090007.md",
+   "rel": "_runs\\090007\\复盘报告_大成策略回报混合A_090007.md",
+   "bytes": 17818
+  },
+  "steps": [
+   {
+    "name": "补建历史索引",
+    "detail": "本次记录由 tools/backfill_runs.mjs 从已落盘底稿反推(原始运行发生在持久化上线之前)",
+    "at": "2026-09-16T11:30:12.636Z"
+   }
+  ],
+  "totalMs": null,
+  "backfilled": true
+ },
+ "files": {
+  "dataset": {
+   "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\底稿_大成策略回报混合A_090007.json",
+   "rel": "_runs\\090007\\底稿_大成策略回报混合A_090007.json",
+   "bytes": 94376
+  },
+  "report": {
+   "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\复盘报告_大成策略回报混合A_090007.md",
+   "rel": "_runs\\090007\\复盘报告_大成策略回报混合A_090007.md",
+   "bytes": 17818
+  },
+  "check": {
+   "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\错误检查记录_大成策略回报混合A_090007.md",
+   "rel": "_runs\\090007\\错误检查记录_大成策略回报混合A_090007.md",
+   "bytes": 5229
+  },
+  "card": {
+   "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\结论卡_大成策略回报混合A_090007.json",
+   "rel": "_runs\\090007\\结论卡_大成策略回报混合A_090007.json",
+   "bytes": 5242
+  },
+  "deck": {
+   "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\演示稿_大成策略回报混合A_090007.html",
+   "rel": "_runs\\090007\\演示稿_大成策略回报混合A_090007.html",
+   "bytes": 34298
+  },
+  "sources": {
+   "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\来源清单_大成策略回报混合A_090007.md",
+   "rel": "_runs\\090007\\来源清单_大成策略回报混合A_090007.md",
+   "bytes": 6407
+  },
+  "reportClean": {
+   "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\复盘报告_大成策略回报混合A_090007_对外版.md",
+   "rel": "_runs\\090007\\复盘报告_大成策略回报混合A_090007_对外版.md",
+   "bytes": 15866
+  }
+ },
+ "pdf": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\090007\\复盘报告_大成策略回报混合A_090007.md",
+ "at": "2026-09-16T11:18:10.301Z",
+ "backfilled": true
+}

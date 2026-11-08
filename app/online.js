@@ -573,7 +573,7 @@ window.FC = window.FC || {};
       var meta = [
         h.quarters ? h.quarters + ' 期' : '',
         h.formTag || '',
-        h.seeded ? '<span class="seeded">种子</span>' : when
+        when
       ].filter(Boolean).join(' · ');
       return '<a class="rl-i' + (h.code === cur ? ' on' : '') + '" data-code="' + FC.esc(h.code) + '" title="载入这次的结果（不重跑）">' +
         '<div class="t"><b>' + FC.esc(h.code) + '</b><i>' + FC.esc(h.name) + '</i></div>' +

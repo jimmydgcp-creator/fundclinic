@@ -17,7 +17,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SHOW = path.join(ROOT, 'showcase');
 const OUT_ZIP = process.argv[2] || path.join(process.env.TEMP || '/tmp', 'mf02_py.zip');
 const SEED = path.join(ROOT, '_seed');
-const CODES = ['519191', '510300'];   // 一只主动、一只 ETF 对照: 对比页和"问一句"都用得上
+const CODES = ['519191', '090007'];   // 两只主动基金: 519191(个股稳定+主题切换) / 090007(主题漂移), 形态可对照
 
 const log = (...a) => console.log(...a);
 const kb = n => (n / 1024).toFixed(0) + ' KB';
