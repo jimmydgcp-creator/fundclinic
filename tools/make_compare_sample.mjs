@@ -20,7 +20,7 @@ const COLORS = ['#b4472c', '#2e5496', '#6b7a86'];
 const W = 1000, H = 320, PAD_L = 46, PAD_R = 96, PAD_T = 16, PAD_B = 30;
 const IW = W - PAD_L - PAD_R, IH = H - PAD_T - PAD_B;
 
-const ORDER = ['519191', '110022', '510300'];
+const ORDER = ['519191', '110022', '090007'];
 const funds = DATA.funds.slice().sort((a, b) => {
   const ia = ORDER.indexOf(a.code), ib = ORDER.indexOf(b.code);
   return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
@@ -98,9 +98,10 @@ const block = `<!-- CMP-SAMPLE:START 由 tools/make_compare_sample.mjs 生成, �
         <tbody>${rows}</tbody>
       </table>
       <p class="note">
-        前两只 ${years12} 年几乎打平：累计 ${pct(funds[0].metrics.cumReturn)} 对 ${pct(funds[1].metrics.cumReturn)}，年化 ${pct(funds[0].metrics.annualized)} 对 ${pct(funds[1].metrics.annualized)}，年化波动 ${pct(funds[0].metrics.volAnnual)} 对 ${pct(funds[1].metrics.volAnnual)}。但最大回撤一个是 ${pct(funds[0].metrics.maxDrawdown)}，一个是 ${pct(funds[1].metrics.maxDrawdown)}。收益一样，要扛的东西不一样。
+        前两只 ${years12} 年几乎打平：累计 ${pct(funds[0].metrics.cumReturn)} 对 ${pct(funds[1].metrics.cumReturn)}，年化 ${pct(funds[0].metrics.annualized)} 对 ${pct(funds[1].metrics.annualized)}，年化波动 ${pct(funds[0].metrics.volAnnual)} 对 ${pct(funds[1].metrics.volAnnual)}；但最大回撤一个是 ${pct(funds[0].metrics.maxDrawdown)}，一个是 ${pct(funds[1].metrics.maxDrawdown)}。
+        <br>波动最低的是第三只（${pct(funds[2].metrics.volAnnual)}），收益却最高（累计 ${pct(funds[2].metrics.cumReturn)}）。看波动率，选不出该拿哪一只。
       </p>
-      <p class="muted cmp-tip">数据截至 ${DATA.window.to}，来源：天天基金净值序列。被动 ETF 与主动基金的「形态标签」不可比，这一段只看曲线和回撤。</p>
+      <p class="muted cmp-tip">数据截至 ${DATA.window.to}，来源：天天基金净值序列。三只都是主动基金，形态可以对照；换成 ETF 或货币基金时，形态标签不可比。</p>
     </div>
     <!-- CMP-SAMPLE:END -->`;
 
