@@ -157,7 +157,9 @@ curl.exe -H "Authorization: Bearer <组令牌>" https://show.lingnan.top/api/sta
 | 能做什么 | 看 519191(13 节)/510300 的完整报告、底稿、质检; **问一句**(真调模型); **横向对比**(真抓净值) |
 | 不能做什么 | 现场跑一只新基金 —— 那要采集六类来源 + 官方 PDF 对账 + 五步模型, 展台装不下这条流水线 |
 | 密钥 | 用 `POST /api/secret {"name":"DEEPSEEK_API_KEY","value":"..."}` 设到服务器; 代码只读 `os.environ`, 包里绝不含 `sk-`(打包脚本会先扫一遍) |
-| 前端配合 | `/api/health` 返回 `caps:{run:false,ask:true,compare:true}`; 前端据此收起"输入代码"、只保留能用的入口, 并在首屏写明边界 |
+| 前端配合 | `/api/health` 返回 `caps:{run:false,ask:true,compare:true}`; 前端据此收起"输入代码"、只保留能用的入口 |
+| 首屏口径 | 展台首屏**不摆解释性长句**(原来顶上那条"当前是展示版…展台装不下这条流水线"已删): 标题改成"这份复盘已经跑完", 主按钮直接进 13 节报告 —— 用控件说清楚能做什么, 而不是先让人读免责 |
+| 对比样例 | 横向对比页有一组预置的三只基金曲线(110022 只出现在这组样例里, 不是预置复盘结果)。数据在 `data/compare-sample.json`, 改完跑 `node tools/make_compare_sample.mjs` 重写 `index.html` 里 `CMP-SAMPLE` 那一段 |
 
 > 展台服务器 30 分钟没人访问会休眠, 第一次打开要等几秒(前端会轮询, 不是死等)。
 
