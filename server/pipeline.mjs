@@ -107,6 +107,30 @@ export async function runPipeline(code, opts = {}) {
   });
   const dataset = crawl.dataset;
   calibrateAgainstOfficial(dataset, step);
+
+  /* ---- 硬闸门: 收益数字与官方披露对不上, 就整块停掉, 不许只加脚注 ----------
+   * 教训(2026-11-08, 163402 兴全趋势): 校准已经报出"5 期最大偏差 592.88pp",
+   * 但报告只在脚注写了一句"需人工复核", 正文照样把 +71861.96% 挂在标题上 ——
+   * 一只只跑了 5 个季度、真实约 +43% 的基金, 看起来像 700 倍。
+   * 现在: 任一季与官方差超过 20pp, 绩效层直接停用, 并说明为什么停。
+   */
+  const PERF_REJECT_PP = 20;
+  const cal0 = dataset.perfCalibration;
+  if (dataset.perf && cal0 && cal0.ok && cal0.maxAbsDiff > PERF_REJECT_PP) {
+    dataset.perfRejected = {
+      threshold: PERF_REJECT_PP,
+      maxAbsDiff: cal0.maxAbsDiff,
+      worst: cal0.worst || null,
+      trBasis: dataset.perf.trBasis || null,
+      note: cal0.worst
+        ? `收益数字与官方季报对不上: ${cal0.worst.period} 差 ${cal0.worst.diff}pp, 全期最大偏差 ${cal0.maxAbsDiff}pp`
+        : `收益数字与官方季报对不上: 全期最大偏差 ${cal0.maxAbsDiff}pp`
+    };
+    if (dataset.perfDetail) dataset.perfDetail.rejected = dataset.perfRejected;
+    dataset.perf = null;
+    step('绩效层停用', `与官方季报偏差 ${cal0.maxAbsDiff}pp > 阈值 ${PERF_REJECT_PP}pp —— 本次不发布任何收益结论`);
+  }
+
   step('采集完成', `${dataset.crawlLog.quarters} 期 · 净值 ${dataset.crawlLog.navPoints} 点 · 来源 ${dataset.sources.length} 类 · ${(dataset.crawlMs / 1000).toFixed(1)}s`);
   if (dataset.rangeInfo && dataset.rangeInfo.humanConfirmed) {
     step('按人工确认口径', `经理 ${dataset.rangeInfo.managerLabel} · 区间 ${dataset.rangeInfo.from}~${dataset.rangeInfo.to}` +

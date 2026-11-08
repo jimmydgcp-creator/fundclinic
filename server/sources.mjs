@@ -218,22 +218,64 @@ export async function getHoldings(code, { fromYear, toYear, onProgress } = {}) {
  */
 export function buildTotalReturnIndex(unitWorth, accWorth) {
   const acByT = new Map();
-  accWorth.forEach(p => acByT.set(p.t, p.nav));
+  (accWorth || []).forEach(p => acByT.set(p.t, p.nav));
+
+  /* ---- 口径体检: 累计净值到底是"加法"还是"复权" ----------------------------
+   * 上面那套算法只在**加法口径**(累计净值 = 单位净值 + 累计分红)下成立。
+   * 但有些基金的累计净值是**复权口径**: 它随单位净值等比放大, 于是 (累计−单位) 每天
+   * 都在变大, 被当成"当日分红"加回去 = 每天都多送一份收益, 连乘几千天直接爆表。
+   * 实测 163402 兴全趋势: 累计净值 4.276→4.3751 的同时单位净值 1.0456→1.0704,
+   * 凭空多出 0.074 的"分红", 5110 个交易日里 168 天这样, 区间收益算出 +71861.96%,
+   * 而真实约 +43%。
+   * 判据: 真分红一年最多几次; 若超过 1% 的交易日都像"分了 2% 以上", 就说明口径不对。
+   */
+  const total = (unitWorth || []).length;
+  let prevNavChk = null, prevCumChk = 0, suspicious = 0;
+  for (const p of unitWorth || []) {
+    if (!p || typeof p.nav !== 'number') continue;
+    const ac = acByT.get(p.t);
+    const cumDiv = (typeof ac === 'number') ? Math.max(0, ac - p.nav) : prevCumChk;
+    if (prevNavChk && prevNavChk > 0) {
+      const d = cumDiv - prevCumChk;
+      if (d > 0 && d / prevNavChk > 0.02) suspicious++;
+    }
+    prevNavChk = p.nav; prevCumChk = cumDiv;
+  }
+  const accUsable = suspicious <= Math.max(5, Math.round(total * 0.01));
+
   const out = [];
   let tr = 1, prevNav = null, prevCumDiv = 0, hasPrev = false;
   for (const p of unitWorth) {
     if (!p || typeof p.nav !== 'number') continue;
+    if (!hasPrev) { out.push({ t: p.t, nav: 1 }); prevNav = p.nav; hasPrev = true; continue; }
+    if (!accUsable) {
+      // 口径不明: 退化为单位净值口径(不加回分红), 宁可低估, 也不编造收益
+      tr = tr * p.nav / prevNav;
+      out.push({ t: p.t, nav: tr });
+      prevNav = p.nav;
+      continue;
+    }
     const ac = acByT.get(p.t);
     const cumDiv = (typeof ac === 'number') ? Math.max(0, ac - p.nav) : prevCumDiv;
     const div = Math.max(0, cumDiv - prevCumDiv);
     // 累计净值只披露到 4 位小数, 低于 0.001 的增量视为噪声
     const divClean = div >= 0.001 ? div : 0;
-    if (!hasPrev) { out.push({ t: p.t, nav: 1 }); }
-    else { tr = tr * (p.nav + divClean) / prevNav; out.push({ t: p.t, nav: tr }); }
-    prevNav = p.nav; prevCumDiv = cumDiv; hasPrev = true;
+    tr = tr * (p.nav + divClean) / prevNav;
+    out.push({ t: p.t, nav: tr });
+    prevNav = p.nav; prevCumDiv = cumDiv;
+  }
+
+  /* 把口径判断挂在数组上(array 也是对象), 调用方据此写进口径说明与被拒记录 */
+  out.trBasis = accUsable ? 'dividend-reinvested' : 'unit-nav-only';
+  out.suspiciousDays = suspicious;
+  if (!accUsable) {
+    out.methodNote = '单位净值口径(未加回分红): 累计净值序列与"单位净值+累计分红"的加法口径对不上'
+      + `(共 ${suspicious} 个交易日出现大于 2% 的隐含分红, 疑似复权口径), 为避免编造收益, 本次不加回分红;`
+      + ' 区间自第一个报告期的期初起算; 最大回撤按区间内日频指数计算';
   }
   return out;
 }
+
 
 /** 时间戳 → 北京时间的 YYYY-MM-DD。
  *
@@ -586,7 +628,7 @@ export async function crawlFund(code, opts = {}) {
 
   // ---- 绩效: 用「分红再投」总回报指数, 并以官方季报披露的净值增长率做校准(见 tools/calibrate_perf.mjs)
   const trIndex = buildTotalReturnIndex(nav.unitWorth, nav.accWorth);
-  const perf = computePerfFromIndex(trIndex, quarters);
+  const perf = computePerfFromIndex(trIndex, quarters, trIndex.methodNote ? { methodNote: trIndex.methodNote } : undefined);
   const aums = quarters.map(q => q.aum).filter(x => typeof x === 'number');
 
   // ---- ① 官方报告 PDF: 抽取 + 逐行对账(SOP 质检的核心一条)
@@ -635,6 +677,12 @@ export async function crawlFund(code, opts = {}) {
       cumReturn: perf.cumReturn, exBestQuarter: perf.exBestQuarter, bestQuarter: perf.bestQuarter,
       maxDrawdown: perf.maxDrawdown, aumPeak: aums.length ? Math.max(...aums) : null,
       aumEnd: aums.length ? aums[aums.length - 1] : null,
+      /* 逐季收益给质检用(B 层"收益量级"那一条要拿单季峰值做常识判断),
+         也方便下游核账。体积很小(每期一个数)。 */
+      quarterReturns: perf.quarterReturns,
+      /* 指数口径: dividend-reinvested(加回分红) / unit-nav-only(累计净值口径不可用, 已退化) */
+      trBasis: trIndex.trBasis,
+      trSuspiciousDays: trIndex.suspiciousDays,
       /* 这里**不能**写"已验证/已校准"之类的断言 —— 抓取阶段还没跟官方窗口对过账。
          校准结论由 pipeline 的 calibrateAgainstOfficial() 在真正比对之后追加,
          否则就是一句无论有没有做都照写的假声明。 */

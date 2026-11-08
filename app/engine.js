@@ -394,6 +394,8 @@ window.FC = window.FC || {};
       perfLayer = {
         cumReturn: n(perf.cumReturn), exBestQuarter: n(perf.exBestQuarter), bestQuarter: perf.bestQuarter || '',
         maxDrawdown: n(perf.maxDrawdown), aumPeak: n(perf.aumPeak), aumEnd: n(perf.aumEnd),
+        // 逐季收益: 质检 B4 要拿单季峰值做常识判断(单季 100% 以上基本只能是口径错了)
+        quarterReturns: perf.quarterReturns || null,
         bestQuarterContribution: singleQuarterShare,
         concentratedInOneQuarter: singleQuarterShare !== null && singleQuarterShare >= 40,
         note: perf.note || ''
@@ -429,6 +431,7 @@ window.FC = window.FC || {};
       fund: fund, quarters: quarters, m: m, form: form, perf: perfLayer, cases: cases,
       card: card, trackers: trackers, sources: dataset.sources || [], env: env,
       synthesis: dataset.synthesis || null,
+      perfRejected: dataset.perfRejected || null,
       range: nQ ? quarters[0].period + '–' + quarters[nQ - 1].period : '—'
     });
 
@@ -438,7 +441,7 @@ window.FC = window.FC || {};
       level: perfLayer ? '结构层 + 绩效层' : '仅结构层',
       fund: fund, range: nQ ? quarters[0].period + '–' + quarters[nQ - 1].period : '—',
       quarterCount: nQ, quarters: quarters, metrics: m, form: form,
-      perf: perfLayer, cases: cases, card: card, trackers: trackers,
+      perf: perfLayer, perfRejected: dataset.perfRejected || null, cases: cases, card: card, trackers: trackers,
       env: env, synthesis: dataset.synthesis || null, report: report
     };
   };
@@ -627,9 +630,14 @@ window.FC = window.FC || {};
         row('区间最大回撤', num(fx(perf.maxDrawdown), '%', 'fact', '净值序列', perf.maxDrawdown)) +
         row('规模', num(fx(perf.aumPeak), ' 亿元', 'fact', '规模序列') + ' → ' + num(fx(perf.aumEnd), ' 亿元', 'fact', '规模序列')) +
         '</tbody></table>' + '<p class="note">' + esc(perf.note) + '</p>' :
-        '<p class="gap-block">本次输入未包含净值/收益序列, <strong>不判定绩效形态, 也不给出任何收益结论</strong>。' +
-        '结构层结论仍然成立(见下), 但"由好转差 / 由差转好 / 持续优秀 / 持续不佳"这类绩效形态必须补净值后另行判定。' +
-        '<br><span class="hint">补法: 在输入页粘贴净值序列, 或使用 <code>fund.eastmoney.com/pingzhongdata/' + esc(f.code) + '.js</code> 获取。</span></p>'
+        '<p class="gap-block">' + (ctx.perfRejected
+          ? '<strong>本次不发布收益结论</strong>：' + esc(ctx.perfRejected.note) +
+            '。按 SOP, 收益数字必须能与官方季报逐季对上才允许对外 —— 对不上就不给, 而不是加个脚注照发。' +
+            ' 结构层结论不受影响(见下), 但"由好转差 / 由差转好 / 持续优秀 / 持续不佳"这类绩效形态, 本次不判定绩效形态。'
+          : '本次输入未包含净值/收益序列, <strong>不判定绩效形态, 也不给出任何收益结论</strong>。' +
+            '结构层结论仍然成立(见下), 但"由好转差 / 由差转好 / 持续优秀 / 持续不佳"这类绩效形态必须补净值后另行判定。' +
+            '<br><span class="hint">补法: 在输入页粘贴净值序列, 或使用 <code>fund.eastmoney.com/pingzhongdata/' + esc(f.code) + '.js</code> 获取。</span>') +
+        '</p>'
     });
 
     S.push({

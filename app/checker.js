@@ -139,11 +139,28 @@ window.FC = window.FC || {};
         : (weird.length ? '推算价 = 持仓市值 ÷ 持股数, 有 ' + weird.length + ' 条落在 0.3–3000 元之外, 通常是单位口径错误(万元/万股混用)。' : priceCount + ' 条推算价全部落在 0.3–3000 元区间, 单位口径自洽。'),
       weird.slice(0, 8)));
 
-    // B4 指标可复现
+    // B4 指标可复现 + 收益量级合理
     var m = analysis.metrics || {};
     var okRepro = m.conc && m.conc.series && m.conc.series.length === qs.length;
-    out.push(R('B4', '计算层', '指标可复现(同输入同输出)', okRepro ? 'pass' : 'fail',
-      okRepro ? '集中度序列长度(' + m.conc.series.length + ')与报告期数一致; 引擎为纯函数, 同一输入重复运行结果逐位相同。' : '集中度序列与报告期数不匹配, 计算结果不可信。'));
+    /* 收益量级这一条是 2026-11-08 补的: 163402 因为累计净值口径搞错, 跑出区间 +71861.96%、
+       单季 +592.88%, 而当时 18 条规则没一条拦得住 —— 数字大本身就该是个红灯。
+       公募基金单季超过 100%、区间超过 3000%、回撤超过 100%, 基本都是口径或拼接出错。 */
+    var perfB = analysis.perf || {};
+    var bad = [];
+    var peakQ = null;
+    (perfB.quarterReturns || []).forEach(function (r) {
+      if (!peakQ || Math.abs(r.ret) > Math.abs(peakQ.ret)) peakQ = r;
+    });
+    if (typeof perfB.cumReturn === 'number' && Math.abs(perfB.cumReturn) > 3000) bad.push('区间收益 ' + perfB.cumReturn + '%');
+    if (typeof perfB.maxDrawdown === 'number' && perfB.maxDrawdown < -100) bad.push('最大回撤 ' + perfB.maxDrawdown + '%');
+    if (peakQ && Math.abs(peakQ.ret) > 100) bad.push(peakQ.period + ' 单季 ' + (Math.round(peakQ.ret * 100) / 100) + '%');
+    out.push(R('B4', '计算层', '指标可复现(同输入同输出)',
+      !okRepro ? 'fail' : (bad.length ? 'fail' : 'pass'),
+      !okRepro
+        ? '集中度序列与报告期数不匹配, 计算结果不可信。'
+        : (bad.length
+          ? '收益量级异常: ' + bad.join('、') + ' —— 优先怀疑净值口径(累计净值被当成"单位净值+累计分红"的加法口径)或序列拼接, 而不是"这只基金涨得猛"。'
+          : '集中度序列长度(' + (m.conc ? m.conc.series.length : 0) + ')与报告期数一致; 区间/单季收益量级在常识范围内(单季 ≤100%、区间 ≤3000%、回撤 ≤100%)。')));
 
     return out;
   }
