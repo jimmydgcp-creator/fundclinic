@@ -1,272 +1,272 @@
 {
-  "schema": "fundclinic/2",
-  "generatedAt": "2026-11-01T05:08:29.310Z",
-  "generatedBy": "基金复诊台 FundClinic v2(SOP §2 自动采集 + 离线规则引擎)",
-  "dataProvenance": {
-    "standard": "六类公开来源: ①官方定期报告 PDF ②基金历史前十大 ③资产配置 ④规模变动 ⑤净值序列 ⑥基金经理履历",
-    "crawledAt": "2026-11-01T05:07:12.982Z",
-    "rangeBasis": "现任经理任期(黄海(2020-11-17 ~ 至今))共 24 个报告期, 足以判定形态",
-    "officialReconcile": {
-      "available": true,
-      "checks": [
-        {
-          "period": "2020Q4",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202101211452764500_1.pdf"
-        },
-        {
-          "period": "2021Q1",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202104211486807806_1.pdf"
-        },
-        {
-          "period": "2021Q2",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202108301513318494_1.pdf"
-        },
-        {
-          "period": "2021Q4",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202201211541681514_1.pdf"
-        },
-        {
-          "period": "2022Q1",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202204211560595109_1.pdf"
-        },
-        {
-          "period": "2022Q2",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202207201576363585_1.pdf"
-        },
-        {
-          "period": "2022Q3",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202210251579428471_1.pdf"
-        },
-        {
-          "period": "2022Q4",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202301201582216877_1.pdf"
-        },
-        {
-          "period": "2023Q1",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202304211585665978_1.pdf"
-        },
-        {
-          "period": "2023Q2",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202307201592479021_1.pdf"
-        },
-        {
-          "period": "2023Q3",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202310241602897296_1.pdf"
-        },
-        {
-          "period": "2023Q4",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202401191617715120_1.pdf"
-        },
-        {
-          "period": "2024Q1",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202404191630639490_1.pdf"
-        },
-        {
-          "period": "2024Q2",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202407181638033198_1.pdf"
-        },
-        {
-          "period": "2024Q3",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202410241640450530_1.pdf"
-        },
-        {
-          "period": "2024Q4",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202501211642389748_1.pdf"
-        },
-        {
-          "period": "2025Q1",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202504211659803005_1.pdf"
-        },
-        {
-          "period": "2025Q2",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202507181711021844_1.pdf"
-        },
-        {
-          "period": "2025Q3",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202510251768595913_1.pdf"
-        },
-        {
-          "period": "2025Q4",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202601211818188258_1.pdf"
-        },
-        {
-          "period": "2026Q1",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202604211821366499_1.pdf"
-        },
-        {
-          "period": "2026Q2",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202607211827191142_1.pdf"
-        },
-        {
-          "period": "2026Q3",
-          "rows": 10,
-          "ok": true,
-          "maxWeightDiff": 0,
-          "url": "https://pdf.dfcfw.com/pdf/H2_AN202610271830981433_1.pdf"
-        }
-      ]
+ "schema": "fundclinic/2",
+ "generatedAt": "2026-11-01T05:08:29.310Z",
+ "generatedBy": "基金复诊台 FundClinic v2(SOP §2 自动采集 + 离线规则引擎)",
+ "dataProvenance": {
+  "standard": "六类公开来源: ①官方定期报告 PDF ②基金历史前十大 ③资产配置 ④规模变动 ⑤净值序列 ⑥基金经理履历",
+  "crawledAt": "2026-11-01T05:07:12.982Z",
+  "rangeBasis": "现任经理任期(黄海(2020-11-17 ~ 至今))共 24 个报告期, 足以判定形态",
+  "officialReconcile": {
+   "available": true,
+   "checks": [
+    {
+     "period": "2020Q4",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202101211452764500_1.pdf"
+    },
+    {
+     "period": "2021Q1",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202104211486807806_1.pdf"
+    },
+    {
+     "period": "2021Q2",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202108301513318494_1.pdf"
+    },
+    {
+     "period": "2021Q4",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202201211541681514_1.pdf"
+    },
+    {
+     "period": "2022Q1",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202204211560595109_1.pdf"
+    },
+    {
+     "period": "2022Q2",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202207201576363585_1.pdf"
+    },
+    {
+     "period": "2022Q3",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202210251579428471_1.pdf"
+    },
+    {
+     "period": "2022Q4",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202301201582216877_1.pdf"
+    },
+    {
+     "period": "2023Q1",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202304211585665978_1.pdf"
+    },
+    {
+     "period": "2023Q2",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202307201592479021_1.pdf"
+    },
+    {
+     "period": "2023Q3",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202310241602897296_1.pdf"
+    },
+    {
+     "period": "2023Q4",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202401191617715120_1.pdf"
+    },
+    {
+     "period": "2024Q1",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202404191630639490_1.pdf"
+    },
+    {
+     "period": "2024Q2",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202407181638033198_1.pdf"
+    },
+    {
+     "period": "2024Q3",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202410241640450530_1.pdf"
+    },
+    {
+     "period": "2024Q4",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202501211642389748_1.pdf"
+    },
+    {
+     "period": "2025Q1",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202504211659803005_1.pdf"
+    },
+    {
+     "period": "2025Q2",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202507181711021844_1.pdf"
+    },
+    {
+     "period": "2025Q3",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202510251768595913_1.pdf"
+    },
+    {
+     "period": "2025Q4",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202601211818188258_1.pdf"
+    },
+    {
+     "period": "2026Q1",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202604211821366499_1.pdf"
+    },
+    {
+     "period": "2026Q2",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202607211827191142_1.pdf"
+    },
+    {
+     "period": "2026Q3",
+     "rows": 10,
+     "ok": true,
+     "maxWeightDiff": 0,
+     "url": "https://pdf.dfcfw.com/pdf/H2_AN202610271830981433_1.pdf"
     }
-  },
-  "fund": {
-    "code": "519191",
-    "name": "万家新利灵活配置混合",
-    "manager": "黄海",
-    "range": "2020Q4–2026Q3",
-    "quarters": 24
-  },
-  "card": {
-    "formTag": "个股稳定 + 主题切换型",
-    "formConfidence": "中",
-    "mainQuestion": "在2020Q4–2026Q3的24个季报期末快照中, 该基金是“主题坚守”还是“个股稳定下的单次主题切换”, 且前十集中度的下移是否有数据支撑?",
-    "claim": "【披露事实】24个报告期的前十大合计权重均值为72.77%, 区间为[58.37%, 86.42%], 最新一期为61.91%; 集中度斜率为-0.45pp/期; 第一大重仓均值9.25%、最高9.86%; 全期出现过的个股47只, 最长连续在榜19期; 主导主题序列为房地产/房地产开发5期、煤炭/煤炭开采19期, 主题切换次数为1。 【合理推断】相邻期平均留存7.48只、平均新进2.52只、平均Jaccard 0.61, 与“个股层面存在较强延续、主题层面发生一次整体迁移(房地产→煤炭)”的形态相容; 第一大重仓均值不足10%, 说明组合并非单一重仓依赖型; 集中度斜率-0.45pp/期, 且最新值61.91%低于均值72.77%, 与“逐步分散”方向一致, 但幅度温和, 未改变前十占七成左右的基本结构。 【事后解读, 仅作回溯复盘口径】区间复利119.36%, 剔除最好一季后降至68.10%, 最大回撤-32.45%; 该差异仅说明区间收益对个别季度贡献较敏感, 属事后统计特征, 不构成任何对未来收益的判断或暗示。",
-    "falsifier": "出现以下任一情形即可推翻上述归类: (1) 后续季报相邻期留存只数持续显著低于7.48只, 或单季新进≥5只成为常态(即不再是个股稳定); (2) 主导主题序列出现第二次及以上切换, 且切换前后无重合个股贯穿(即不再是个股稳定下的单次切换); (3) 前十合计权重回升并稳定在接近86.42%区间上沿(即不再是集中度下移); (4) 第一大重仓权重长期显著高于9.86%的历史最高值(即转向单一重仓依赖)。",
-    "evidenceLevel": "公开季报 + 天天基金 F10(已对账)",
-    "trackers": [
-      {
-        "item": "前十名单稳定性",
-        "baseline": "历史平均留存 7.5/10",
-        "watch": "下一期留存数低于 5 只即视为结构变化"
-      },
-      {
-        "item": "集中度",
-        "baseline": "58.37–86.42%(均值 72.77%)",
-        "watch": "连续两期落在区间外"
-      },
-      {
-        "item": "第一大重仓",
-        "baseline": "均值 9.25%, 最高 9.86%",
-        "watch": "接近 10% 上限需说明理由"
-      },
-      {
-        "item": "主导主题",
-        "baseline": "当前 煤炭/煤炭开采, 历史切换 1 次",
-        "watch": "再次切换时须能列出切换时点可得证据"
-      },
-      {
-        "item": "规模",
-        "baseline": "1.80 → 3.62 亿元(峰值 16.72)",
-        "watch": "规模继续下降会改变策略容量与操作空间"
-      },
-      {
-        "item": "收益集中度",
-        "baseline": "单季(2022Q1)贡献约占区间收益 42.95%",
-        "watch": "剔除该季后的收益 68.10% 才是可持续性的更保守口径"
-      }
-    ],
-    "caveats": [
-      "只看前十大持仓, 不是全部持仓(季报仅披露前十)",
-      "季报持仓是期末快照, 期间买卖不可见",
-      "推算价未复权、不含分红, 不代表真实收益",
-      "绩效为区间口径, 未做基准调整",
-      "不构成投资建议, 不评价基金经理个人"
-    ]
-  },
-  "structure": {
-    "top10SumAvg": 72.77,
-    "top10SumRange": [
-      58.37,
-      86.42
-    ],
-    "top10SumSlope": -0.45,
-    "avgRetained": 7.48,
-    "avgAdded": 2.52,
-    "avgJaccard": 0.61,
-    "themeSwitches": 1,
-    "themeChain": [
-      "房地产/房地产开发(5期)",
-      "煤炭/煤炭开采(19期)"
-    ],
-    "top1Avg": 9.25,
-    "distinctHoldings": 47,
-    "maxStreak": 19
-  },
-  "performance": {
-    "method": "分红再投总回报指数(单位净值 + 除息日分红回加, 链式相乘); 区间自第一个报告期的期初(2020-09-30)起算; 最大回撤按区间内日频指数计算",
-    "cumReturn": 119.36,
-    "exBestQuarter": 68.1,
-    "bestQuarter": "2022Q1",
-    "bestQuarterContribution": 42.95,
-    "maxDrawdown": -32.45,
-    "aumPeak": 16.72,
-    "aumEnd": 3.62
-  },
-  "check": {
-    "total": 18,
-    "pass": 16,
-    "warn": 2,
-    "fail": 0,
-    "verdict": "warn",
-    "verdictText": "通过, 有 2 项建议人工确认"
-  },
-  "gates": {
-    "g1_口径确认": true,
-    "g2_判断方向": false,
-    "g3_终审三查": false
+   ]
   }
+ },
+ "fund": {
+  "code": "519191",
+  "name": "万家新利灵活配置混合",
+  "manager": "黄海",
+  "range": "2020Q4–2026Q3",
+  "quarters": 24
+ },
+ "card": {
+  "formTag": "个股稳定 + 主题切换型",
+  "formConfidence": "中",
+  "mainQuestion": "在2020Q4–2026Q3的24个季报期末快照中, 该基金是“主题坚守”还是“个股稳定下的单次主题切换”, 且前十集中度的下移是否有数据支撑?",
+  "claim": "【披露事实】24个报告期的前十大合计权重均值为72.77%, 区间为[58.37%, 86.42%], 最新一期为61.91%; 集中度斜率为-0.45pp/期; 第一大重仓均值9.25%、最高9.86%; 全期出现过的个股47只, 最长连续在榜19期; 主导主题序列为房地产/房地产开发5期、煤炭/煤炭开采19期, 主题切换次数为1。 【合理推断】相邻期平均留存7.48只、平均新进2.52只、平均Jaccard 0.61, 与“个股层面存在较强延续、主题层面发生一次整体迁移(房地产→煤炭)”的形态相容; 第一大重仓均值不足10%, 说明组合并非单一重仓依赖型; 集中度斜率-0.45pp/期, 且最新值61.91%低于均值72.77%, 与“逐步分散”方向一致, 但幅度温和, 未改变前十占七成左右的基本结构。 【事后解读, 仅作回溯复盘口径】区间复利119.36%, 剔除最好一季后降至68.10%, 最大回撤-32.45%; 该差异仅说明区间收益对个别季度贡献较敏感, 属事后统计特征, 不构成任何对未来收益的判断或暗示。",
+  "falsifier": "出现以下任一情形即可推翻上述归类: (1) 后续季报相邻期留存只数持续显著低于7.48只, 或单季新进≥5只成为常态(即不再是个股稳定); (2) 主导主题序列出现第二次及以上切换, 且切换前后无重合个股贯穿(即不再是个股稳定下的单次切换); (3) 前十合计权重回升并稳定在接近86.42%区间上沿(即不再是集中度下移); (4) 第一大重仓权重长期显著高于9.86%的历史最高值(即转向单一重仓依赖)。",
+  "evidenceLevel": "公开季报 + 天天基金 F10(已对账)",
+  "trackers": [
+   {
+    "item": "前十名单稳定性",
+    "baseline": "历史平均留存 7.5/10",
+    "watch": "下一期留存数低于 5 只即视为结构变化"
+   },
+   {
+    "item": "集中度",
+    "baseline": "58.37–86.42%(均值 72.77%)",
+    "watch": "连续两期落在区间外"
+   },
+   {
+    "item": "第一大重仓",
+    "baseline": "均值 9.25%, 最高 9.86%",
+    "watch": "接近 10% 上限需说明理由"
+   },
+   {
+    "item": "主导主题",
+    "baseline": "当前 煤炭/煤炭开采, 历史切换 1 次",
+    "watch": "再次切换时须能列出切换时点可得证据"
+   },
+   {
+    "item": "规模",
+    "baseline": "1.80 → 3.62 亿元(峰值 16.72)",
+    "watch": "规模继续下降会改变策略容量与操作空间"
+   },
+   {
+    "item": "收益集中度",
+    "baseline": "单季(2022Q1)贡献约占区间收益 42.95%",
+    "watch": "剔除该季后的收益 68.10% 才是可持续性的更保守口径"
+   }
+  ],
+  "caveats": [
+   "只看前十大持仓, 不是全部持仓(季报仅披露前十)",
+   "季报持仓是期末快照, 期间买卖不可见",
+   "推算价未复权、不含分红, 不代表真实收益",
+   "绩效为区间口径, 未做基准调整",
+   "不构成投资建议, 不评价基金经理个人"
+  ]
+ },
+ "structure": {
+  "top10SumAvg": 72.77,
+  "top10SumRange": [
+   58.37,
+   86.42
+  ],
+  "top10SumSlope": -0.45,
+  "avgRetained": 7.48,
+  "avgAdded": 2.52,
+  "avgJaccard": 0.61,
+  "themeSwitches": 1,
+  "themeChain": [
+   "房地产/房地产开发(5期)",
+   "煤炭/煤炭开采(19期)"
+  ],
+  "top1Avg": 9.25,
+  "distinctHoldings": 47,
+  "maxStreak": 19
+ },
+ "performance": {
+  "method": "分红再投总回报指数(单位净值 + 除息日分红回加, 链式相乘); 区间自第一个报告期的期初(2020-09-30)起算; 最大回撤按区间内日频指数计算",
+  "cumReturn": 119.36,
+  "exBestQuarter": 68.1,
+  "bestQuarter": "2022Q1",
+  "bestQuarterContribution": 42.95,
+  "maxDrawdown": -32.45,
+  "aumPeak": 16.72,
+  "aumEnd": 3.62
+ },
+ "check": {
+  "total": 18,
+  "pass": 17,
+  "warn": 1,
+  "fail": 0,
+  "verdict": "warn",
+  "verdictText": "通过, 有 1 项建议人工确认"
+ },
+ "gates": {
+  "g1_口径确认": true,
+  "g2_判断方向": false,
+  "g3_终审三查": false
+ }
 }

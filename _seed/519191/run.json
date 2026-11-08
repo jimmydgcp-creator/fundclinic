@@ -14,11 +14,11 @@
   },
   "check": {
    "total": 18,
-   "pass": 16,
-   "warn": 2,
+   "pass": 17,
+   "warn": 1,
    "fail": 0,
    "verdict": "warn",
-   "verdictText": "通过, 有 2 项建议人工确认"
+   "verdictText": "通过, 有 1 项建议人工确认"
   },
   "official": {
    "available": true,
