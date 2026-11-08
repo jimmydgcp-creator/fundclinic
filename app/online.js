@@ -259,8 +259,34 @@ window.FC = window.FC || {};
       FC.restoreLast();
     } catch (e) {
       panel.classList.add('hidden');
+      /* 没有后端(纯静态部署 / 展台服务器只托管 HTML)时的形态。
+         原来的做法只是把在线面板收掉 —— 但左栏的"输入代码"还在, 人点进去只会看到一条 JSON 解析失败;
+         "横向对比"和"问一句"同理。所以这里明确切到"展示版": 收掉输入, 把两个要后端的入口标成不可用,
+         并在首屏顶上写清楚"能看什么、不能做什么"。 */
+      staticDemoMode();
     }
   };
+
+  /** 纯静态部署时的形态: 有一说一, 不假装能现场跑。 */
+  function staticDemoMode() {
+    document.body.classList.add('static-demo');
+    var ri = $('#rail-input'); if (ri) ri.classList.add('hidden');
+    var rh = $('#rail-history-block'); if (rh) rh.classList.add('hidden');
+    var host = $('#view-input');
+    if (host && !document.querySelector('.static-note')) {
+      var note = document.createElement('div');
+      note.className = 'static-note';
+      note.innerHTML = '<strong>当前是展示版。</strong>展台服务器只托管网页, 不跑采集与模型 —— ' +
+        '这里能看完整的复盘报告、数据底稿与质检记录, <strong>不能现场跑一只新基金</strong>; ' +
+        '「横向对比」和「问一句」需要后端, 在本站不可用。' +
+        '要输入任意 6 位基金代码自动复盘, 在电脑上运行 <code>启动_基金复诊台.bat</code>。';
+      host.insertBefore(note, host.firstChild);
+    }
+    var ask = $('#btn-ask');
+    if (ask) { ask.title = '展示版没有后端, 问一句只在本机可用'; ask.setAttribute('aria-disabled', 'true'); }
+    var cmp = document.querySelector('.rail-foot .rf-i[data-view="compare"]');
+    if (cmp) { cmp.title = '展示版没有后端, 横向对比只在本机可用'; cmp.setAttribute('aria-disabled', 'true'); }
+  }
 
   /* ==================================================== 第一阶段: 探路 */
   var gate1 = null;   // 探路结果 + 用户改动

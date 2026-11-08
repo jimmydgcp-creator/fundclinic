@@ -1229,6 +1229,18 @@ body.shelled .cand-more:hover { text-decoration: underline; }
 }
 .gate-fold-hint button:hover { text-decoration: underline; }
 
+/* 纯静态展示版(展台服务器只托管 HTML): 需要后端的入口标灰并挡住点击, 首屏顶上写明"能看什么"。
+   本机与云端部署都不会带 body.static-demo 这个类, 所以这两条规则平时不生效。 */
+body.static-demo #btn-ask,
+body.static-demo .rail-foot .rf-i[data-view="compare"] { opacity: .4; pointer-events: none; }
+.static-note {
+  margin: 0 0 18px; padding: 12px 15px;
+  background: var(--warn-bg); border: 1px solid #e8dcc4; border-left: 3px solid var(--warn);
+  border-radius: var(--r-sm); font-size: 12.5px; line-height: 1.78; color: #4a3a1c;
+}
+.static-note strong { color: #3a2c12; }
+.static-note code { font-family: var(--mono); font-size: 11.5px; background: rgba(138, 90, 18, .1); padding: 1px 5px; border-radius: 4px; }
+
 /* 左栏底部被点中的那一条(横向对比 / 说明页) */
 .rf-i.active { background: rgba(21, 27, 35, .06); color: var(--navy); font-weight: 600; }
 .rf-state #topstatus {
@@ -5164,8 +5176,34 @@ window.FC = window.FC || {};
       FC.restoreLast();
     } catch (e) {
       panel.classList.add('hidden');
+      /* 没有后端(纯静态部署 / 展台服务器只托管 HTML)时的形态。
+         原来的做法只是把在线面板收掉 —— 但左栏的"输入代码"还在, 人点进去只会看到一条 JSON 解析失败;
+         "横向对比"和"问一句"同理。所以这里明确切到"展示版": 收掉输入, 把两个要后端的入口标成不可用,
+         并在首屏顶上写清楚"能看什么、不能做什么"。 */
+      staticDemoMode();
     }
   };
+
+  /** 纯静态部署时的形态: 有一说一, 不假装能现场跑。 */
+  function staticDemoMode() {
+    document.body.classList.add('static-demo');
+    var ri = $('#rail-input'); if (ri) ri.classList.add('hidden');
+    var rh = $('#rail-history-block'); if (rh) rh.classList.add('hidden');
+    var host = $('#view-input');
+    if (host && !document.querySelector('.static-note')) {
+      var note = document.createElement('div');
+      note.className = 'static-note';
+      note.innerHTML = '<strong>当前是展示版。</strong>展台服务器只托管网页, 不跑采集与模型 —— ' +
+        '这里能看完整的复盘报告、数据底稿与质检记录, <strong>不能现场跑一只新基金</strong>; ' +
+        '「横向对比」和「问一句」需要后端, 在本站不可用。' +
+        '要输入任意 6 位基金代码自动复盘, 在电脑上运行 <code>启动_基金复诊台.bat</code>。';
+      host.insertBefore(note, host.firstChild);
+    }
+    var ask = $('#btn-ask');
+    if (ask) { ask.title = '展示版没有后端, 问一句只在本机可用'; ask.setAttribute('aria-disabled', 'true'); }
+    var cmp = document.querySelector('.rail-foot .rf-i[data-view="compare"]');
+    if (cmp) { cmp.title = '展示版没有后端, 横向对比只在本机可用'; cmp.setAttribute('aria-disabled', 'true'); }
+  }
 
   /* ==================================================== 第一阶段: 探路 */
   var gate1 = null;   // 探路结果 + 用户改动
