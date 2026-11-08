@@ -5262,19 +5262,19 @@ window.FC = window.FC || {};
     if (!caps.ask) document.body.classList.add('demo-no-ask');
     if (!caps.compare) document.body.classList.add('demo-no-compare');
     var ri = $('#rail-input'); if (ri) ri.classList.add('hidden');
-    var host = $('#view-input');
-    if (host && !document.querySelector('.static-note')) {
-      var can = [];
-      if (caps.ask) can.push('「问一句」可以答(只答这份报告里已有的事)');
-      if (caps.compare) can.push('「横向对比」可以比 2–3 只');
-      var note = document.createElement('div');
-      note.className = 'static-note';
-      note.innerHTML = '<strong>当前是展示版。</strong>报告、底稿、质检都是真结果' +
-        (can.length ? ', ' + can.join('、') : '') +
-        '; <strong>但不能现场跑一只新基金</strong> —— 跑一次要采集六类公开来源、逐行对账官方季报、再走五步模型, ' +
-        '展台环境(384MB 内存、30 分钟休眠)装不下这条流水线。' +
-        '要输入任意 6 位基金代码自动复盘, 在电脑上运行 <code>启动_基金复诊台.bat</code>。';
-      host.insertBefore(note, host.firstChild);
+    /* 不能跑新基金时, 首屏原来那套"输入一个基金代码"的话术是假的: 代码框已经被收掉, 「开始复盘」点了也不出结果。
+       与其在顶上摆一大段解释(没人读, 而且像在找借口), 不如把首屏本身改成实话: 报告是跑好的, 主按钮直接进报告。 */
+    var head = document.querySelector('#view-input .page-head');
+    if (!head) return;
+    var h1 = head.querySelector('h1');
+    if (h1) h1.innerHTML = '这份复盘已经跑完，<br>每个数字都能追到<em>出处</em>。';
+    var hs = $('#btn-hero-start');
+    if (hs) {
+      /* 复制一个新节点顶掉旧的: 顺手把 ui.js 绑在它上面的"滚到面板"处理一起卸掉, 不用去改 ui.js */
+      var btn = hs.cloneNode(true);
+      hs.parentNode.replaceChild(btn, hs);
+      btn.textContent = '看复盘报告';
+      btn.addEventListener('click', function () { FC.show('report'); });
     }
   }
 
