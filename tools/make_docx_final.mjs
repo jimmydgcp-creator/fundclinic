@@ -99,7 +99,7 @@ doc.push(P('5 人分工与逐字稿', { bold: true, size: 26, color: '1F3864', a
 doc.push(P('基金复诊台 FundClinic', { bold: true, size: 15, color: '2E5496', align: 'center', after: 60 }));
 doc.push(P('金融AI智能体设计与应用 · 第 2 组', { size: 11, color: '666666', align: 'center', after: 520 }));
 doc.push(P('线上地址  fundclinic.onrender.com', { size: 11, align: 'center', after: 40 }));
-doc.push(P('总量 1502 字 · 5 人各约 2 分钟 · 语速 150 字/分', { size: 11, align: 'center', after: 40 }));
+doc.push(P('总量 1490 字 · 5 人各约 2 分钟 · 语速 150 字/分', { size: 11, align: 'center', after: 40 }));
 doc.push(P('讲者 A · B · C · D · E（人员待定，定了把字母换成人名即可）', { size: 11, align: 'center', after: 500 }));
 doc.push(Note('打印建议：整份打印后，第三部分每位讲者单独一页，直接撕下来带上台 —— 每人只背自己那一段，外加第四部分那四句衔接。'));
 doc.push(PageBreak());

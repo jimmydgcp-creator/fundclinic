@@ -1406,8 +1406,7 @@ body.rail-collapsed .sb-menu { display: grid; }
   <section class="view active" id="view-input">
 
     <div class="page-head">
-      <h1>你已经买了的那只基金，<br><em>这几年到底是怎么赚的</em>？</h1>
-      <p class="panel-sub" style="max-width:640px">给<strong>已经持有某只基金、正犹豫要不要继续拿的人</strong>看。输入 6 位代码，出一份每个数字都能追到出处的持仓复盘。</p>
+      <h1>输入一个基金代码，<br>出一份<em>每个数字都能追到出处</em>的复盘。</h1>
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-hero-start">开始复盘</button>
         <button class="btn" id="btn-hero-how">它到底怎么做的</button>
@@ -1503,41 +1502,9 @@ body.rail-collapsed .sb-menu { display: grid; }
       <p class="note">另有一条路: 打开 <code>基金复诊台_单文件版.html</code> —— 不联网、不装任何东西、不需要 Key, 内置同样两只样例。</p>
     </div>
 
-    <!-- 用户画像: 老师提过「面向的用户不明确」。三类人不并列, 分主角/第二类/第三类 ---- -->
-    <div class="panel" id="panel-persona">
-      <h3>这东西到底给谁用</h3>
-      <p class="panel-sub">
-        同一份证据, 三种深度。<strong>界面只为第一类人说话</strong> —— 结论先行、少术语; 第二、三类要的底稿和质检, 往下翻就有。
-      </p>
-      <table class="tbl tbl-compact">
-        <thead><tr><th style="width:96px">角色</th><th>谁</th><th>什么时刻打开它</th><th>走的时候拿到什么</th></tr></thead>
-        <tbody>
-          <tr>
-            <td><strong>主角</strong><br><span class="note">界面默认口径</span></td>
-            <td>已经买了某只基金、<strong>正犹豫要不要继续拿</strong>的人</td>
-            <td>涨了不知道该不该止盈、跌了不知道该不该割; 或者刚被人推荐了一只</td>
-            <td>一份看懂「钱是怎么赚的、还拿不拿得住」的复盘</td>
-          </tr>
-          <tr>
-            <td><strong>第二类</strong></td>
-            <td>做基金初步评价的人: 基金公司考核、FOF 选人</td>
-            <td>要给一只基金写初步结论, 得先有能复核的证据</td>
-            <td>逐行对账的底稿 + 18 条质检 + 来源清单, 能交差</td>
-          </tr>
-          <tr>
-            <td><strong>第三类</strong></td>
-            <td>想搞明白某只基金的研究者</td>
-            <td>要弄清持仓结构、主题演进、规模变化怎么走的</td>
-            <td>全套底稿与可引用的数字, 每个都能回查</td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="note">说到「用户」时请按这个顺序: <strong>主角 → 第二类 → 第三类</strong>。把三类并列说成「我们的用户」, 等于谁都不专门服务。</p>
-    </div>
     <div class="panel">
       <h3>它做什么</h3>
       <p class="panel-sub">
-        给<strong>已经持有某只基金、正犹豫要不要继续拿的人</strong>用——先看清它这几年到底在做什么、赚的钱靠的是什么; 也给<strong>做基金初步评价的人</strong>(基金公司考核 / FOF 选人)用, 他们要的是能复核的证据。<br>
         把〔一只公募基金的代码 + 复盘区间〕变成〔一份可核验的"十大持仓回溯复盘报告"网页 + 一份能直接发给别人的演示稿:
         结构看清动作、绩效看清代价, 每个数字可指回公开季报原文, 并标出证据级别与推翻条件〕。<br>
         <strong>全部计算都在本地完成; 离线模式下不联网、不上传任何数据。</strong>
@@ -1627,7 +1594,7 @@ body.rail-collapsed .sb-menu { display: grid; }
         持仓动作看得清、收益代价看得见、每个数字都能指回公开季报原文。
       </p>
       <div class="grid3">
-        <div class="metric"><div class="metric-l">给谁用</div><div class="metric-v" style="font-size:14px">主角: 持有某只基金的普通人<br>其次: 基金评价 / FOF 选人</div></div>
+        <div class="metric"><div class="metric-l">输出</div><div class="metric-v" style="font-size:14px">复盘报告 + 底稿 + 质检 + 来源清单</div></div>
         <div class="metric"><div class="metric-l">替代什么</div><div class="metric-v" style="font-size:14px">手工翻 20+ 期季报 PDF、逐季录 Excel、再手写报告</div></div>
         <div class="metric"><div class="metric-l">省在哪</div><div class="metric-v" style="font-size:14px">约 70% 时间花在找数 / 录数 / 核数, 这部分全自动</div></div>
       </div>
