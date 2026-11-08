@@ -41,3 +41,4 @@ _变体预览/
 showcase/static/
 showcase/data/
 showcase/.pack/
+showcase/__pycache__/
