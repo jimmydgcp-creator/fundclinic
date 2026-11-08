@@ -61,12 +61,20 @@ const svg = [
     const pts = f.series.map((p) => `${f1(X(p.d))},${f1(Y(p.v))}`).join(' ');
     return `<polyline points="${pts}" fill="none" stroke="${COLORS[i]}" stroke-width="1.9" stroke-linejoin="round"/>`;
   }),
-  /* 右端标注 */
-  ...funds.map((f, i) => {
-    const last = f.series[f.series.length - 1];
-    const yy = Y(last.v);
-    return `<text x="${PAD_L + IW + 8}" y="${f1(yy) + 4}" font-size="12.5" fill="${COLORS[i]}" font-weight="600">${f.code} ${Math.round(last.v)}</text>`;
-  }),
+  /* 右端标注: 终点接近时会把字叠在一起(519191 与 110022 只差 4 点), 这里做一次避让 */
+  (() => {
+    const items = funds.map((f, i) => {
+      const last = f.series[f.series.length - 1];
+      return { i, code: f.code, v: Math.round(last.v), y: Y(last.v) };
+    }).sort((a, b) => a.y - b.y);
+    const GAP = 15;
+    for (let k = 1; k < items.length; k++) {
+      if (items[k].y - items[k - 1].y < GAP) items[k].y = items[k - 1].y + GAP;
+    }
+    return items.map((it) =>
+      `<text x="${PAD_L + IW + 8}" y="${f1(it.y) + 4}" font-size="12.5" fill="${COLORS[it.i]}" font-weight="600">${it.code} ${it.v}</text>`
+    ).join('');
+  })(),
   `</svg>`
 ].join('');
 
@@ -81,11 +89,9 @@ const rows = funds.map((f, i) => {
 
 const years12 = (DATA.window.days / 365).toFixed(1);
 const block = `<!-- CMP-SAMPLE:START 由 tools/make_compare_sample.mjs 生成, 请勿手改 -->
-    <div class="panel" id="cmp-sample">
-      <h3>样例：三只基金，同一个 ${years12} 年</h3>
-      <p class="panel-sub">
-        起点都归一到 <strong>100</strong>，口径都是<strong>分红再投总回报</strong>，区间取三只都有的重叠段（${DATA.window.from} → ${DATA.window.to}）。这组结果预置在页面里，不用等接口；想换代码，上面那个入口可以现场重跑。
-      </p>
+    <div class="cmp-sample" id="cmp-sample">
+      <h3>内置样例：三只基金，同一个 ${years12} 年</h3>
+      <p class="panel-sub">这组结果预置在页面里，<strong>打开就能看，不用输入任何代码</strong>。起点都归一到 100，口径都是分红再投总回报，区间取三只都有的重叠段（${DATA.window.from} → ${DATA.window.to}）。</p>
       <div class="cmp-chart">${svg}</div>
       <table class="tbl tbl-compact">
         <thead><tr><th>基金</th><th>累计</th><th>年化</th><th>最大回撤</th><th>年化波动</th></tr></thead>

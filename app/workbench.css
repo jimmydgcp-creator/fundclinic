@@ -101,3 +101,9 @@
 .cmp-chart svg { display: block; max-width: 100%; height: auto; }
 #cmp-sample .note { margin: 10px 0 6px; }
 #cmp-sample table.tbl td:first-child { white-space: nowrap; }
+
+/* 内置对比样例：整块用浅底区分开，它是"打开就能看的结果"，不是输入区 */
+.cmp-sample { margin: 16px 0 4px; padding: 14px 14px 6px; background: var(--surface-2, #f7f5f0); border: 1px solid var(--line, #e3e0d8); border-radius: 12px; }
+.cmp-sample h3 { margin: 0 0 6px; font-size: 15px; letter-spacing: .2px; }
+.cmp-form-sep { display: flex; align-items: center; gap: 10px; margin: 22px 0 2px; color: var(--muted, #8a867e); font-size: 12px; }
+.cmp-form-sep::before, .cmp-form-sep::after { content: ''; flex: 1; height: 1px; background: var(--line, #e3e0d8); }
