@@ -111,7 +111,7 @@ body::before {
   opacity: .025;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.topbar, main, footer { position: relative; z-index: 1; }
+.rail, main, footer { position: relative; z-index: 1; }
 
 ::selection { background: var(--brass-soft); color: var(--navy); }
 
@@ -125,53 +125,10 @@ a:hover { color: var(--brass-2); }
   border-radius: 3px;
 }
 
-/* ---------------------------------------------------------------- 顶栏 */
-.topbar {
-  position: sticky; top: 0; z-index: 50;
-  display: flex; align-items: center; gap: 26px;
-  padding: 0 28px; height: 58px;
-  background: var(--navy);
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, .07);
-}
-.brand {
-  font-size: 16.5px; font-weight: 600; letter-spacing: .06em;
-  white-space: nowrap; display: flex; align-items: baseline; gap: 9px;
-}
-.brand::before {
-  content: ""; width: 3px; height: 16px; border-radius: 2px;
-  background: var(--brass-2); display: inline-block; transform: translateY(1px);
-}
-.brand span {
-  font-size: 10.5px; font-weight: 400; letter-spacing: .22em;
-  opacity: .5; text-transform: uppercase;
-}
-
-/* 导航: 细下划线指示器, 不再用"白块糊在导航条上" */
-.tabs { display: flex; gap: 2px; flex: 1; align-self: stretch; }
-.tab {
-  appearance: none; border: 0; cursor: pointer; position: relative;
-  background: transparent; color: rgba(255, 255, 255, .6);
-  padding: 0 15px; height: 100%;
-  font-size: 13.5px; font-family: inherit; letter-spacing: .02em;
-  transition: color var(--t) var(--ease), background var(--t) var(--ease);
-}
-.tab::after {
-  content: ""; position: absolute; left: 15px; right: 15px; bottom: 0; height: 2px;
-  background: var(--brass-2); transform: scaleX(0); transform-origin: left;
-  transition: transform var(--t) var(--ease);
-}
-.tab:hover { color: #fff; background: rgba(255, 255, 255, .05); }
-.tab:active { background: rgba(255, 255, 255, .09); }
-.tab.active { color: #fff; font-weight: 600; }
-.tab.active::after { transform: scaleX(1); }
-
-.topstatus {
-  font-size: 11.5px; letter-spacing: .08em; white-space: nowrap;
-  color: rgba(255, 255, 255, .62);
-  padding: 4px 11px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 999px;
-  font-variant-numeric: tabular-nums;
-}
+/* ---------------------------------------------------------------- 导航 */
+/* 2026-11-08 起导航不再是顶部横排标签: 左栏(.rail)与顶栏分段控件(.seg)全在 app/shell.css 里,
+   这里原来那套 .topbar/.brand/.tabs/.tab/.topstatus 已整体删除(死代码不留在主样式表)。
+   保留一句提醒: 内容样式只认本文件, 外壳样式只认 shell.css, 两边不要互相写对方的选择器。 */
 
 /* ---------------------------------------------------------------- 布局 */
 main { max-width: 1340px; margin: 0 auto; padding: 30px 28px 10px; }
@@ -211,43 +168,8 @@ main { max-width: 1340px; margin: 0 auto; padding: 30px 28px 10px; }
 .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 @media (max-width: 980px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
 
-/* 首屏 hero: 把"这是一件什么事"和"唯一该点的按钮"讲清楚 */
-.hero {
-  display: grid; grid-template-columns: 1.35fr 1fr; gap: 40px; align-items: center;
-  padding: 38px 34px 34px; margin-bottom: 20px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
-  box-shadow: var(--sh-2);
-}
-@media (max-width: 1000px) { .hero { grid-template-columns: 1fr; gap: 26px; } }
-.hero-eyebrow {
-  font-size: 11px; letter-spacing: .2em; color: var(--brass);
-  text-transform: uppercase; margin-bottom: 14px;
-}
-.hero h1 {
-  margin: 0 0 14px; font-size: 38px; line-height: 1.24; font-weight: 800;
-  letter-spacing: -.025em; color: var(--navy); text-wrap: balance;
-}
-.hero h1 em { font-style: normal; color: var(--brass); }
-.hero p {
-  margin: 0 0 22px; font-size: 15px; line-height: 1.85; color: var(--ink-2);
-  max-width: 52ch; text-wrap: pretty;
-}
-.hero-side {
-  border-left: 1px solid var(--line); padding-left: 32px;
-  display: flex; flex-direction: column; gap: 16px;
-}
-@media (max-width: 1000px) { .hero-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 22px; } }
-/* 首屏右侧那一栏。
-   2026-10-10 按用户要求改版: 原来是一组"大数字 + 小说明"的指标条(6 类 / 逐行 / 3 道 / 0 外链),
-   被判定太像模板 —— 四个数字排一列, 什么页面都能套。现在换成一段文字(边界与纪律),
-   和左栏互补: 左边讲"它怎么做的", 右边讲"它不许做什么"。 */
-.hero-note-title {
-  font-size: 15px; font-weight: 700; color: var(--navy);
-  margin: 0 0 12px; letter-spacing: .01em;
-}
-.hero-note { display: flex; flex-direction: column; gap: 11px; font-size: 13px; line-height: 1.85; color: var(--ink-2); }
-.hero-note p { margin: 0; }
-.hero-note strong { color: var(--navy); font-weight: 600; }
+/* 首屏 hero 那套样式(38px 双栏大标题 + 右栏边界说明)已随 2026-11-08 的两栏外壳退役:
+   现在首屏是 .page-head(样式在 shell.css), 边界说明常驻左栏 .rail-note。 */
 
 /* 运行上下文条: 跑完之后一直挂着, 随时知道"现在看的是哪只基金" */
 .ctxbar {
@@ -418,24 +340,8 @@ td.pos, .num.pos { color: var(--up); }
 td.neg, .num.neg { color: var(--down); }
 
 /* ---------------------------------------------------------------- 报告 */
-.report-layout { display: grid; grid-template-columns: 232px 1fr; gap: 26px; align-items: start; }
-@media (max-width: 1080px) { .report-layout { grid-template-columns: 1fr; } }
-.toc {
-  position: sticky; top: 80px;
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--r); padding: 18px 14px; box-shadow: var(--sh-1);
-}
-.toc h4 {
-  margin: 0 0 12px; font-size: 11px; letter-spacing: .14em;
-  color: var(--ink-3); text-transform: uppercase; padding-left: 8px;
-}
-.toc a {
-  display: block; padding: 7px 9px; border-radius: var(--r-sm);
-  color: var(--ink-2); text-decoration: none; font-size: 13px;
-  border-left: 2px solid transparent;
-  transition: background var(--t) var(--ease), color var(--t) var(--ease), border-color var(--t) var(--ease);
-}
-.toc a:hover { background: var(--surface-2); color: var(--navy); border-left-color: var(--brass); }
+/* 报告页原来自带一个 232px 的左侧目录(.report-layout + .toc),
+   2026-11-08 起目录搬进左栏 #rail-dir, 正文变成单栏满宽 —— 这两块样式已删。 */
 
 .rsec {
   background: var(--surface); border: 1px solid var(--line);
@@ -830,7 +736,7 @@ footer {
 @media print {
   body { background: #fff; }
   body::before { display: none; }
-  .topbar, .toc, .btn, .btn-row, .gate, footer, .toast, .toolbar, .ctxbar, .hero-side { display: none !important; }
+  .btn, .btn-row, .gate, footer, .toast, .toolbar, .ctxbar { display: none !important; }
   .view { display: none !important; }
   .view.active { display: block !important; animation: none !important; }
   /* 打印兜底: 任何动画/过渡都不许留下"初始态"(尤其是 opacity:0) */
@@ -839,7 +745,6 @@ footer {
     break-inside: avoid; box-shadow: none; border-color: #ccc;
     animation: none !important; padding: 16px 18px; margin-bottom: 12px;
   }
-  .report-layout { grid-template-columns: 1fr; }
   /* 关键: 任何 max-height/overflow 滚动容器在打印时都会裁掉内容, 必须放开。
      上一份交付物就是栽在"打印时内容被裁 / 被动画初始态隐藏"这一类问题上。 */
   .appendix, .prompt-box, textarea, pre, .runlog, .rule-ev { max-height: none !important; overflow: visible !important; }
@@ -950,92 +855,592 @@ footer {
 }
 
 </style>
+<style>
+/* ============================================================================
+   基金复诊台 FundClinic · 工作台外壳 (shell)
+   ----------------------------------------------------------------------------
+   为什么改: 顶部 6 个横排标签在 1440px 下已经折成两行(实测截图), 字都被压成竖排;
+   而"输入一个代码、看一眼口径"是反复要做的事, 却被埋在下半页的表单里。
+   改成 AI 产品通用的两栏外形:
+
+     左栏 288px = 新建复盘 / 基金代码输入 / 当前口径摘要 / 已复盘的基金 / 工具
+     右栏       = 工作区(开工台 或 一份报告), 自己滚, 不再整页滚
+
+   分工写死一句话: 外壳只管"东西放在哪", 不管"长什么样" ——
+   内容样式一行不改, 全部沿用 styles.css, 所以报告、底稿、质检的排版一个字都不会动。
+
+   工程约束(不能破):
+     · 只新增类名 .rail* .stage* .doc* .seg 等; styles.css 已有的 104 个类一个不改
+     · 打印/导 PDF 时外壳整体退场, 回到原来的单栏版面(见文件末尾 @media print)
+     · DOM 顺序 = 焦点顺序: 左栏在内容之前, 键盘 Tab 先走导航再进正文
+   ============================================================================ */
+
+:root {
+  --rail-w: 288px;
+  --rail-w-mini: 68px;
+  --stagebar-h: 52px;
+}
+
+/* ---------------------------------------------------------------- 两栏骨架 */
+body.shelled {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  height: 100vh;
+  overflow: hidden;
+}
+body.shelled.rail-mini { grid-template-columns: var(--rail-w-mini) minmax(0, 1fr); }
+
+/* ---------------------------------------------------------------- 左栏 */
+.rail {
+  position: relative; display: flex; flex-direction: column; min-height: 0;
+  background: var(--paper-2); border-right: 1px solid var(--line);
+}
+
+.rail-head {
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 15px 12px 12px 16px;
+}
+.rail-brand {
+  display: flex; align-items: baseline; gap: 8px; min-width: 0;
+  font-size: 15px; font-weight: 600; color: var(--navy); letter-spacing: .04em;
+  white-space: nowrap;
+}
+.rail-brand::before {
+  content: ""; width: 3px; height: 14px; border-radius: 2px;
+  background: var(--brass); flex: none; transform: translateY(1px);
+}
+.rail-brand span {
+  font-size: 9.5px; font-weight: 400; letter-spacing: .18em;
+  color: var(--ink-4); text-transform: uppercase;
+}
+/* 收起/展开: 只留按钮位置, 图标用两条斜杠示意(不引外部图标库) */
+.rail-fold {
+  margin-left: auto; width: 26px; height: 26px; flex: none;
+  display: grid; place-items: center; border: 0; border-radius: 6px;
+  background: none; color: var(--ink-3); cursor: pointer;
+}
+.rail-fold:hover { background: rgba(21, 27, 35, .05); color: var(--navy); }
+.rail-fold svg { width: 15px; height: 15px; }
+
+/* 新建: 全栏唯一的主行动, 学 AI 界面的 "新对话" */
+.rail-new {
+  display: flex; align-items: center; gap: 8px; width: calc(100% - 24px); margin: 0 12px 6px;
+  height: 36px; padding: 0 11px; border: 0; border-radius: 8px; cursor: pointer;
+  background: var(--navy); color: #fff; font: inherit; font-size: 13.5px; font-weight: 500;
+  box-shadow: var(--sh-1); transition: background var(--t) var(--ease);
+}
+.rail-new:hover { background: #24384b; }
+.rail-new svg { width: 14px; height: 14px; flex: none; opacity: .9; }
+.rail-new kbd {
+  margin-left: auto; font: 400 10.5px/16px var(--mono);
+  color: rgba(255, 255, 255, .45); border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 4px; padding: 0 5px;
+}
+
+.rail-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 10px 12px; scrollbar-width: thin; }
+
+/* 一段 = 一个标题 + 一组控件 */
+.rb { padding: 11px 2px 12px; border-top: 1px solid var(--line); }
+.rb:first-child { border-top: 0; padding-top: 6px; }
+.rb-h {
+  display: flex; align-items: center; gap: 6px; margin: 0 4px 9px;
+  font-size: 10.5px; letter-spacing: .13em; color: var(--ink-3);
+}
+.rb-h .cnt {
+  font-size: 10px; letter-spacing: 0; color: var(--ink-3);
+  background: var(--surface-3); border-radius: 999px; padding: 1px 6px;
+  font-variant-numeric: tabular-nums;
+}
+.rb-h button {
+  margin-left: auto; border: 0; background: none; padding: 0 2px; cursor: pointer;
+  font: inherit; font-size: 11px; letter-spacing: 0; color: var(--ink-3);
+}
+.rb-h button:hover { color: var(--brass); }
+
+/* 代码输入: 一行放完, 输入框吃满, 年数收成小下拉 */
+.rb-row { display: flex; gap: 6px; }
+.rb-row input[type=text] {
+  flex: 1; min-width: 0; height: 36px; padding: 0 10px;
+  font: 600 15px/36px var(--num); letter-spacing: .1em;
+  border-radius: 7px; background: var(--surface);
+}
+.rb-row input[type=text]::placeholder {
+  font: 400 12.5px var(--font-sans); letter-spacing: .02em; color: var(--ink-4);
+}
+.rb-row select {
+  width: 84px; flex: none; height: 36px; padding: 0 6px;
+  font-size: 12px; border-radius: 7px; background: var(--surface);
+  font-variant-numeric: tabular-nums;
+}
+.rb-go {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  width: 100%; height: 31px; margin-top: 7px; cursor: pointer;
+  border: 1px solid var(--line-strong); border-radius: 7px;
+  background: var(--surface); color: var(--navy); font: inherit; font-size: 12.5px;
+  transition: border-color var(--t) var(--ease), color var(--t) var(--ease);
+}
+.rb-go:hover { border-color: var(--brass); color: var(--brass); background: var(--brass-soft); }
+.rb-go[disabled] { color: var(--ink-4); cursor: not-allowed; background: var(--surface-2); }
+.rb-go svg { width: 13px; height: 13px; }
+
+/* 口径摘要: 左边窄标签, 右边值 —— 两栏并排, 一行一条, 不用换行也不占高度 */
+.kv {
+  margin: 0; display: grid; grid-template-columns: 52px minmax(0, 1fr);
+  row-gap: 7px; column-gap: 6px; align-items: baseline;
+}
+.kv dt { font-size: 11px; color: var(--ink-3); line-height: 1.5; }
+.kv dd {
+  margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--ink);
+  font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+}
+.kv dd b { font-weight: 600; }
+.kv dd .dim { color: var(--ink-3); }
+
+/* 已复盘的基金 = 对话历史 */
+.rl { display: flex; flex-direction: column; gap: 1px; margin: 0 -4px; }
+.rl-i {
+  display: block; padding: 6px 8px 7px 9px; border-radius: 7px; cursor: pointer;
+  border-left: 2px solid transparent; text-decoration: none; color: inherit;
+}
+.rl-i:hover { background: rgba(21, 27, 35, .045); }
+.rl-i.on { background: var(--surface); border-left-color: var(--brass); box-shadow: var(--sh-1); }
+.rl-i .t {
+  display: flex; align-items: baseline; gap: 6px; min-width: 0;
+  font-size: 12.8px; color: var(--ink); line-height: 1.45;
+}
+.rl-i .t b {
+  flex: none; font: 600 11.5px var(--num); letter-spacing: .04em; color: var(--ink-2);
+}
+.rl-i.on .t b { color: var(--brass); }
+.rl-i .t i {
+  font-style: normal; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rl-i .m {
+  margin-top: 1px; font-size: 10.5px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.rl-i .m .seeded { color: var(--brass); }
+
+/* 报告目录: 读一份东西的时候, 左栏就换成它的目录(不再和正文里的目录打架) */
+.dir { display: flex; flex-direction: column; gap: 0; margin: 0 -2px; }
+.dir a {
+  display: flex; gap: 7px; padding: 4px 6px; border-radius: 6px;
+  font-size: 12.3px; line-height: 1.5; color: var(--ink-2); text-decoration: none;
+}
+.dir a .n {
+  flex: none; width: 13px; padding-top: 1px; text-align: right;
+  font: 400 10.5px var(--num); color: var(--ink-4);
+}
+.dir a:hover { background: rgba(21, 27, 35, .045); color: var(--navy); }
+.dir a.on { background: var(--surface); color: var(--navy); font-weight: 600; box-shadow: var(--sh-1); }
+.dir a.on .n { color: var(--brass); }
+
+/* 左栏最下面那段: 原来放在首屏右栏的"边界与纪律", 现在缩成一小段常驻文字 ——
+   首屏 hero 收掉之后, "这份复盘的边界"不能跟着一起消失, 它得一直在视线里。 */
+.rail-note {
+  margin: 4px 6px 0; padding: 10px 2px 2px;
+  border-top: 1px solid var(--line);
+  font-size: 11px; line-height: 1.75; color: var(--ink-3); text-wrap: pretty;
+}
+.rail-note b { font-weight: 600; color: var(--ink-2); }
+
+/* 左栏底部: 工具 + 状态 */
+.rail-foot { flex: none; border-top: 1px solid var(--line); padding: 8px 10px 10px; }
+.rf-i {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px;
+  font-size: 12.3px; color: var(--ink-2); text-decoration: none; cursor: pointer;
+}
+.rf-i:hover { background: rgba(21, 27, 35, .045); color: var(--navy); }
+.rf-i svg { width: 13px; height: 13px; flex: none; opacity: .55; }
+.rf-i .k {
+  margin-left: auto; font: 400 10.5px var(--mono); color: var(--ink-4);
+}
+.rf-state {
+  display: flex; align-items: center; gap: 6px; margin: 6px 2px 0; padding: 0 8px;
+  font-size: 10.5px; color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+.rf-state .dot { width: 5px; height: 5px; border-radius: 999px; background: var(--ok); flex: none; }
+.rf-state .dot.warn { background: var(--warn); }
+
+/* ---------------------------------------------------------------- 右栏 */
+.stage { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--paper); }
+
+.stagebar {
+  flex: none; display: flex; align-items: center; gap: 12px; height: var(--stagebar-h);
+  padding: 0 18px 0 22px; border-bottom: 1px solid var(--line);
+  background: rgba(250, 248, 244, .92);
+}
+.sb-title { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.sb-title b {
+  font-size: 14px; font-weight: 600; color: var(--navy);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sb-title .code {
+  flex: none; font: 600 12px var(--num); letter-spacing: .06em; color: var(--ink-3);
+}
+.sb-sp { flex: 1; }
+
+/* 窄屏的汉堡: 左栏收成抽屉之后, 这是唯一能把它叫回来的东西(桌面端不出现) */
+.sb-menu {
+  display: none; width: 30px; height: 30px; flex: none; place-items: center;
+  border: 1px solid var(--line-strong); border-radius: 7px;
+  background: var(--surface); color: var(--ink-2); cursor: pointer;
+}
+.sb-menu:hover { border-color: var(--brass); color: var(--brass); }
+.sb-menu svg { width: 14px; height: 14px; }
+
+/* 分段控件: 报告 / 底稿 / 质检 —— 同一只基金的三种读法 */
+.seg { display: flex; gap: 2px; padding: 3px; background: var(--surface-3); border-radius: 8px; }
+.seg button {
+  border: 0; background: none; padding: 4px 11px; border-radius: 6px; cursor: pointer;
+  font: inherit; font-size: 12.3px; color: var(--ink-2); white-space: nowrap;
+}
+.seg button:hover { color: var(--navy); }
+.seg button.on, .seg button.active { background: var(--surface); color: var(--navy); font-weight: 600; box-shadow: var(--sh-1); }
+
+.sb-btn {
+  display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px;
+  border: 1px solid var(--line-strong); border-radius: 7px; background: var(--surface);
+  color: var(--navy); font: inherit; font-size: 12.3px; cursor: pointer;
+}
+.sb-btn:hover { border-color: var(--brass); color: var(--brass); }
+.sb-btn svg { width: 12px; height: 12px; opacity: .6; }
+
+/* 阅读进度: 一条 2px 的铜色线, 只在读报告时出现 */
+.stage-main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.doc { max-width: 1010px; margin: 0 auto; padding: 24px 40px 120px; }
+
+/* 一份东西的抬头: 谁、什么时候、几节、什么标签 */
+.doc-head { margin: 0 0 22px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.doc-eyebrow {
+  margin: 0 0 9px; font-size: 10.5px; letter-spacing: .18em;
+  color: var(--brass); text-transform: uppercase;
+}
+.doc-head h1 {
+  margin: 0 0 11px; font-size: 26px; line-height: 1.32; font-weight: 700;
+  letter-spacing: -.02em; color: var(--navy); text-wrap: balance;
+}
+.doc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; font-size: 11.5px; color: var(--ink-2); }
+.chip {
+  padding: 2px 9px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--surface); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.chip.brass { border-color: #e3d5bb; background: var(--brass-soft); color: var(--brass); }
+.chip.ok { border-color: #cfe0d5; background: var(--ok-bg); color: var(--ok); }
+
+/* 开工台首屏: 原来是一段 hero 大标题 + 一段"它怎么做的"说明。说明那段已经删了 ——
+   同一件事下面面板里写得更准(六类来源 / 环境自检 / 内置样例口径), 首屏只留一句主张和两个入口。 */
+.page-head { margin: 0 0 22px; }
+.page-head h1 {
+  margin: 0 0 16px; font-size: 27px; line-height: 1.34; font-weight: 800;
+  letter-spacing: -.024em; color: var(--navy); text-wrap: balance; max-width: 30ch;
+}
+.page-head h1 em { font-style: normal; color: var(--brass); }
+
+/* 左栏输入块下面的那句提示(原来在在线面板里) */
+.rail-hint { margin: 6px 2px 0; font-size: 10.5px; line-height: 1.55; color: var(--ink-4); min-height: 16px; }
+.kv .rail-muted { color: var(--ink-4); }
+
+/* 读报告时右栏顶部那条进度线 */
+.doc-prog { flex: none; height: 2px; background: var(--line); }
+.doc-prog i { display: block; height: 2px; width: 0; background: var(--brass); transition: width .12s linear; }
+
+/* 探路结果: 开跑前先看"机器查到了什么" */
+.probe {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px;
+  padding: 13px 16px; margin: 0 0 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  box-shadow: var(--sh-1); font-size: 12.5px; color: var(--ink-2);
+}
+.probe b { color: var(--navy); font-weight: 600; }
+.probe .sep { color: var(--line-strong); }
+.probe .tag {
+  font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  background: var(--ok-bg); color: var(--ok); border: 1px solid #cfe0d5;
+}
+
+/* 口径表折起来的那 4 格: 八格全摊开有 700px 高, 而人真正要决定的只有前四格。
+   默认填好的四格收成一行(展开可改), 让"开跑"这个按钮回到一屏之内。 */
+.gate-more {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+  margin-top: 12px; padding: 9px 12px;
+  background: var(--surface-2); border: 1px dashed var(--line-strong); border-radius: var(--r-sm);
+  font-size: 12px; line-height: 1.7; color: var(--ink-3);
+}
+.gate-more b { font-weight: 600; color: var(--ink-2); }
+.gate-more .sep { color: var(--line-strong); }
+.gate-more button {
+  margin-left: auto; border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 11.5px; color: var(--brass);
+}
+.gate-more button:hover { text-decoration: underline; }
+
+/* 折起来那一行放在表格里: 单元格自身的内边距会把虚线框挤歪, 交给 .gate-more 自己排 */
+.gate-more-tr td { padding: 0 !important; }
+.gate-more-tr .gate-more { margin: 12px 0 4px; }
+
+/* 7 列步骤条: 原来铺满 1340 的画布, 现在画布只有约 940, 说明文字会挤成三四行。
+   收窄内边距 + 降一档字号, 让每一步的说明稳定落在两行以内。 */
+body.shelled .steps { margin-bottom: 0; }
+body.shelled .step { padding: 9px 10px 9px 15px; }
+body.shelled .step-name { font-size: 12px; }
+body.shelled .step-note { font-size: 10px; line-height: 1.45; }
+
+/* 开跑按钮行: 主行动放右, 与 AI 界面的"发送"位置一致 */
+.act-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.act-row .sp { flex: 1; }
+
+/* 口径确认表出现时, 首屏介绍整块让位 —— 人已经进到"确认这一步"了, 不需要再读一遍"这是什么"。 */
+#view-input.gate-open .page-head { display: none; }
+/* 同理, "数据来源: 六类公开来源"那句是开跑前的科普, 进到口径确认这一步就收起来;
+   环境自检那三个 ✓(pdftotext / Edge / AI 模块)仍然留着 —— 它们直接影响这次能跑出什么。 */
+#view-input.gate-open .hint-lead { display: none; }
+#view-input.gate-open #online-panel > h3 { margin-bottom: 2px; }
+
+/* 探路说明收成可点开的一行 */
+.probe-notes { margin-top: 4px; font-size: 12px; }
+.probe-notes summary { cursor: pointer; color: var(--brass); }
+.probe-notes summary:hover { text-decoration: underline; }
+.probe-notes div { margin-top: 3px; color: var(--ink-2); line-height: 1.7; }
+
+/* 候选区间从竖排改横排: 竖排两张卡片要占 180px, 而它们本来就是在二选一, 横排一眼就能比 */
+body.shelled .cands { flex-direction: row; flex-wrap: wrap; gap: 10px; }
+body.shelled .cand { flex: 1 1 44%; margin-bottom: 0; }
+body.shelled .cand.cand-rec { flex: 1 1 100%; }
+body.shelled .cand-others { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+body.shelled .cand-more {
+  margin: 8px 0 0; border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 12px; color: var(--brass);
+}
+body.shelled .cand-more:hover { text-decoration: underline; }
+@media (max-width: 720px) { body.shelled .cand { flex: 1 1 100%; } }
+
+/* 填过一次 Key 之后, 表单折成一行 —— 探路成功时人要看的是口径表, 不是 Key 输入框。
+   只在"本机自带 Key"这条路上有意义; 公网形态下整块 Key 区本来就被收掉了。 */
+.gate.folded .grid3, .gate.folded .btn-row, .gate.folded .note { display: none; }
+.gate.folded { padding-bottom: 12px; }
+.gate-fold-hint { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-2); }
+.gate-fold-hint code { font-family: var(--mono); font-size: 12px; color: var(--navy); }
+.gate-fold-hint button {
+  border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 12px; color: var(--brass);
+}
+.gate-fold-hint button:hover { text-decoration: underline; }
+
+/* 左栏底部被点中的那一条(横向对比 / 说明页) */
+.rf-i.active { background: rgba(21, 27, 35, .06); color: var(--navy); font-weight: 600; }
+.rf-state #topstatus {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 「问一句」原来是个右下角悬浮按钮, 有左栏之后它有了常驻位置; 悬浮球必须收掉,
+   否则会压在报告正文右下角(截图里那块空白本来就没有内容, 但挡住数字的锅得算在它头上)。 */
+body.shelled .ask-fab { display: none; }
+
+/* 运行语境条(深蓝)与顶栏重复: 现在"在看哪只基金"写在顶栏 #sb-title 里。 */
+body.shelled .ctxbar { display: none; }
+
+/* 桌面端把左栏收起来: 主区吃满整个宽度, 顶栏同时冒出汉堡 —— 收进去的东西必须能叫回来,
+   否则就是"点一下界面少一块, 再也回不去"。 */
+body.rail-collapsed { grid-template-columns: 0 minmax(0, 1fr); }
+body.rail-collapsed .rail { display: none; }
+body.rail-collapsed .sb-menu { display: grid; }
+
+/* 窄屏: 左栏变抽屉, 顶栏出汉堡 */
+.rail-scrim { display: none; }
+@media (max-width: 1120px) {
+  :root { --rail-w: 264px; }
+  .doc { padding-left: 26px; padding-right: 26px; }
+}
+@media (max-width: 900px) {
+  body.shelled { display: block; height: auto; overflow: visible; }
+  body.shelled .rail {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 70; width: 288px;
+    transform: translateX(-102%); transition: transform var(--t) var(--ease);
+    box-shadow: 12px 0 34px rgba(21, 27, 35, .16);
+  }
+  body.rail-open .rail { transform: none; }
+  body.rail-open .rail-scrim {
+    display: block; position: fixed; inset: 0; z-index: 69;
+    background: rgba(21, 27, 35, .32);
+  }
+  .stage { height: 100vh; }
+  .stagebar { padding-left: 10px; gap: 8px; }
+  .sb-menu { display: grid; }
+  .doc { padding: 18px 18px 90px; }
+  .seg button { padding: 4px 8px; font-size: 11.5px; }
+  .doc-head h1, .page-head h1 { font-size: 21px; }
+  .page-head h1 br { display: none; }
+}
+@media (max-width: 560px) {
+  .sb-btn .lbl { display: none; }
+  .stagebar .sb-title b { max-width: 34vw; }
+  .stagebar .sb-title .code { display: none; }
+}
+
+/* 打印 / 导 PDF: 外壳整体退场, 回到原来的单栏版面。
+   ⚠️ 这里必须显式写回 display/overflow —— 两栏用的是 100vh + overflow:hidden,
+   交给浏览器自动处理会把正文截在视口高度上(踩过一次, PDF 只有 3 页)。 */
+@media print {
+  body.shelled { display: block; height: auto; overflow: visible; }
+  .rail, .rail-scrim, .stagebar, .doc-prog { display: none !important; }
+  .stage { display: block; height: auto; }
+  .stage-main { overflow: visible; height: auto; }
+  .doc { max-width: none; padding: 0; }
+}
+
+</style>
 </head>
-<body>
+<body class="shelled">
 
-<header class="topbar">
-  <div class="brand">基金复诊台<span>FundClinic</span></div>
-  <nav class="tabs" aria-label="主导航">
-    <button class="tab active" data-view="input">① 输入与口径</button>
-    <button class="tab" data-view="report">② 复盘报告</button>
-    <button class="tab" data-view="ledger">③ 数据底稿</button>
-    <button class="tab" data-view="audit">④ 质检与 AI 记录</button>
-    <button class="tab" data-view="compare">⑥ 横向对比</button>
-    <button class="tab" data-view="about">⑤ 这个网页做什么</button>
-  </nav>
-  <div class="topstatus" id="topstatus">就绪</div>
-</header>
+<!-- ==========================================================================
+     两栏外壳: 左边是"做什么"(新建 / 输入 / 当前口径 / 已复盘 / 工具), 右边是"在做的事"。
+     原来顶部那排 6 个横排标签在 1440px 下就会折行, 而且输入框被埋在首屏下半页 ——
+     这一版把它们都收到左栏, 右栏只负责当前这一件事。样式见 app/shell.css。
+     ==========================================================================-->
+<aside class="rail" id="rail">
+  <div class="rail-head">
+    <div class="rail-brand">基金复诊台 <span>FundClinic</span></div>
+    <button class="rail-fold" id="rail-fold" type="button" title="收起左栏(窄屏下是抽屉开关)" aria-label="收起左栏">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 4.6L6.2 8l3.4 3.4M13 4.6L9.6 8 13 11.4"/></svg>
+    </button>
+  </div>
 
-<main>
+  <button class="rail-new" id="btn-new-run" type="button">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 3.2v9.6M3.2 8h9.6"/></svg>
+    新建复盘<kbd>N</kbd>
+  </button>
 
-  <!-- ================================================== ① 输入 -->
-  <section class="view active" id="view-input">
-
-    <!-- 首屏: 先讲清"这是什么、输入什么、出什么", 再给唯一一个主行动 -->
-    <div class="hero">
-      <div>
-        <p class="hero-eyebrow">基金持仓回溯复盘 · Fund Manager Review</p>
-        <h1>输入一个基金代码,<br>出一份<em>每个数字都能追到出处</em>的复盘。</h1>
-        <p>
-          按 SOP 六类公开来源自动采集, 把官方季报 PDF 与第三方逐行对账, 再算绩效、拆持仓动作、校验经理言行。
-          抓取、计算、对账全部由脚本完成, 大模型只做语言类的判断与成文 —— 且每一份输出都必须过校验才允许进报告。
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btn-hero-start">开始复盘</button>
-          <button class="btn" id="btn-hero-how">它到底怎么做的</button>
-        </div>
+  <div class="rail-body">
+    <!-- 输入: 在线模式下代码框就住在这儿(#online-code 的 id 不能改, online.js 全靠它取值)。
+         离线(直接双击 HTML)时这一块被 detectOnline 收掉, 只剩"内置样例"。 -->
+    <div class="rb" id="rail-input">
+      <div class="rb-h">输入<span class="cnt">6 位代码</span></div>
+      <div class="rb-row">
+        <input type="text" id="online-code" placeholder="如 519191 / 005827" maxlength="6" inputmode="numeric" autocomplete="off" aria-label="基金代码">
+        <select id="online-years" aria-label="抓取年数">
+          <option value="5">5 年</option>
+          <option value="8">8 年</option>
+          <option value="10" selected>10 年</option>
+          <option value="15">15 年</option>
+        </select>
       </div>
-      <aside class="hero-side">
-        <p class="hero-note-title">这份复盘的边界, 写在每个结论旁边</p>
-        <div class="hero-note">
-          <p>所有数字来自公开定期报告, 或由这些数字<strong>加减乘除</strong>得到; 找不到出处的会被校验拦下, 不进报告。</p>
-          <p>持仓只看前十大, 且是<strong>期末快照</strong> —— 所以"新进前十"不等于当季买入, "退出前十"不等于清仓或最高点卖出。</p>
-          <p>证据分三级: <strong>披露事实 / 合理推断 / 事后解读</strong>。第一级直接陈述, 第二级标注推断依据, 第三级只作历史复盘、不冒充当时信号。</p>
-          <p>不评价基金经理个人, 不推荐任何基金, <strong>不构成投资建议</strong>。</p>
-        </div>
-      </aside>
+      <button class="rb-go" id="btn-online-probe" type="button" disabled>探路，起草口径 →</button>
+      <p class="rail-hint" id="probe-hint">填 6 位基金代码后即可点</p>
     </div>
 
-    <!-- 在线模式: 输入代码 -> 自动爬取 -> 出报告与演示稿 -->
+    <!-- 当前口径: 只放摘要。完整的八格确认表在右栏 —— 288px 装不下表格, 挤进去只会变成一堆换行的标签。 -->
+    <div class="rb">
+      <div class="rb-h">当前口径<button type="button" data-view="input">改</button></div>
+      <dl class="kv" id="rail-kv">
+        <dt>复盘对象</dt><dd class="rail-muted">还没跑过</dd>
+        <dt>复盘区间</dt><dd class="rail-muted">—</dd>
+        <dt>数据截止</dt><dd class="rail-muted">—</dd>
+        <dt>收益口径</dt><dd>分红再投总回报</dd>
+        <dt>持仓范围</dt><dd>前十大 <span class="dim">期末快照</span></dd>
+      </dl>
+    </div>
+
+    <!-- 已复盘 = 这个产品的"对话历史"。原来它藏在输入页最下面, 跑过几只要翻半天。 -->
+    <div class="rb" id="rail-history-block">
+      <div class="rb-h">已复盘<span class="cnt" id="rail-count">0</span></div>
+      <div class="rl" id="rail-history"></div>
+    </div>
+
+    <!-- 读报告时左栏换成这份报告的目录: 正文里不再放第二个目录, 免得左右两个左栏打架 -->
+    <div class="rb hidden" id="rail-dir-block">
+      <div class="rb-h">这份报告的目录<span class="cnt" id="rail-dir-count">0 节</span></div>
+      <div class="dir" id="rail-dir"></div>
+    </div>
+
+    <div class="rail-note">
+      持仓只看<b>前十大</b>，季报是<b>期末快照</b> ——「新进前十」不等于买入，「退出前十」不等于清仓。推算价不是成交价，全文不构成投资建议。
+    </div>
+  </div>
+
+  <div class="rail-foot">
+    <a class="rf-i" data-view="compare" href="#compare">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3.5 12.5V7M8 12.5V3.5M12.5 12.5V9"/></svg>
+      横向对比<span class="k">≤ 3 只</span>
+    </a>
+    <a class="rf-i" id="btn-ask" href="#ask" title="问一句：只答这份报告里已有的事">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.8 4.2h10.4v6.6H6.4L2.8 13z"/></svg>
+      问一句（BOT）<span class="k">会拒答</span>
+    </a>
+    <a class="rf-i" id="btn-rail-builtin" href="#offline-panel">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M8 2.8L14 6 8 9.2 2 6z"/><path d="M2 9.4L8 12.6 14 9.4"/></svg>
+      内置样例<span class="k">不用 Key</span>
+    </a>
+    <a class="rf-i" data-view="about" href="#about">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.6"/><path d="M8 7.3v3.6M8 5.1v.2"/></svg>
+      这个网页做什么<span class="k">↗</span>
+    </a>
+    <div class="rf-state"><i class="dot" id="rail-dot"></i><span id="topstatus">就绪</span></div>
+  </div>
+</aside>
+<div class="rail-scrim" id="rail-scrim"></div>
+
+<div class="stage">
+  <!-- 顶栏: 只回答"现在看的是哪只基金的哪一面"。基金名/区间由 ui.js 填, 分段控件切视图。 -->
+  <div class="stagebar">
+    <button class="sb-menu" id="sb-menu" type="button" aria-label="打开导航">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.8 4.4h10.4M2.8 8h10.4M2.8 11.6h10.4"/></svg>
+    </button>
+    <div class="sb-title"><b id="sb-title">开工台</b><span class="code" id="sb-code"></span></div>
+    <div class="sb-sp"></div>
+    <div class="seg" id="viewseg" role="tablist" aria-label="视图切换">
+      <button type="button" data-view="input" role="tab" class="active">开工台</button>
+      <button type="button" data-view="report" role="tab">复盘报告</button>
+      <button type="button" data-view="ledger" role="tab">数据底稿</button>
+      <button type="button" data-view="audit" role="tab">质检</button>
+    </div>
+  </div>
+  <div class="doc-prog hidden" id="doc-prog"><i id="doc-prog-i"></i></div>
+
+  <div class="stage-main" id="stage-main">
+  <main class="doc">
+
+  <!-- ================================================== ① 开工台 -->
+  <section class="view active" id="view-input">
+
+    <div class="page-head">
+      <h1>输入一个基金代码，<br>出一份<em>每个数字都能追到出处</em>的复盘。</h1>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-hero-start">开始复盘</button>
+        <button class="btn" id="btn-hero-how">它到底怎么做的</button>
+      </div>
+    </div>
+
+    <!-- 在线模式: 代码框在左栏, 这里只放"能不能跑"和"跑到哪一步" -->
     <div class="panel hidden" id="online-panel">
-      <h3>在线模式 · 输入基金代码, 自动采集并生成报告与演示稿</h3>
+      <h3>开跑前的确认与进度</h3>
       <p class="panel-sub" id="online-hint"></p>
 
-      <div class="grid3">
-        <label class="field"><span>① 基金代码(6 位)</span><input type="text" id="online-code" placeholder="如 519191 / 005827" maxlength="6" inputmode="numeric" autocomplete="off"></label>
-        <label class="field"><span>抓取年数</span>
-          <select id="online-years">
-            <option value="5">最近 5 年</option>
-            <option value="8">最近 8 年</option>
-            <option value="10" selected>最近 10 年</option>
-            <option value="15">最近 15 年</option>
-          </select>
-        </label>
-        <div class="field">
-          <span>② AI 模块状态</span>
-          <div class="kb-status" id="ai-status">检测中…</div>
-        </div>
-      </div>
-
-      <!-- 服务端已经持有 Key 时(公网部署 / 本机配了 llm.local.json), 用这一条替掉下面整块 Key 表单:
-           访客不需要知道 Key 这回事, 也不该被要求去申请一个。本机没配 Key 时这一条不出现。 -->
+      <!-- 服务端已经持有 Key 时(公网部署 / 本机配了 llm.local.json), 用这一条替掉下面整块 Key 表单 -->
       <p class="panel-sub hidden" id="server-key-note"></p>
-      <!-- 公网额度: 在点"开始复盘"之前就让访客知道今天还剩几次、为什么会被拦。
-           和 Key 表单无关 —— 它是本站的成本闸门, 所以放在 #ai-block 外面(否则会被一起收掉)。 -->
+      <!-- 公网额度: 在开跑之前就让访客知道今天还剩几次、为什么会被拦 -->
       <p class="panel-sub hidden" id="quota-note"></p>
 
       <div class="gate" id="ai-block">
-        <h4>② API Key(必填)· 在 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">platform.deepseek.com</a> 申请</h4>
+        <h4>API Key（必填）· 在 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">platform.deepseek.com</a> 申请</h4>
+        <!-- 填过一次之后(探路成功)自动折成一行: 这时候人要看的是口径表和"开跑", 不是 Key 表单 -->
+        <p class="gate-fold-hint hidden" id="key-fold-hint">
+          AI 模块已就绪 · <code id="key-fold-model">deepseek-v4-flash</code>
+          · <button type="button" id="btn-key-unfold">改 Key</button>
+        </p>
         <div class="grid3">
           <label class="field"><span>API Base(OpenAI 兼容)</span><input type="text" id="ai-base" value="https://api.deepseek.com"></label>
           <label class="field"><span>模型名</span><input type="text" id="ai-model" value="deepseek-v4-flash"></label>
           <label class="field"><span>API Key</span><input type="password" id="ai-key" placeholder="sk-..." autocomplete="off"></label>
         </div>
         <div class="btn-row">
-          <button class="btn btn-sm" id="btn-ai-ping">测试 Key 连通性</button>
+          <button class="btn btn-sm" id="btn-ai-ping" type="button">测试 Key 连通性</button>
           <label style="display:flex;gap:8px;align-items:center;font-size:13px;cursor:pointer">
             <input type="checkbox" id="ai-remember"> 记住(存在本机浏览器, 下次不用重填)
           </label>
+          <span class="kb-status" id="ai-status" style="margin-left:auto">检测中…</span>
         </div>
         <p class="note" style="margin-top:12px">
           为什么必填: <strong>主题归类</strong>这一步没有公开接口可替代(天天基金不提供"主题"字段),
@@ -1046,28 +1451,19 @@ footer {
         </p>
       </div>
 
-      <div class="btn-row" style="margin-bottom:4px">
-        <button class="btn btn-primary" id="btn-online-probe" disabled>③ 开始复盘(先探路 → 填口径 → 再开跑)</button>
-        <span class="hint" id="probe-hint">填 6 位基金代码后即可点</span>
-      </div>
-
       <!-- 第二阶段: 开跑前的口径确认表(SOP §0 八格, 人主做) -->
       <div class="gate hidden" id="gate1-table">
-        <h4>④ 开跑前口径确认表(人主做 · 任何一格留空不许开跑)</h4>
+        <h4>开跑前口径确认表（SOP §0 · 任何一格留空不许开跑）</h4>
         <p class="note" style="margin-top:0" id="probe-summary"></p>
         <table class="tbl tbl-compact gate1-tbl"><tbody id="gate1-body"></tbody></table>
         <div class="btn-row" style="margin-top:14px">
-          <button class="btn btn-primary" id="btn-online-run" disabled>按此口径开跑</button>
-          <button class="btn btn-sm" id="btn-probe-again">重新探路</button>
+          <button class="btn btn-primary" id="btn-online-run" type="button" disabled>按此口径开跑</button>
+          <button class="btn btn-sm" id="btn-probe-again" type="button">重新探路</button>
           <span class="hint" id="gate1-status"></span>
         </div>
       </div>
 
-      <!-- 步骤进度: 让"现在跑到哪一步了"可见, 而不是只滚日志。
-           这 7 步是**量出来的**, 不是拍的: tools/capture_progress.mjs 录了一次完整跑动,
-           33 条进度消息归并成 7 个阶段。原来我写了 8 步, "绩效与轮动"那一步
-           在实际流水线里**永远不亮**(它是规则引擎内部算的, 不单独发进度) —— 用户会以为卡住了。
-           另外从录到的耗时看: 官方对账约 4.5s、导出 PDF 约 3s, 是两条长尾, 其余都在 1s 内。 -->
+      <!-- 步骤进度: 7 步是**量出来的**(tools/capture_progress.mjs 录一次完整跑动, 33 条进度消息归并) -->
       <div class="steps hidden" id="run-steps">
         <div class="step" data-step="probe"><div class="step-name">探路</div><div class="step-note">元数据 / 报告期网格</div></div>
         <div class="step" data-step="crawl"><div class="step-name">六类来源采集</div><div class="step-note">官方 PDF 为最高权威</div></div>
@@ -1079,7 +1475,6 @@ footer {
       </div>
 
       <div id="online-log" class="runlog"></div>
-      <div class="panel hidden" id="online-history" style="margin-top:18px"></div>
       <div id="online-result"></div>
     </div>
 
@@ -1092,8 +1487,7 @@ footer {
       </p>
 
       <!-- 口径: 内置样例的口径是定死的。原来这里摆三个"必须勾满才允许开跑"的复选框,
-           2026-10-10 收掉了 —— 访客连数据都没提供, 让他确认"数据不含内部信息"是空勾,
-           填满它不能证明任何事。改成直接把口径摆出来给人看。 -->
+           2026-10-10 收掉了 —— 访客连数据都没提供, 让他确认"数据不含内部信息"是空勾。 -->
       <div class="gate" id="gate1">
         <h4>内置样例的口径(已经定好, 不需要你确认)</h4>
         <table class="tbl tbl-compact"><tbody>
@@ -1118,31 +1512,33 @@ footer {
       <div class="grid3">
         <div class="metric"><div class="metric-l">输入</div><div class="metric-v" style="font-size:14px">基金代码</div></div>
         <div class="metric"><div class="metric-l">AI 模块</div><div class="metric-v" style="font-size:14px">规则引擎 + 大模型(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗)</div></div>
-        <div class="metric"><div class="metric-l">输出</div><div class="metric-v" style="font-size:14px">11 节复盘报告 + 结论卡 + 错误检查记录 + 来源清单 + 演示稿(HTML/PDF)</div></div>
+        <div class="metric"><div class="metric-l">输出</div><div class="metric-v" style="font-size:14px">复盘报告 + 结论卡 + 错误检查记录 + 来源清单 + 演示稿(HTML/PDF)</div></div>
       </div>
     </div>
   </section>
 
-  <!-- ================================================== ② 报告 -->
+  <!-- ================================================== ② 复盘报告 -->
   <section class="view" id="view-report">
     <div id="report-empty">
       <div class="empty">
         <div class="empty-art"><svg viewBox="0 0 24 24"><path d="M4 4h11l5 5v11H4z"/><path d="M15 4v5h5"/><path d="M8 13h8M8 16h5"/></svg></div>
         <h3>还没有跑过任何基金</h3>
-        <p>复盘报告会出现在这里: 11 节固定骨架, 先说结论, 每个数字带证据级别与推翻条件。</p>
+        <p>复盘报告会出现在这里: 固定骨架, 先说结论, 每个数字带证据级别与推翻条件。目录在左栏。</p>
         <div class="empty-actions">
           <button class="btn btn-primary" data-goto="input">去输入基金代码</button>
         </div>
         <div class="empty-hint">想马上看效果? 到 <a href="#offline-panel" data-goto="input">用内置样例</a> 也能看到完整报告</div>
       </div>
     </div>
-    <div class="report-layout hidden" id="report-layout">
-      <aside class="toc" id="report-toc"></aside>
+    <!-- 报告抬头(名称/区间/标签/质检)由 ui.js 填进 #doc-head; 正文由 #report-body 接住。
+         目录不再放在正文左侧 —— 它搬到左栏 #rail-dir, 免得两个左栏并排。 -->
+    <div id="report-layout" class="hidden">
+      <div class="doc-head" id="doc-head"></div>
       <div id="report-body"></div>
     </div>
   </section>
 
-  <!-- ================================================== ③ 底稿 -->
+  <!-- ================================================== ③ 数据底稿 -->
   <section class="view" id="view-ledger">
     <div id="ledger-empty">
       <div class="empty">
@@ -1172,8 +1568,7 @@ footer {
     <div id="audit-body"></div>
   </section>
 
-  <!-- ================================================== ⑤ 这个网页做什么 -->
-  <!-- ================================================== ⑥ 横向对比 -->
+  <!-- ================================================== ⑤ 横向对比 -->
   <section class="view" id="view-compare">
     <div class="panel">
       <h3>横向对比 · 最多 3 只</h3>
@@ -1189,6 +1584,8 @@ footer {
       <p class="muted cmp-tip">提示：被动 ETF / 指数基金与主动基金的「形态标签」不可比，看曲线和回撤就行。样本不足的会在表里标出来。</p>
     </div>
   </section>
+
+  <!-- ================================================== ⑥ 这个网页做什么 -->
   <section class="view" id="view-about">
     <div class="panel">
       <h3>一句话</h3>
@@ -1249,7 +1646,7 @@ footer {
         <tbody>
           <tr><th style="width:22%">门禁 1 · 口径确认</th><td>开跑前把八格口径摆出来: 复盘哪一任经理、哪个区间、数据截止日、业绩比较基准、收益口径、只看前十大、产出位置。这几格机器猜不出来(同一只基金往往有几任经理、还跨共管期), 所以由人定; <strong>任何一格留空不许开跑。</strong></td></tr>
           <tr><th>门禁 2 · 判断方向</th><td>形态标签由引擎给出候选与置信度, 报告按此方向成文; 人工改判要写理由, 并原样记进结论卡的 <code>humanOverride</code> 字段 —— 事后能看出来这条结论是谁定的。</td></tr>
-          <tr><th>门禁 3 · 终审三查</th><td>数字查(12 处抽检清单逐条给出官方原文链接)、结论查(每条结论找得到证据行)、合规查(违禁词扫描 + 免责声明)。三项都有规则在实际跑, 结果直接显示在「④ 质检与 AI 记录」页, 不需要访客替我们打勾。</td></tr>
+          <tr><th>门禁 3 · 终审三查</th><td>数字查(12 处抽检清单逐条给出官方原文链接)、结论查(每条结论找得到证据行)、合规查(违禁词扫描 + 免责声明)。三项都有规则在实际跑, 结果直接显示在「质检」页, 不需要访客替我们打勾。</td></tr>
         </tbody>
       </table>
     </div>
@@ -1266,12 +1663,14 @@ footer {
     </div>
   </section>
 
-</main>
+  <footer>
+    基金复诊台 FundClinic · 数据仅来自公开渠道(公募基金定期报告 / 天天基金 F10) · 只看前十大持仓, 季报为期末快照 ·
+    全部输出为回溯复盘, 不构成投资建议, 不评价基金经理个人。
+  </footer>
 
-<footer>
-  基金复诊台 FundClinic · 数据仅来自公开渠道(公募基金定期报告 / 天天基金 F10) · 只看前十大持仓, 季报为期末快照 ·
-  全部输出为回溯复盘, 不构成投资建议, 不评价基金经理个人。
-</footer>
+  </main>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -3591,11 +3990,71 @@ window.FC = window.FC || {};
 
   /* ============================================================ 视图切换 */
   var VIEWS = ['input', 'report', 'ledger', 'audit', 'compare', 'about'];
+  var VIEW_LABEL = {
+    input: '开工台', report: '复盘报告', ledger: '数据底稿',
+    audit: '质检与 AI 记录', compare: '横向对比', about: '这个网页做了什么'
+  };
+
+  /** 左栏中段在同一时刻只摆一件事:
+   *    读报告时 -> 摆这份报告的目录(正文里不再有第二个目录);
+   *    其他时候 -> 摆"已复盘"(这个产品的对话历史)。
+   *  两段都常驻会让左栏一屏放不下, 而"读的时候想跳章节"是即时需求, "换一只基金"可以晚一步。 */
+  function syncRailPanels(view) {
+    var histBlock = $('#rail-history') && $('#rail-history').closest ? $('#rail-history').closest('.rb') : null;
+    var dirBlock = $('#rail-dir-block');
+    var showDir = view === 'report' && !!state.analysis;
+    if (histBlock) histBlock.classList.toggle('hidden', showDir);
+    if (dirBlock) dirBlock.classList.toggle('hidden', !showDir);
+  }
+
+  /** 顶栏那行"现在看的是哪只基金的哪一面"。有结果时显示基金, 没结果时显示视图名。 */
+  function syncStagebar(view) {
+    var a = state.analysis;
+    var title = $('#sb-title'), code = $('#sb-code'), prog = $('#doc-prog');
+    if (title) title.textContent = a ? a.fund.name : (VIEW_LABEL[view] || '开工台');
+    if (code) {
+      code.textContent = a
+        ? (a.fund.code + ' · ' + a.range + ' · ' + a.quarterCount + ' 期')
+        : (view === 'input' ? '' : VIEW_LABEL[view] || '');
+    }
+    if (prog) prog.classList.toggle('hidden', !(view === 'report' && a));
+    syncRailPanels(view);
+    syncProgress();
+    syncDirActive();
+  }
+
+  /** 阅读进度线: 两条 CSS 就能做的事, 不引滚动监听库 —— 直接按 .stage-main 的 scrollTop 算。 */
+  function syncProgress() {
+    var sm = $('#stage-main'), bar = $('#doc-prog-i');
+    if (!sm || !bar) return;
+    var max = sm.scrollHeight - sm.clientHeight;
+    var pct = max > 8 ? Math.min(1, Math.max(0, sm.scrollTop / max)) * 100 : 100;
+    bar.style.width = pct.toFixed(1) + '%';
+  }
+
+  /** 左栏目录的"读到哪一节了": 滚到一半的章节算当前章节。 */
+  function syncDirActive() {
+    var host = $('#rail-dir'), block = $('#rail-dir-block');
+    if (!host || !block || block.classList.contains('hidden')) return;
+    var sm = $('#stage-main');
+    if (!sm) return;
+    var top = sm.getBoundingClientRect().top + 120;
+    var cur = null;
+    $$('#report-body .rsec').forEach(function (sec) {
+      if (sec.getBoundingClientRect().top <= top) cur = sec.id.replace(/^sec-/, '');
+    });
+    $$('#rail-dir a').forEach(function (a) { a.classList.toggle('on', a.dataset.sec === cur); });
+  }
+
   function show(view) {
     if (VIEWS.indexOf(view) < 0) view = 'input';
     $$('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-' + view); });
-    $$('.tab').forEach(function (t) { t.classList.toggle('active', t.dataset.view === view); });
+    $$('[data-view]').forEach(function (t) { t.classList.toggle('active', t.dataset.view === view); });
+    var sm = $('#stage-main');
+    if (sm) sm.scrollTop = 0;
+    document.body.classList.remove('rail-open');
     if (location.hash.slice(1) !== view) { try { history.replaceState(null, '', '#' + view); } catch (e) { location.hash = view; } }
+    syncStagebar(view);
     window.scrollTo(0, 0);
   }
   FC.show = show;
@@ -3663,6 +4122,8 @@ window.FC = window.FC || {};
   }
 
   function updateStatus() {
+    var dot = $('#rail-dot');
+    if (dot) dot.className = 'dot' + (state.check && state.check.summary && state.check.summary.fail ? ' warn' : '');
     if (!state.analysis) { setStatus('就绪'); return; }
     var a = state.analysis;
     var bits = [a.fund.code + ' ' + a.range, a.quarterCount + ' 期', '形态: ' + a.form.tag];
@@ -3702,14 +4163,84 @@ window.FC = window.FC || {};
   FC.setStatus = setStatus;
 
   /* ============================================================ 报告页 */
+  /** 报告区间末季 → 数据截止日。季报按季末披露, 所以这一格不用再引第二个来源。
+   *  ⚠️ 区间是 "2020Q4–2026Q3" 这种两头都带季度的写法, 必须取**最后一个**季度 ——
+   *  取第一个会得到 2020-12-31, 那是起始季不是截止日(第一版就这么错的, 截图里抓出来的)。 */
+  function rangeToCutoff(range) {
+    var all = String(range || '').match(/(\d{4})\s*Q([1-4])/g);
+    if (!all || !all.length) return '—';
+    var m = /(\d{4})\s*Q([1-4])/.exec(all[all.length - 1]);
+    if (!m) return '—';
+    return m[1] + '-' + ['03-31', '06-30', '09-30', '12-31'][Number(m[2]) - 1];
+  }
+
+  /** 左栏的"当前口径"摘要。完整的八格在右栏(表格塞不进 288px, 硬塞会变成一堆换行的标签)。 */
+  function renderRailKv() {
+    var kv = $('#rail-kv');
+    if (!kv) return;
+    var a = state.analysis;
+    if (!a) {
+      kv.innerHTML = '<dt>复盘对象</dt><dd class="rail-muted">还没跑过</dd>' +
+        '<dt>复盘区间</dt><dd class="rail-muted">—</dd>' +
+        '<dt>数据截止</dt><dd class="rail-muted">—</dd>' +
+        '<dt>收益口径</dt><dd>分红再投总回报</dd>' +
+        '<dt>持仓范围</dt><dd>前十大 <span class="dim">期末快照</span></dd>';
+      return;
+    }
+    var f = a.fund || {};
+    var rows = [
+      ['复盘对象', esc(f.manager || '—') + (f.managerSince ? ' <span class="dim">' + esc(f.managerSince) + '</span>' : '')],
+      ['复盘区间', esc(a.range) + ' <span class="dim">' + a.quarterCount + ' 期</span>'],
+      ['数据截止', esc((state.dataset && state.dataset.dataCutoff) || rangeToCutoff(a.range))],
+      ['收益口径', '分红再投总回报'],
+      ['持仓范围', '前十大 <span class="dim">期末快照</span>']
+    ];
+    kv.innerHTML = rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('');
+  }
+
+  /** 报告抬头: 谁、哪一段、什么标签、质检几分。原来这一堆散在状态条和结论卡里。 */
+  function renderDocHead() {
+    var dh = $('#doc-head'), a = state.analysis;
+    if (!dh || !a) return;
+    var secs = a.report.sections;
+    var f = a.fund || {};
+    var chips = [];
+    if (a.form && a.form.tag) chips.push('<span class="chip brass">' + esc(a.form.tag) + (a.form.confidence ? ' · 置信度' + esc(a.form.confidence) : '') + '</span>');
+    chips.push('<span class="chip">' + esc(a.range) + ' · ' + a.quarterCount + ' 个报告期</span>');
+    chips.push('<span class="chip">' + secs.length + ' 节</span>');
+    if (state.check && state.check.summary) {
+      var c = state.check.summary;
+      chips.push('<span class="chip ' + (c.fail ? '' : 'ok') + '">质检 ' + c.pass + '/' + c.total + ' 通过' + (c.warn ? ' · ' + c.warn + ' 项待人工确认' : '') + '</span>');
+    }
+    if (a.perf) {
+      var up = FC.dirCls(a.perf.cumReturn), dn = FC.dirCls(a.perf.maxDrawdown);
+      chips.push('<span class="chip">区间收益 <b' + (up ? ' class="' + up + '"' : '') + '>' + (a.perf.cumReturn > 0 ? '+' : '') + a.perf.cumReturn + '%</b> · 最大回撤 <b' + (dn ? ' class="' + dn + '"' : '') + '>' + a.perf.maxDrawdown + '%</b></span>');
+    }
+    chips.push('<span class="chip">' + (state.source === 'crawled' ? '本次在线采集' : '内置样例 / 历史结果') + '</span>');
+    dh.innerHTML =
+      '<p class="doc-eyebrow">持仓回溯复盘 · 每个数字都能追到出处</p>' +
+      '<h1>' + esc(f.name || '') + '（' + esc(f.code || '') + '）· ' + esc(f.manager || '') + '任内前十大持仓复盘</h1>' +
+      '<div class="doc-meta">' + chips.join('') + '</div>';
+  }
+
+  /** 报告目录搬进左栏 —— 正文里再放一个左目录, 就会和左栏并排成"两个左栏"。
+   *  这里只负责填内容, 显示/收起交给 syncRailPanels(它按当前视图决定)。 */
+  function renderRailDir() {
+    var dir = $('#rail-dir'), cnt = $('#rail-dir-count');
+    var a = state.analysis;
+    if (!dir || !a) return;
+    var secs = a.report.sections;
+    dir.innerHTML = secs.map(function (s, i) {
+      var t = String(s.title).replace(/^[一二三四五六七八九十]+、\s*/, '');
+      return '<a href="#" data-sec="' + esc(s.id) + '"><span class="n">' + (i + 1) + '</span><span>' + esc(t) + '</span></a>';
+    }).join('');
+    if (cnt) cnt.textContent = secs.length + ' 节';
+  }
+
   function renderReport() {
     var a = state.analysis;
     if (!a) return;
     var secs = a.report.sections;
-
-    $('#report-toc').innerHTML = '<h4>目录</h4>' + secs.map(function (s) {
-      return '<a href="#sec-' + s.id + '">' + esc(s.title) + '</a>';
-    }).join('');
 
     /* 门禁 2 原来是"请确认或改判"的单选 + 两个输入框 + 确认按钮 —— 已收掉(见 renderAudit 顶部注释)。
        留下的是判断结果本身: 引擎给了什么标签、置信度多少、证据级别、次优解释是什么,
@@ -3725,7 +4256,17 @@ window.FC = window.FC || {};
     $('#report-body').innerHTML = gate + secs.map(function (s) {
       return '<section class="rsec" id="sec-' + s.id + '"><h3>' + esc(s.title) + '</h3>' + s.html + '</section>';
     }).join('');
+    renderDocHead();
+    renderRailDir();
+    renderRailKv();
     markDrawn('report');
+    syncStagebar(curView());
+  }
+
+  /** 当前在哪个视图 —— 由 DOM 说话, 不在全局再存一份状态去跟它同步。 */
+  function curView() {
+    var v = document.querySelector('.view.active');
+    return v ? v.id.replace(/^view-/, '') : 'input';
   }
 
   function renderLedger() {
@@ -4006,7 +4547,80 @@ window.FC = window.FC || {};
 
   /* ============================================================ 事件绑定 */
   function bind() {
-    $$('.tab').forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.view); }); });
+    /* 视图切换: 左栏条目(横向对比 / 说明)和顶栏分段控件都用 data-view 说话, 由同一个处理函数接住 ——
+       原来只认 .tab, 现在任何带 data-view 的元素都能跳, 不许出现"点了没反应"的入口。 */
+    $$('[data-view]').forEach(function (t) {
+      t.addEventListener('click', function (e) {
+        if (t.tagName === 'A') e.preventDefault();
+        show(t.dataset.view);
+      });
+    });
+
+    /* ---------------------------------------------------------- 左栏交互 */
+    function toggleRail() {
+      if (window.innerWidth <= 900) document.body.classList.toggle('rail-open');
+      else document.body.classList.toggle('rail-collapsed');
+    }
+    var fold = $('#rail-fold'); if (fold) fold.addEventListener('click', toggleRail);
+    var menu = $('#sb-menu'); if (menu) menu.addEventListener('click', toggleRail);
+    var scrim = $('#rail-scrim');
+    if (scrim) scrim.addEventListener('click', function () { document.body.classList.remove('rail-open'); });
+
+    /* 新建复盘 = AI 界面里的"新对话": 清空代码框并聚焦; 离线(代码框被收掉)时滚到内置样例 */
+    var newRun = $('#btn-new-run');
+    function startNew() {
+      show('input');
+      document.body.classList.remove('rail-open');
+      var vi = $('#view-input'); if (vi) vi.classList.remove('gate-open');
+      var block = $('#rail-input'), codeIn = $('#online-code');
+      if (block && !block.classList.contains('hidden') && codeIn) {
+        codeIn.value = '';
+        if (FC.syncRunButton) FC.syncRunButton();
+        codeIn.focus();
+      } else {
+        var off = $('#offline-panel');
+        if (off) off.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    if (newRun) newRun.addEventListener('click', startNew);
+
+    var builtin = $('#btn-rail-builtin');
+    if (builtin) builtin.addEventListener('click', function (e) {
+      e.preventDefault(); show('input');
+      var off = $('#offline-panel');
+      if (off) off.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* 「问一句」的抽屉由 chat.js 管, 这里只替它点一下那个已被收起来的悬浮球 —— 不改 chat.js 一行 */
+    var askBtn = $('#btn-ask');
+    if (askBtn) askBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var fab = document.getElementById('ask-fab');
+      if (fab) fab.click();
+    });
+
+    /* 左栏目录: 自己滚, 不用 location.hash —— 那个 hash 是视图路由, 点目录会被判成"切到 input" */
+    var dirBox = $('#rail-dir');
+    if (dirBox) dirBox.addEventListener('click', function (e) {
+      var a2 = e.target.closest('a[data-sec]');
+      if (!a2) return;
+      e.preventDefault();
+      var sec = document.getElementById('sec-' + a2.dataset.sec);
+      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* 阅读进度与目录高亮: 只监听 .stage-main(整页不滚), passive 避免拖慢滚动 */
+    var sm = $('#stage-main');
+    if (sm) sm.addEventListener('scroll', function () { syncProgress(); syncDirActive(); }, { passive: true });
+    window.addEventListener('resize', function () { syncProgress(); });
+
+    /* 快捷键 N = 新建复盘(正在输入框里打字时不抢) */
+    document.addEventListener('keydown', function (e) {
+      if ((e.key !== 'n' && e.key !== 'N') || e.ctrlKey || e.metaKey || e.altKey) return;
+      var t2 = e.target;
+      if (t2 && (/^(INPUT|TEXTAREA|SELECT)$/.test(t2.tagName) || t2.isContentEditable)) return;
+      if (newRun) { e.preventDefault(); newRun.click(); }
+    });
 
     $('#builtin-list').addEventListener('click', function (e) {
       var b = e.target.closest('.btn-run');
@@ -4389,6 +5003,12 @@ window.FC = window.FC || {};
     if (!panel) return;
     if (location.protocol === 'file:') {
       panel.classList.add('offline-only');
+      /* 左栏的"输入"块在离线状态下没有意义(没有本地服务就抓不到数据), 收掉免得点出一堆红叉;
+         Key 表单同理 —— 直接打开 HTML 时那条路本来就不通, 摆在上面只会误导。 */
+      var ri = $('#rail-input'); if (ri) ri.classList.add('hidden');
+      /* "已复盘"是靠服务端 /api/history 喂的, 离线时它永远是空的 —— 留一个 0 在那儿只会误导 */
+      var rh = $('#rail-history-block'); if (rh) rh.classList.add('hidden');
+      var ab0 = $('#ai-block'); if (ab0) ab0.classList.add('hidden');
       $('#online-hint').innerHTML =
         '<strong>当前是离线模式(直接打开 HTML 文件)。</strong><br>' +
         '浏览器不允许网页从本地文件跨域抓取天天基金的数据, 也不允许直连大模型接口(CORS)。' +
@@ -4433,19 +5053,26 @@ window.FC = window.FC || {};
           var ab = $('#ai-block'); if (ab) ab.classList.add('hidden');
           var skn = $('#server-key-note');
           if (skn) {
-            skn.classList.remove('hidden');
-            skn.innerHTML = 'AI 模块由<strong>本站服务端</strong>提供 —— 你只需要输入基金代码, 不用申请、也不用填写任何 Key。' +
-              '大模型只做语言类的事(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗), 抓取、计算、对账、质检全部由脚本完成; ' +
-              '它的每一份输出都要过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒)才允许进报告, 不通过一律拦截。' +
-              '你提供的只有那 6 位基金代码, 本站没有你的任何账号信息。';
+            if (h.cloud) {
+              skn.classList.remove('hidden');
+              skn.innerHTML = 'AI 模块由<strong>本站服务端</strong>提供 —— 你只需要输入基金代码, 不用申请、也不用填写任何 Key。' +
+                '大模型只做语言类的事(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗), 抓取、计算、对账、质检全部由脚本完成; ' +
+                '它的每一份输出都要过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒)才允许进报告, 不通过一律拦截。' +
+                '你提供的只有那 6 位基金代码, 本站没有你的任何账号信息。';
+            } else {
+              /* 本机形态: Key 已经在 llm.local.json 里配好, 页面上一句都不提 —— 提了也是让人找"哪里填"。
+                 真想知道 AI 从哪来, README 和"它做什么"那一节都写着。 */
+              skn.classList.add('hidden');
+              skn.innerHTML = '';
+            }
           }
         } else {
           setAiStatus(null, '② 需要你自己填一个 API Key(见下方)');
         }
       }
-      // 本机浏览器记住过就直接填回来
+      // 本机浏览器记住过就直接填回来(服务端已经有 Key 时不必再碰它)
       var saved = loadRemembered();
-      if (saved && saved.apiKey && !$('#ai-key').value) {
+      if (!online.serverKey && saved && saved.apiKey && !$('#ai-key').value) {
         $('#ai-base').value = saved.baseUrl || $('#ai-base').value;
         $('#ai-model').value = saved.model || $('#ai-model').value;
         $('#ai-key').value = saved.apiKey;
@@ -4474,10 +5101,10 @@ window.FC = window.FC || {};
       online.popplerHint = h.popplerHint || '';
       online.env = { pdftotext: !!h.pdftotext, edge: !!h.edge };
       $('#online-hint').innerHTML =
-        '数据来源: <strong>六类公开来源</strong>(官方定期报告 PDF 为最高权威, 第三方平台只做交叉验证)。' +
+        '<span class="hint-lead">数据来源: <strong>六类公开来源</strong>(官方定期报告 PDF 为最高权威, 第三方平台只做交叉验证)。</span>' +
         '<span class="envchk">官方 PDF 解析 ' + (h.pdftotext ? '✓ ' + base(h.pdftotextPath) : '✗ 未安装 Poppler, 官方对账会标记为未完成') + '</span>' +
         '<span class="envchk">PDF 导出 ' + (h.edge ? '✓ ' + base(h.edge) : '✗ 未找到 Edge/Chrome') + '</span>' +
-        '<span class="envchk">AI 模块 ' + (online.serverKey ? '由本站服务端提供' : '<strong>需自带 Key</strong>') + '</span>' +
+        '<span class="envchk">AI 模块 ' + (online.serverKey ? '✓ ' + (h.cloud ? '由本站服务端提供' : '本机已配置') : '<strong>需自带 Key</strong>') + '</span>' +
         /* 缺 Poppler 时直接把**本机对应的**安装命令摆出来, 不让用户自己去猜去搜 */
         (!h.pdftotext && h.popplerHint
           ? '<div class="note" style="margin-top:8px">装上它能让报告多出最关键的一栏(官方季报逐行对账)。在' +
@@ -4566,18 +5193,36 @@ window.FC = window.FC || {};
         var lbl = m.managers.join('+') + '(' + m.start + ' ~ ' + m.end + ')' + (m.coManaged ? '【共管期】' : '') + ' 任职' + (m.tenure || '') + (m.returnPct !== null && m.returnPct !== undefined ? ' 任内' + m.returnPct + '%' : '');
         return '<option value="m' + i + '"' + (i === 0 ? ' selected' : '') + '>' + FC.esc(lbl) + '</option>';
       }).join('') + '</select>' +
-      (p.managers.some(function (m) { return m.coManaged; }) ? '<div class="flag">检出共管期: ' + p.managers.filter(function (m) { return m.coManaged; }).map(function (m) { return m.managers.join('+') + '(' + m.start + '~' + m.end + ')'; }).join('、') + ' —— 这段时间的操作不能全归功于单人</div>' : '') +
+      (function () {
+        var co = p.managers.filter(function (m) { return m.coManaged; });
+        if (!co.length) return '';
+        /* 共管期可能有好几段(老基金 5~6 段很常见)。全列出来这一格就 3 行, 把口径表和开跑按钮往下顶;
+           列前两段 + "等 N 段"既保住了"这不是单人战绩"这个信号, 也不让高度随基金变化乱跳。 */
+        var shown = co.slice(0, 2).map(function (m) { return m.managers.join('+') + '(' + m.start + '~' + m.end + ')'; }).join('、');
+        return '<div class="flag">检出共管期 ' + co.length + ' 段: ' + shown +
+          (co.length > 2 ? ' 等 ' + (co.length - 1) + ' 段' : '') + ' —— 这段时间的操作不能全归功于单人</div>';
+      })() +
       '</td></tr>');
 
     /* 3 复盘区间 —— 候选直接列出来让用户点 */
-    var candRows = p.candidates.map(function (c) {
+    /* 候选区间可能有 6~7 个(每段任期一个), 全摊开光这一格就 400px。
+       默认只摆"推荐的那个", 其余收在"其他 N 个候选"里 —— 人多数时候直接按推荐走,
+       要改再展开。这样"按此口径开跑"才可能留在第一屏。 */
+    function candCard(c) {
       return '<label class="cand' + (c.recommended ? ' cand-rec' : '') + '">' +
         '<input type="radio" name="g1cand" value="' + FC.esc(c.id) + '"' + (c.recommended ? ' checked' : '') + '>' +
         '<span>' + FC.esc(c.label) + '<br><b>' + c.from + ' ~ ' + c.to + '</b> · ' + c.n + ' 期' +
         (c.coManaged ? ' <span class="flag-inline">共管期</span>' : '') + '</span></label>';
-    }).join('');
+    }
+    var recCand = p.candidates.filter(function (c) { return c.recommended; })[0] || p.candidates[0];
+    var otherCands = p.candidates.filter(function (c) { return c !== recCand; });
+    var candRows = recCand ? candCard(recCand) : '';
+    var candRest = otherCands.length
+      ? '<div class="cand-others hidden">' + otherCands.map(candCard).join('') + '</div>' +
+        '<button type="button" class="cand-more" id="btn-cand-more">其他 ' + otherCands.length + ' 个候选区间 ▾</button>'
+      : '';
     rows.push('<tr><th>③ 复盘区间(起点季度)<span class="req">*</span><div class="note">SOP: 默认经理上任季度;跨度过长可截断</div></th><td>' +
-      '<div class="cands">' + candRows + '</div>' +
+      '<div class="cands">' + candRows + '</div>' + candRest +
       '<div class="note" id="g1-range-reason">推荐理由: ' + FC.esc(p.recommendReason) + '</div>' +
       '<div class="note">也可手工微调: <input type="text" id="g1-from" value="' + FC.esc(d.rangeFrom) + '" style="width:110px"> ~ <input type="text" id="g1-to" value="' + FC.esc(d.rangeTo) + '" style="width:110px"></div>' +
       '</td></tr>');
@@ -4606,10 +5251,29 @@ window.FC = window.FC || {};
     rows.push('<tr><th>⑧ 产出目录<span class="req">*</span></th><td><input type="text" id="g1-outdir" value="' + FC.esc(d.outputDir) + '" readonly>' +
       '<div class="note">结果按基金代码存在本机项目目录下, 页面上一键下载。</div></td></tr>');
 
-    box.innerHTML = rows.join('');
+    /* 八格全摊开有 600~700px 高, 而人真正要决定的只有前三格(哪只基金 / 哪一任经理 / 哪段区间)。
+       后五格默认填好、折成一行摘要, 需要时展开改 —— 这样"按此口径开跑"不会被推到第二屏。
+       折起来不等于跳过: 五格照样在 DOM 里, 校验照旧逐格查空(syncGate1Table 只认 input 的值)。 */
+    var core = rows.slice(0, 3), restRows = rows.slice(3);
+    var summary = '<span>另外 <b>' + restRows.length + '</b> 格已按 SOP 默认填好，要改可以展开 ——</span>' +
+      '<span>④ 数据截止日 <b>' + esc(d.dataCutoff) + '</b></span><span class="sep">·</span>' +
+      '<span>⑤ 业绩比较基准 <b>' + esc(d.benchmark) + '</b></span><span class="sep">·</span>' +
+      '<span>⑥ 收益口径 <b>分红再投总回报</b></span><span class="sep">·</span>' +
+      '<span>⑦ 持仓范围 <b>' + esc(d.scope) + '</b></span><span class="sep">·</span>' +
+      '<span>⑧ 产出目录 <b>' + esc(d.outputDir) + '</b></span>' +
+      '<button type="button" id="btn-gate-more">展开 ④ ~ ⑧</button>';
+    var moreRow = '<tr class="gate-more-tr"><td colspan="2"><div class="gate-more">' + summary + '</div></td></tr>';
+
+    box.innerHTML = core.join('') + moreRow + restRows.map(function (r) {
+      return r.replace('<tr>', '<tr class="gate-rest hidden">');
+    }).join('');
     $('#probe-summary').innerHTML = '探路结果: <strong>' + FC.esc(p.fund.name) + '(' + p.code + ')</strong> · 报告期网格 ' + p.periods.length +
       ' 期(' + p.periods[0].period + '~' + p.periods[p.periods.length - 1].period + ') · 历任经理 ' + p.managers.length + ' 任 · 用时 ' + p.probeMs + ' ms' +
-      '<br>' + p.notes.map(function (n) { return '· ' + FC.esc(n); }).join('<br>');
+      /* 说明收成可点开的一行: 探路的几条提示很重要, 但它们是"要读的注", 不该把口径表和开跑按钮往下推 */
+      ((p.notes && p.notes.length)
+        ? ' <details class="probe-notes"><summary>' + p.notes.length + ' 条说明</summary>' +
+          p.notes.map(function (n) { return '<div>· ' + FC.esc(n) + '</div>'; }).join('') + '</details>'
+        : '');
 
     // 点候选区间 => 自动回填起止
     document.querySelectorAll('input[name=g1cand]').forEach(function (r) {
@@ -4624,8 +5288,21 @@ window.FC = window.FC || {};
     });
 
     $('#gate1-table').classList.remove('hidden');
+    foldKeyBlock();
+    /* 进到"确认口径"这一步之后, 首屏那段介绍就该让位 —— 否则光标题 + 三个按钮就占掉 300px */
+    var vi = $('#view-input'); if (vi) vi.classList.add('gate-open');
+    /* 滚动必须放在"折起来 / 收起首屏"**之后**: 先滚再收, 页面会矮一截, 视口就落到表格中段去了。 */
     $('#gate1-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
     syncGate1Table();
+  }
+
+  /** 把 Key 表单折成一行(探路成功后自动做); 点"改 Key"再放回来 */
+  function foldKeyBlock() {
+    var block = $('#ai-block'), hint = $('#key-fold-hint'), model = $('#key-fold-model');
+    if (!block || block.classList.contains('hidden')) return;
+    if (model) model.textContent = ($('#ai-model').value || 'deepseek-v4-flash');
+    block.classList.add('folded');
+    if (hint) hint.classList.remove('hidden');
   }
 
   /** 八格全填才放行 —— 这是 SOP 的"任何一格留空不许开跑" */
@@ -4684,21 +5361,27 @@ window.FC = window.FC || {};
   };
 
   function renderHistory() {
-    var box = $('#online-history');
+    var box = $('#rail-history'), cnt = $('#rail-count');
     if (!box) return;
-    if (!HISTORY.length) { box.innerHTML = ''; box.classList.add('hidden'); return; }
-    box.classList.remove('hidden');
-    box.innerHTML =
-      '<h4 style="margin:0 0 8px;font-size:13.5px;color:var(--navy)">最近的复盘记录(跑过就存下来了, 刷新、关浏览器、重启服务都还在)</h4>' +
-      '<table class="tbl tbl-compact"><thead><tr><th>时间</th><th>基金</th><th>区间 / 期数</th><th>形态</th><th>质检</th><th>操作</th></tr></thead><tbody>' +
-      HISTORY.slice(0, 12).map(function (h) {
-        return '<tr><td class="mono">' + String(h.at || '').slice(0, 16).replace('T', ' ') + '</td>' +
-          '<td><strong>' + FC.esc(h.name) + '</strong><br><span class="mono">' + FC.esc(h.code) + '</span></td>' +
-          '<td>' + FC.esc(h.range) + ' · ' + h.quarters + ' 期</td>' +
-          '<td>' + FC.esc(h.formTag) + '</td>' +
-          '<td>' + FC.esc(h.check || '—') + '</td>' +
-          '<td><button class="btn btn-sm btn-load-run" data-code="' + FC.esc(h.code) + '">载入</button></td></tr>';
-      }).join('') + '</tbody></table>';
+    if (cnt) cnt.textContent = HISTORY.length || 0;
+    if (!HISTORY.length) {
+      box.innerHTML = '<p class="rail-hint" style="margin:0 4px">还没有跑过。在上面填 6 位代码，点「探路」。</p>';
+      return;
+    }
+    var lastCode = '';
+    try { lastCode = localStorage.getItem('fundclinic.lastCode') || ''; } catch (e) {}
+    var cur = (online.summary && online.summary.code) || lastCode;
+    box.innerHTML = HISTORY.slice(0, 20).map(function (h) {
+      var when = String(h.at || '').slice(5, 16).replace('T', ' ');
+      var meta = [
+        h.quarters ? h.quarters + ' 期' : '',
+        h.formTag || '',
+        h.seeded ? '<span class="seeded">种子</span>' : when
+      ].filter(Boolean).join(' · ');
+      return '<a class="rl-i' + (h.code === cur ? ' on' : '') + '" data-code="' + FC.esc(h.code) + '" title="载入这次的结果（不重跑）">' +
+        '<div class="t"><b>' + FC.esc(h.code) + '</b><i>' + FC.esc(h.name) + '</i></div>' +
+        '<div class="m">' + meta + '</div></a>';
+    }).join('');
   }
 
   /** 把某次运行的结果重新画到页面上(不重跑, 直接读服务端存下来的结果) */
@@ -4713,11 +5396,13 @@ window.FC = window.FC || {};
       online.summary = j.summary;
       gate1 = null;
       var gt = $('#gate1-table'); if (gt) gt.classList.add('hidden');
+      var vi2 = $('#view-input'); if (vi2) vi2.classList.remove('gate-open');
       clearLog();
       log('已载入 ' + code + ' 的历史结果(' + String((j.summary && j.summary.range) || '') + ')', 'ok');
       renderResult(j.summary);
       renderCtxbar(j.summary);
       FC.applyServerResult(j.analysis, j.check, j.datasetMeta, j.summary);
+      renderHistory();
       try { localStorage.setItem('fundclinic.lastCode', code); } catch (e) {}
       if (opts.silent) { FC.setStatus('已恢复上次复盘: ' + code + '(' + ((j.summary && j.summary.range) || '') + ')'); }
       else { FC.toast('已恢复 ' + (j.summary && j.summary.name) + ' 的复盘结果', 'ok'); FC.show('report'); }
@@ -5100,6 +5785,7 @@ window.FC = window.FC || {};
   /* ------------------------------------------------------------ 绑定 */
   FC.initOnline = function () {
     FC.detectOnline();
+    FC.syncRunButton = syncRunButton;
     var probe = $('#btn-online-probe');
     if (probe) probe.addEventListener('click', FC.probe);
     var again = $('#btn-probe-again');
@@ -5108,6 +5794,15 @@ window.FC = window.FC || {};
     if (btn) btn.addEventListener('click', FC.runOnline);
     var ping = $('#btn-ai-ping');
     if (ping) ping.addEventListener('click', FC.pingAi);
+    /* "改 Key": 把折起来的表单放回来 */
+    var unfold = $('#btn-key-unfold');
+    if (unfold) unfold.addEventListener('click', function () {
+      var block = $('#ai-block'), hint = $('#key-fold-hint');
+      if (block) block.classList.remove('folded');
+      if (hint) hint.classList.add('hidden');
+      var k = $('#ai-key');
+      if (k) k.focus();
+    });
     ['#online-code', '#ai-key', '#ai-base', '#ai-model', '#online-years'].forEach(function (sel) {
       var el = $(sel);
       if (el) el.addEventListener('input', syncRunButton);
@@ -5117,6 +5812,32 @@ window.FC = window.FC || {};
     if (t) {
       t.addEventListener('input', syncGate1Table);
       t.addEventListener('change', syncGate1Table);
+      /* 折起来的 ④~⑧, 点一下展开/收起。用 class 记状态, 不依赖内联 style。 */
+      t.addEventListener('click', function (e) {
+        /* 其他候选区间 */
+        var cm = e.target.closest('#btn-cand-more');
+        if (cm) {
+          var box = t.querySelector('.cand-others');
+          if (box) {
+            var open = box.classList.toggle('hidden');
+            cm.textContent = open ? '其他 ' + box.querySelectorAll('.cand').length + ' 个候选区间 ▾'
+              : '收起其他候选 ▴';
+          }
+          return;
+        }
+        var b = e.target.closest('#btn-gate-more');
+        if (!b) return;
+        var open = t.classList.toggle('gate-open');
+        Array.prototype.forEach.call(t.querySelectorAll('tr.gate-rest'), function (tr) {
+          tr.classList.toggle('hidden', !open);
+        });
+        b.textContent = open ? '收起 ④ ~ ⑧' : '展开 ④ ~ ⑧';
+        if (open) {
+          var first = t.querySelector('tr.gate-rest input, tr.gate-rest select');
+          if (first) first.focus();
+        }
+        syncGate1Table();
+      });
     }
 
     /* 下载 / 载入历史 都走事件委托(结果面板是动态生成的) */
@@ -5130,6 +5851,9 @@ window.FC = window.FC || {};
       }
       var l = e.target.closest('.btn-load-run');
       if (l) { FC.loadRun(l.getAttribute('data-code')); return; }
+      /* 左栏"已复盘"列表: 点一下就把那次结果重新画出来(不重跑、不花额度) */
+      var row = e.target.closest('.rl-i[data-code]');
+      if (row) { FC.loadRun(row.getAttribute('data-code')); return; }
     });
 
     var codeInput = $('#online-code');
