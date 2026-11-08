@@ -369,6 +369,23 @@ window.FC = window.FC || {};
       };
     }
 
+    /* ---- 形态改判(门禁 2)
+     * 规则引擎只给候选与置信度; 真正定方向的是门禁 2 那一步(大模型起草 + 人工复核)。
+     * 内置样例是"某次正式跑批的快照", 所以把它当时的改判结果随数据带进来,
+     * 好让样例和「最近的复盘记录」里同一次跑批显示同一个标签 —— 否则同一只基金会出两个形态。
+     * 引擎原判不丢: 留在 engineTag 里, 两个都留着(与报告里 humanOverride 的存法一致)。 */
+    if (dataset.formOverride && dataset.formOverride.tag && nQ >= 4) {
+      var fo = dataset.formOverride;
+      form = {
+        tag: fo.tag,
+        confidence: fo.confidence || form.confidence,
+        reasons: (fo.reasons && fo.reasons.length) ? fo.reasons : form.reasons,
+        alternatives: fo.alternatives || form.alternatives,
+        engineTag: form.tag,
+        overrideNote: fo.note || '形态标签取自该次正式跑批的判断(门禁 2: 引擎给候选, 大模型起草, 人工复核)'
+      };
+    }
+
     /* ---- 绩效层(仅在提供了净值/收益口径时) */
     var perfLayer = null;
     if (perf) {
