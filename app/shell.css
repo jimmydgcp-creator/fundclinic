@@ -371,10 +371,10 @@ body.shelled .cand-more:hover { text-decoration: underline; }
 }
 .gate-fold-hint button:hover { text-decoration: underline; }
 
-/* 纯静态展示版(展台服务器只托管 HTML): 需要后端的入口标灰并挡住点击, 首屏顶上写明"能看什么"。
-   本机与云端部署都不会带 body.static-demo 这个类, 所以这两条规则平时不生效。 */
-body.static-demo #btn-ask,
-body.static-demo .rail-foot .rf-i[data-view="compare"] { opacity: .4; pointer-events: none; }
+/* 展示版(展台服务器只托管网页, 或只有部分接口): 用不了的入口标灰并挡住点击, 首屏顶上写明"能看什么"。
+   本机与 Render 云端都不会带这些类, 所以平时不生效。 */
+body.demo-no-ask #btn-ask,
+body.demo-no-compare .rail-foot .rf-i[data-view="compare"] { opacity: .4; pointer-events: none; }
 .static-note {
   margin: 0 0 18px; padding: 12px 15px;
   background: var(--warn-bg); border: 1px solid #e8dcc4; border-left: 3px solid var(--warn);

@@ -339,6 +339,17 @@ td.down .ev, .ev.down { color: var(--down); border-bottom-color: currentColor; f
 td.pos, .num.pos { color: var(--up); }
 td.neg, .num.neg { color: var(--down); }
 
+/* 报告第二节是"标签列 + 内容列"的竖表(<tr><th>复盘对象</th><td>…</td></tr>)。
+   内容列里可能出现很长的一段(比如业绩比较基准的每次调整记录), 而标签列没有宽度约束 ——
+   浏览器会把 th 压到"一个字宽", 打印成 A4 时整列竖排(2026-11-08 在 PDF 第 2 页发现)。
+   这里给标签列一个下限, 让它永远保持一行。 */
+.rsec table.tbl > tbody > tr > th,
+.panel table.tbl > tbody > tr > th,
+.gate table.tbl > tbody > tr > th { min-width: 6.5em; white-space: nowrap; vertical-align: top; }
+.rsec table.tbl > tbody > tr > td,
+.panel table.tbl > tbody > tr > td,
+.gate table.tbl > tbody > tr > td { vertical-align: top; }
+
 /* ---------------------------------------------------------------- 报告 */
 /* 报告页原来自带一个 232px 的左侧目录(.report-layout + .toc),
    2026-11-08 起目录搬进左栏 #rail-dir, 正文变成单栏满宽 —— 这两块样式已删。 */
@@ -1229,10 +1240,10 @@ body.shelled .cand-more:hover { text-decoration: underline; }
 }
 .gate-fold-hint button:hover { text-decoration: underline; }
 
-/* 纯静态展示版(展台服务器只托管 HTML): 需要后端的入口标灰并挡住点击, 首屏顶上写明"能看什么"。
-   本机与云端部署都不会带 body.static-demo 这个类, 所以这两条规则平时不生效。 */
-body.static-demo #btn-ask,
-body.static-demo .rail-foot .rf-i[data-view="compare"] { opacity: .4; pointer-events: none; }
+/* 展示版(展台服务器只托管网页, 或只有部分接口): 用不了的入口标灰并挡住点击, 首屏顶上写明"能看什么"。
+   本机与 Render 云端都不会带这些类, 所以平时不生效。 */
+body.demo-no-ask #btn-ask,
+body.demo-no-compare .rail-foot .rf-i[data-view="compare"] { opacity: .4; pointer-events: none; }
 .static-note {
   margin: 0 0 18px; padding: 12px 15px;
   background: var(--warn-bg); border: 1px solid #e8dcc4; border-left: 3px solid var(--warn);
@@ -5148,8 +5159,20 @@ window.FC = window.FC || {};
         }
       }
 
+      /* 能力声明: 后端可能只提供一部分接口 —— 展台服务器跑的是 Python 薄后端,
+         有"问一句""横向对比", 但没有采集与模型流水线, 所以 run=false。
+         前端据此收掉"输入代码", 只把能用的入口留着, 而不是让人点了报错。 */
+      online.caps = (h.caps && typeof h.caps === 'object')
+        ? { run: h.caps.run !== false, ask: h.caps.ask !== false, compare: h.caps.compare !== false }
+        : { run: true, ask: true, compare: true };
+
       var panel2 = $('#online-panel');
-      panel2.classList.remove('hidden');
+      if (online.caps.run === false) {
+        panel2.classList.add('hidden');
+        showcaseMode(online.caps);
+      } else {
+        panel2.classList.remove('hidden');
+      }
       /* 路径取末段: 不能只按 "\\" 切, macOS 用 "/" —— 否则 Mac 上会把整条路径显示出来。 */
       var base = function (p) { return String(p || '').split(/[\\/]/).filter(Boolean).pop() || ''; };
       online.popplerHint = h.popplerHint || '';
@@ -5186,9 +5209,13 @@ window.FC = window.FC || {};
 
   /** 纯静态部署时的形态: 有一说一, 不假装能现场跑。 */
   function staticDemoMode() {
-    document.body.classList.add('static-demo');
-    var ri = $('#rail-input'); if (ri) ri.classList.add('hidden');
+    showcaseMode({ run: false, ask: false, compare: false });
+    /* 纯静态时"已复盘"永远是空的(没有 /api/history), 留着那个 0 只会误导 */
     var rh = $('#rail-history-block'); if (rh) rh.classList.add('hidden');
+    var ask = $('#btn-ask');
+    if (ask) ask.title = '展示版没有后端, 问一句只在本机可用';
+    var cmp = document.querySelector('.rail-foot .rf-i[data-view="compare"]');
+    if (cmp) cmp.title = '展示版没有后端, 横向对比只在本机可用';
     var host = $('#view-input');
     if (host && !document.querySelector('.static-note')) {
       var note = document.createElement('div');
@@ -5199,10 +5226,28 @@ window.FC = window.FC || {};
         '要输入任意 6 位基金代码自动复盘, 在电脑上运行 <code>启动_基金复诊台.bat</code>。';
       host.insertBefore(note, host.firstChild);
     }
-    var ask = $('#btn-ask');
-    if (ask) { ask.title = '展示版没有后端, 问一句只在本机可用'; ask.setAttribute('aria-disabled', 'true'); }
-    var cmp = document.querySelector('.rail-foot .rf-i[data-view="compare"]');
-    if (cmp) { cmp.title = '展示版没有后端, 横向对比只在本机可用'; cmp.setAttribute('aria-disabled', 'true'); }
+  }
+
+  /** 有后端但能力不全(展台的 Python 薄后端): 能用哪些就说哪些, 用哪些就留哪些。 */
+  function showcaseMode(caps) {
+    document.body.classList.add('showcase');
+    if (!caps.ask) document.body.classList.add('demo-no-ask');
+    if (!caps.compare) document.body.classList.add('demo-no-compare');
+    var ri = $('#rail-input'); if (ri) ri.classList.add('hidden');
+    var host = $('#view-input');
+    if (host && !document.querySelector('.static-note')) {
+      var can = [];
+      if (caps.ask) can.push('「问一句」可以答(只答这份报告里已有的事)');
+      if (caps.compare) can.push('「横向对比」可以比 2–3 只');
+      var note = document.createElement('div');
+      note.className = 'static-note';
+      note.innerHTML = '<strong>当前是展示版。</strong>报告、底稿、质检都是真结果' +
+        (can.length ? ', ' + can.join('、') : '') +
+        '; <strong>但不能现场跑一只新基金</strong> —— 跑一次要采集六类公开来源、逐行对账官方季报、再走五步模型, ' +
+        '展台环境(384MB 内存、30 分钟休眠)装不下这条流水线。' +
+        '要输入任意 6 位基金代码自动复盘, 在电脑上运行 <code>启动_基金复诊台.bat</code>。';
+      host.insertBefore(note, host.firstChild);
+    }
   }
 
   /* ==================================================== 第一阶段: 探路 */

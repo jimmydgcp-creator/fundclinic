@@ -33,16 +33,17 @@ const funds = FC.builtinFunds();
 ok(funds.length === 2, '两只内置样例', JSON.stringify(funds.map(f => f.code)));
 const raw = FC.getBuiltin('519191');
 ok(!!raw, '取到 519191');
-ok(raw.quarters.length === 23, '519191 共 23 个报告期', String(raw.quarters.length));
+/* 期数不写死: 内置样例会随数据同步变化(2026-11-08 从 23 期同步到 24 期)。断言"≥20 且与 quarterCount 自洽" */
+ok(raw.quarters.length >= 20, '519191 期数合理', String(raw.quarters.length));
 ok(raw.quarters[0].period === '2020Q4' && raw.quarters[22].period === '2026Q2', '区间 2020Q4–2026Q2', raw.quarters[0].period + '–' + raw.quarters[22].period);
 
 console.log('\n=== 2. 引擎: 519191 ===');
 const a = FC.analyze(JSON.parse(JSON.stringify(raw)), { source: 'builtin' });
 ok(!a.error, '分析无错误', a.error);
-ok(a.quarterCount === 23, '期数 23');
+ok(a.quarterCount === raw.quarters.length, '期数与底稿一致', String(a.quarterCount));
 eq(a.quarters[22].top10[0].weight, 7.52, '2026Q2 第一大重仓权重 7.52%');
 ok(a.quarters[22].top10[0].name === '潞安环能', '2026Q2 第一大重仓=潞安环能', a.quarters[22].top10[0].name);
-ok(a.metrics.churn.length === 22, '换手序列 22 条(23 期相邻对)');
+ok(a.metrics.churn.length === a.quarterCount - 1, '换手序列 = 期数-1', String(a.metrics.churn.length));
 ok(a.metrics.conc.avg > 60 && a.metrics.conc.avg < 90, '前十合计均值落在合理区间', a.metrics.conc.avg);
 ok(a.metrics.avgRetained > 5 && a.metrics.avgRetained <= 10, '平均留存合理', a.metrics.avgRetained);
 ok(a.metrics.totalDistinct > 10, '个股份额集合非空', String(a.metrics.totalDistinct));
@@ -126,7 +127,7 @@ raw.quarters.forEach(q => (q.top10 || []).forEach(h => {
 }));
 const r4 = FC.parsePaste(fakeRows.join('\n'), { code: '519191', name: '万家新利灵活配置混合' });
 ok(r4.report.ok, '240 行真实数据可解析');
-ok(r4.report.periodCount === 23, '解析回 23 期', String(r4.report.periodCount));
+ok(r4.report.periodCount === raw.quarters.length, '解析回期数与底稿一致', String(r4.report.periodCount));
 const a4 = FC.analyze(r4.dataset, { source: 'paste' });
 eq(a4.metrics.conc.avg, a.metrics.conc.avg, '粘贴路径与内置路径的集中度均值一致(往返一致)');
 eq(a4.quarters[22].top10[0].weight, 7.52, '粘贴路径末期权重一致');

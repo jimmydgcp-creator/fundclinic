@@ -175,12 +175,14 @@ const must = [
   ['不构成投资建议', '免责句'],
   ['只看前十大持仓', '口径边界'],
   ['潞安环能', '真实持仓'],
-  ['主题坚守型', '形态标签'],
+  [/主题坚守型|个股稳定|主题切换型|低换手长期持有/, '形态标签'],
   ['推翻条件', '可证伪条件'],
   ['跟踪清单', '跟踪章节']
 ];
 for (const [m, label] of must) {
-  ok(pdfNorm.includes(norm(m)), label, '«' + m + '»');
+  /* 允许正则: 形态标签会随数据变化(主题坚守型 → 个股稳定 + 主题切换型), 写死一个词必然过期 */
+  const hit = (m instanceof RegExp) ? m.test(pdfNorm) : pdfNorm.includes(norm(m));
+  ok(hit, label, '«' + String(m) + '»');
 }
 
 console.log('\n==================================================');

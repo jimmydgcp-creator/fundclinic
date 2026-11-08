@@ -137,6 +137,32 @@ export FUNDCLINIC_LLM_KEY=sk-xxxx     # macOS / Linux
 
 ---
 
+### 路线 D · 展台部署(岭南学院作品展台, 只跑 Python)
+
+课程展台(`https://<组号>.show.lingnan.top/`)只支持**纯静态**或 **Python 后端**, 跑不了本项目的 Node 主服务。
+所以另做一个"薄后端": 前端还是同一份单文件版, 后端只提供三个接口 —— 预置报告、问一句、横向对比。
+
+```bash
+node tools/pack_showcase.mjs            # 生成 showcase/static + showcase/data, 并打出 zip(默认到系统临时目录)
+# 上传
+curl.exe -X POST -H "Authorization: Bearer <组令牌>" -H "Content-Type: application/zip" \
+  --data-binary "@%TEMP%\mf02_py.zip" https://show.lingnan.top/api/deploy
+curl.exe -H "Authorization: Bearer <组令牌>" https://show.lingnan.top/api/status   # 直到 deploy.state=ok
+```
+
+| 项 | 说明 |
+| --- | --- |
+| 部署类型 | `deploy.json` = `{"type":"python","start":"python app.py","port":8000}` |
+| 依赖 | `requirements.txt` 只有 `flask`、`requests`(展台内存 384MB, 别多装) |
+| 能做什么 | 看 519191(13 节)/510300 的完整报告、底稿、质检; **问一句**(真调模型); **横向对比**(真抓净值) |
+| 不能做什么 | 现场跑一只新基金 —— 那要采集六类来源 + 官方 PDF 对账 + 五步模型, 展台装不下这条流水线 |
+| 密钥 | 用 `POST /api/secret {"name":"DEEPSEEK_API_KEY","value":"..."}` 设到服务器; 代码只读 `os.environ`, 包里绝不含 `sk-`(打包脚本会先扫一遍) |
+| 前端配合 | `/api/health` 返回 `caps:{run:false,ask:true,compare:true}`; 前端据此收起"输入代码"、只保留能用的入口, 并在首屏写明边界 |
+
+> 展台服务器 30 分钟没人访问会休眠, 第一次打开要等几秒(前端会轮询, 不是死等)。
+
+---
+
 ## 二、数据从哪里来(严格按 SOP §2)
 
 **官方定期报告 PDF 是最高权威,天天基金只做第三方交叉验证。** 六类来源与对应接口:

@@ -37,3 +37,7 @@ node_modules/
 # 过程产物：逐页体检截图 / 变体预览
 _校验截图/
 _变体预览/
+# 展台包的生成物(每台机器重新 pack 即可, 不进仓库)
+showcase/static/
+showcase/data/
+showcase/.pack/

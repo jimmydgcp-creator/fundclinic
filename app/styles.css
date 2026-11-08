@@ -328,6 +328,17 @@ td.down .ev, .ev.down { color: var(--down); border-bottom-color: currentColor; f
 td.pos, .num.pos { color: var(--up); }
 td.neg, .num.neg { color: var(--down); }
 
+/* 报告第二节是"标签列 + 内容列"的竖表(<tr><th>复盘对象</th><td>…</td></tr>)。
+   内容列里可能出现很长的一段(比如业绩比较基准的每次调整记录), 而标签列没有宽度约束 ——
+   浏览器会把 th 压到"一个字宽", 打印成 A4 时整列竖排(2026-11-08 在 PDF 第 2 页发现)。
+   这里给标签列一个下限, 让它永远保持一行。 */
+.rsec table.tbl > tbody > tr > th,
+.panel table.tbl > tbody > tr > th,
+.gate table.tbl > tbody > tr > th { min-width: 6.5em; white-space: nowrap; vertical-align: top; }
+.rsec table.tbl > tbody > tr > td,
+.panel table.tbl > tbody > tr > td,
+.gate table.tbl > tbody > tr > td { vertical-align: top; }
+
 /* ---------------------------------------------------------------- 报告 */
 /* 报告页原来自带一个 232px 的左侧目录(.report-layout + .toc),
    2026-11-08 起目录搬进左栏 #rail-dir, 正文变成单栏满宽 —— 这两块样式已删。 */
