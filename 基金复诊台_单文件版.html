@@ -5118,6 +5118,10 @@ window.FC = window.FC || {};
       var h = await r.json();
       online.available = !!h.ok;
       online.health = h;
+      /* 展台(薄后端): 报告是预置结果, 不能现场跑。下面好几处文案要按这个分叉 —— 不写清楚的话,
+         页面会一直喊"你只需要输入基金代码", 而展台上根本没有代码框。 */
+      online.showcase = !!(h.caps && h.caps.run === false);
+      var showcase = online.showcase;
 
       /* 代码过期检测: 改过代码但没重启服务时, 页面必须显眼提醒 ——
          否则用户会以为修复没生效(实际踩过: 报告里照样出现 [object Object])。 */
@@ -5149,10 +5153,13 @@ window.FC = window.FC || {};
           if (skn) {
             if (h.cloud) {
               skn.classList.remove('hidden');
-              skn.innerHTML = 'AI 模块由<strong>本站服务端</strong>提供 —— 你只需要输入基金代码, 不用申请、也不用填写任何 Key。' +
+              skn.innerHTML = 'AI 模块由<strong>本站服务端</strong>提供 —— ' +
+                (showcase ? '不用申请、也不用填任何 Key。' : '你只需要输入基金代码, 不用申请、也不用填写任何 Key。') +
                 '大模型只做语言类的事(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗), 抓取、计算、对账、质检全部由脚本完成; ' +
                 '它的每一份输出都要过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒)才允许进报告, 不通过一律拦截。' +
-                '你提供的只有那 6 位基金代码, 本站没有你的任何账号信息。';
+                (showcase
+                  ? '这里的报告是本机跑完烤进来的, 模型那几步的结果一并留档, 见下面「AI 模块调用」。'
+                  : '你提供的只有那 6 位基金代码, 本站没有你的任何账号信息。');
             } else {
               /* 本机形态: Key 已经在 llm.local.json 里配好, 页面上一句都不提 —— 提了也是让人找"哪里填"。
                  真想知道 AI 从哪来, README 和"它做什么"那一节都写着。 */
@@ -5186,6 +5193,14 @@ window.FC = window.FC || {};
             + L.perIpHour + ' 次/小时) · 今天已跑 ' + q.dayRuns + ' 次'
             + (tight ? '<br><span style="color:var(--warn)">额度快用完了 —— 想反复试的话, 用下面的内置样例模式, 不消耗额度。</span>' : '');
         }
+      } else if (showcase) {
+        /* 展台没有限额后端, 硬写"还剩 40 次"是编的。这里说的是真事: 报告不占额度, 只有"问一句/对比"现场调模型。 */
+        var qb = $('#quota-note');
+        if (qb) {
+          qb.classList.remove('hidden');
+          qb.innerHTML = '这个部署是课程展台的展示版: 下面这份报告是<strong>预置结果</strong>(本机跑完烤进来的), 打开不消耗额度; ' +
+            '「问一句」和「横向对比」是现场算的, 每次各调一次模型。';
+        }
       }
 
       /* 能力声明: 后端可能只提供一部分接口 —— 展台服务器跑的是 Python 薄后端,
@@ -5196,29 +5211,15 @@ window.FC = window.FC || {};
         : { run: true, ask: true, compare: true };
 
       var panel2 = $('#online-panel');
-      if (online.caps.run === false) {
-        panel2.classList.add('hidden');
-        showcaseMode(online.caps);
-      } else {
-        panel2.classList.remove('hidden');
-      }
+      panel2.classList.remove('hidden');
+      /* 展台也把这块露出来: 它记的是"那只基金那次运行"的事实(区间/对账/交付物/步骤/AI 调用),
+         预置结果同样有这些, 收起来等于把最该给人看的过程证据藏了。 */
+      if (online.caps.run === false) showcaseMode(online.caps);
       /* 路径取末段: 不能只按 "\\" 切, macOS 用 "/" —— 否则 Mac 上会把整条路径显示出来。 */
       var base = function (p) { return String(p || '').split(/[\\/]/).filter(Boolean).pop() || ''; };
       online.popplerHint = h.popplerHint || '';
       online.env = { pdftotext: !!h.pdftotext, edge: !!h.edge };
-      $('#online-hint').innerHTML =
-        '<span class="hint-lead">数据来源: <strong>六类公开来源</strong>(官方定期报告 PDF 为最高权威, 第三方平台只做交叉验证)。</span>' +
-        '<span class="envchk">官方 PDF 解析 ' + (h.pdftotext ? '✓ ' + base(h.pdftotextPath) : '✗ 未安装 Poppler, 官方对账会标记为未完成') + '</span>' +
-        '<span class="envchk">PDF 导出 ' + (h.edge ? '✓ ' + base(h.edge) : '✗ 未找到 Edge/Chrome') + '</span>' +
-        '<span class="envchk">AI 模块 ' + (online.serverKey ? '✓ ' + (h.cloud ? '由本站服务端提供' : '本机已配置') : '<strong>需自带 Key</strong>') + '</span>' +
-        /* 缺 Poppler 时直接把**本机对应的**安装命令摆出来, 不让用户自己去猜去搜 */
-        (!h.pdftotext && h.popplerHint
-          ? '<div class="note" style="margin-top:8px">装上它能让报告多出最关键的一栏(官方季报逐行对账)。在' +
-            (navigator.platform && /Mac/i.test(navigator.platform) ? '「终端」' : 'PowerShell') +
-            '里执行: <code>' + FC.esc(h.popplerHint) + '</code>' +
-            (/^brew/.test(h.popplerHint) ? '(需要先装 Homebrew)' : '') +
-            ', 然后重启一次服务。</div>'
-          : '');
+      $('#online-hint').innerHTML = envChipsHtml();
       syncRunButton();
       /* 质检页要按"有没有服务端"决定长什么样(有服务端就整页只读, 见 ui.js renderAudit)。
          页面初始化时还不知道 -- 那时 FC.online.available 还是 false, 会先画成"要人工中转"的样子,
@@ -5263,6 +5264,11 @@ window.FC = window.FC || {};
     if (!caps.ask) document.body.classList.add('demo-no-ask');
     if (!caps.compare) document.body.classList.add('demo-no-compare');
     var ri = $('#rail-input'); if (ri) ri.classList.add('hidden');
+    /* 展台上的"内置样例"是浏览器内算出来的那份(10 节, 没有产品类型/持仓拟合/该追问),
+       和上面这份预置结果(14 节)不是一回事。手一点就把好报告换成差报告, 所以这块收起来 ——
+       要看结果就看预置的那两份(左栏「已复盘」)。
+       只在"确实有后端结果可看"时收; 纯静态(双击 HTML)那条路没有预置结果, 内置样例是唯一的内容, 不能收。 */
+    if (caps.ask || caps.compare) { var off = $('#offline-panel'); if (off) off.classList.add('hidden'); }
     /* 不能跑新基金时, 首屏原来那套"输入一个基金代码"的话术是假的: 代码框已经被收掉, 「开始复盘」点了也不出结果。
        与其在顶上摆一大段解释(没人读, 而且像在找借口), 不如把首屏本身改成实话: 报告是跑好的, 主按钮直接进报告。 */
     var head = document.querySelector('#view-input .page-head');
@@ -5277,6 +5283,33 @@ window.FC = window.FC || {};
       btn.textContent = '看复盘报告';
       btn.addEventListener('click', function () { FC.show('report'); });
     }
+  }
+
+  /* 「数据来源 / 环境检查 / AI 模块」那一行小字。
+     本机与云端按 /api/health 的真值写; 展台没有 Poppler、也没有无头浏览器,
+     但它跑过的那次预置运行确实做过官方对账 —— 所以写"预置运行已逐行对账", 不写"未安装 Poppler"。 */
+  function envChipsHtml() {
+    var h = online.health || {};
+    var base = function (p) { return String(p || '').split(/[\\/]/).filter(Boolean).pop() || ''; };
+    var head = '<span class="hint-lead">数据来源: <strong>六类公开来源</strong>(官方定期报告 PDF 为最高权威, 第三方平台只做交叉验证)。</span>';
+    if (online.showcase) {
+      return head +
+        '<span class="envchk">官方 PDF 解析 ' + (online.hasOfficial === false ? '— 这次运行没有对到官方报告' : '✓ 预置运行已逐行对账') + '</span>' +
+        '<span class="envchk">PDF 导出 ✗ 本站没有无头浏览器</span>' +
+        '<span class="envchk">AI 模块 ' + (online.serverKey ? '✓ 由本站服务端提供' : '✗ 未配置') + '</span>';
+    }
+    return head +
+      '<span class="envchk">官方 PDF 解析 ' + (h.pdftotext ? '✓ ' + base(h.pdftotextPath) : '✗ 未安装 Poppler, 官方对账会标记为未完成') + '</span>' +
+      '<span class="envchk">PDF 导出 ' + (h.edge ? '✓ ' + base(h.edge) : '✗ 未找到 Edge/Chrome') + '</span>' +
+      '<span class="envchk">AI 模块 ' + (online.serverKey ? '✓ ' + (h.cloud ? '由本站服务端提供' : '本机已配置') : '<strong>需自带 Key</strong>') + '</span>' +
+      /* 缺 Poppler 时直接把**本机对应的**安装命令摆出来, 不让用户自己去猜去搜 */
+      (!h.pdftotext && h.popplerHint
+        ? '<div class="note" style="margin-top:8px">装上它能让报告多出最关键的一栏(官方季报逐行对账)。在' +
+          (navigator.platform && /Mac/i.test(navigator.platform) ? '「终端」' : 'PowerShell') +
+          '里执行: <code>' + FC.esc(h.popplerHint) + '</code>' +
+          (/^brew/.test(h.popplerHint) ? '(需要先装 Homebrew)' : '') +
+          ', 然后重启一次服务。</div>'
+        : '');
   }
 
   /* ==================================================== 第一阶段: 探路 */
@@ -5791,6 +5824,10 @@ window.FC = window.FC || {};
   }
   function renderResult(s) {
     var box = $('#online-result');
+    online.summary = s;
+    /* 上面那排环境小字里的"官方对账"要跟着当前这份结果走: 换一只基金就换一次判断 */
+    online.hasOfficial = !!(s && s.official && ((s.official.checks || []).length > 0 || s.official.available));
+    if (online.showcase) { var eh = $('#online-hint'); if (eh) eh.innerHTML = envChipsHtml(); }
     var dl = function (key, label) {
       return '<button class="btn btn-sm btn-dl" data-key="' + key + '" data-label="' + FC.esc(label) + '">' + label + '</button>';
     };
@@ -5922,7 +5959,8 @@ window.FC = window.FC || {};
       (s.deckT6 && s.deckT6.ok ? '<a class="btn btn-sm" href="/deck/' + s.code + '?v=old" target="_blank" rel="noopener">对照: 旧模板版</a>' : '') +
       '</div>' +
       '<p class="note" style="margin-top:8px">下载走的是浏览器下载(不会跳走页面); 在线预览一律开新标签页 —— 这样你按回退或刷新, 结果都还在(也存进了"最近复盘记录")。</p>' +
-      '<p class="note" style="margin-top:10px">生成链路: 采集 → 官方对账 → 官方窗口校准 → 清洗 → 计算 → 质检 → 规则报告 → 深度报告(T5) → 深度演示稿(T6) → PDF。总耗时 ' + (s.totalMs / 1000).toFixed(1) + ' 秒。</p>' +
+      '<p class="note" style="margin-top:10px">生成链路: 采集 → 官方对账 → 官方窗口校准 → 清洗 → 计算 → 质检 → 规则报告 → 深度报告(T5) → 深度演示稿(T6) → PDF。总耗时 ' +
+      (s.totalMs ? (s.totalMs / 1000).toFixed(1) + ' 秒' : '未留档(这条是补建的历史记录)') + '。</p>' +
       '</div>' +
 
       '<div class="panel"><h3>本次执行步骤(运行记录)</h3>' +

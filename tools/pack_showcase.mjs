@@ -24,6 +24,21 @@ const kb = n => (n / 1024).toFixed(0) + ' KB';
 
 /* 1) 预置结果: analysis / check / fit / 结论卡 / summary —— 只留报告要用的, PDF 与 MD 都不带 */
 const RUNS = path.join(SHOW, 'data', 'runs');
+
+/* 交付物: 页面上那排"可下载的交付物"必须真能点开 —— 所以把它们也打进包里,
+   但**改名叫 ASCII**(report.md / deck.html …): zip 里的中文条目在不同系统上会乱码,
+   原始文件名记进 summary.files[key].name, 下载时用它当文件名。 */
+const DELIV = {
+  report: /^复盘报告_(?!.*_对外版).*\.md$/,
+  reportClean: /^复盘报告_.*_对外版\.md$/,
+  deck: /^演示稿_(?!.*深度版).*\.html$/,
+  deckT6: /^演示稿_.*深度版\.html$/,
+  card: /^结论卡_.*\.json$/,
+  check: /^错误检查记录_.*\.md$/,
+  sources: /^来源清单_.*\.md$/,
+  dataset: /^底稿_.*\.json$/
+};
+
 fs.rmSync(path.join(SHOW, 'data'), { recursive: true, force: true });
 for (const code of CODES) {
   const src = path.join(SEED, code);
@@ -32,14 +47,43 @@ for (const code of CODES) {
   fs.mkdirSync(dst, { recursive: true });
   fs.copyFileSync(path.join(src, 'analysis.json'), path.join(dst, 'analysis.json'));
   if (fs.existsSync(path.join(src, 'check.json'))) fs.copyFileSync(path.join(src, 'check.json'), path.join(dst, 'check.json'));
+  if (fs.existsSync(path.join(src, 'datasetMeta.json'))) fs.copyFileSync(path.join(src, 'datasetMeta.json'), path.join(dst, 'datasetMeta.json'));
   if (fs.existsSync(path.join(src, 'fit.json'))) fs.copyFileSync(path.join(src, 'fit.json'), path.join(dst, 'fit.json'));
-  const card = fs.readdirSync(src).find(f => f.startsWith('结论卡_') && f.endsWith('.json'));
-  if (card) fs.copyFileSync(path.join(src, card), path.join(dst, 'card.json'));
+
+  /* 交付物文件(一个 run 目录里可能有 PDF, 故意不带: 3MB 起, 而且页面文案本来就写着"本站没有无头浏览器") */
+  const srcFiles = fs.readdirSync(src);
+  const filesDir = path.join(dst, 'files');
+  fs.mkdirSync(filesDir, { recursive: true });
+  const fileMeta = {};
+  for (const [key, re] of Object.entries(DELIV)) {
+    const hit = srcFiles.find(n => re.test(n));
+    if (!hit) continue;
+    const ext = path.extname(hit);
+    const outName = key + ext;
+    fs.copyFileSync(path.join(src, hit), path.join(filesDir, outName));
+    fileMeta[key] = { name: hit, file: outName, bytes: fs.statSync(path.join(filesDir, outName)).size };
+  }
+
   /* summary: 前端"复盘完成"卡要用(code/name/range/quarters/formTag/check/perf/aiLog…) */
   const run = JSON.parse(fs.readFileSync(path.join(src, 'run.json'), 'utf8'));
-  fs.writeFileSync(path.join(dst, 'summary.json'), JSON.stringify(run.summary || {}, null, 1), 'utf8');
-  const size = fs.readdirSync(dst).reduce((s, f) => s + fs.statSync(path.join(dst, f)).size, 0);
-  log('  预置 ' + code + '  ' + fs.readdirSync(dst).length + ' 个文件 · ' + kb(size));
+  const summary = run.summary || {};
+  /* 盘上那份 summary 里 files[].path / pdf.path 是**本机绝对路径**(C:\\Users\\...):
+     直接下发等于把电脑上的目录结构发到公网。这里统一换成"只有名字和大小"。 */
+  summary.files = fileMeta;
+  summary.pdf = null;                    // 没带 PDF → 前端的文案会自动说"本站不提供 PDF"
+  if (summary.deckT6 && !fileMeta.deckT6) summary.deckT6 = null;
+  const leak = /[A-Za-z]:\\\\|[A-Za-z]:\\/;
+  if (leak.test(JSON.stringify(summary))) {
+    console.error('!! summary 里还有本机绝对路径, 不能上传');
+    process.exit(1);
+  }
+  fs.writeFileSync(path.join(dst, 'summary.json'), JSON.stringify(summary, null, 1), 'utf8');
+  const size = fs.readdirSync(dst).reduce((s, f) => {
+    const p = path.join(dst, f);
+    return s + (fs.statSync(p).isDirectory() ? fs.readdirSync(p).reduce((a, g) => a + fs.statSync(path.join(p, g)).size, 0) : fs.statSync(p).size);
+  }, 0);
+  log('  预置 ' + code + '  ' + (fs.readdirSync(dst).length + fs.readdirSync(filesDir).length) + ' 个文件 · ' + kb(size) +
+    ' · 交付物 ' + Object.keys(fileMeta).join('/'));
 }
 
 /* 2) 静态页: 用最新单文件版(内联了全部 JS/CSS, 前端一行不用改就知道怎么调这些接口) */

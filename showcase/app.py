@@ -115,7 +115,7 @@ def result():
         "ok": True,
         "analysis": _read(d / "analysis.json"),
         "check": _read(d / "check.json"),
-        "datasetMeta": None,
+        "datasetMeta": _read(d / "datasetMeta.json"),
         "summary": _read(d / "summary.json"),
     })
 
@@ -151,6 +151,145 @@ def compare():
     except Exception as e:
         return jsonify({"ok": False, "error": "对比失败: %s" % e}), 400
     return jsonify(r)
+
+
+# ---------------------------------------------------------------- 交付物下载 / 在线预览
+# 与主服务(Node)同名同形状: /api/download?code=&f=  /report/<code>  /deck/<code>
+# 这样前端一行都不用改 —— 那排"可下载的交付物"按钮在展台上也是真能点开的。
+FILE_KEYS = ("report", "reportClean", "deck", "deckT6", "card", "check", "sources", "dataset")
+
+
+def _run_dir(code):
+    code = re.sub(r"\D", "", str(code or ""))[:6]
+    d = RUNS / code
+    return d if (d / "analysis.json").exists() else None
+
+
+def _deliverable(d, key):
+    """包里的交付物统一存成 <key>.<ext>(ASCII 名), 见 tools/pack_showcase.mjs。"""
+    files_dir = d / "files"
+    if not files_dir.exists() or key not in FILE_KEYS:
+        return None
+    hits = sorted(files_dir.glob(key + ".*"))
+    return hits[0] if hits else None
+
+
+@app.route("/api/download")
+def download():
+    d = _run_dir(request.args.get("code", ""))
+    key = str(request.args.get("f", ""))
+    if d is None:
+        return jsonify({"ok": False, "error": "没有这只基金的预置结果"}), 404
+    f = _deliverable(d, key)
+    if f is None:
+        return jsonify({"ok": False, "error": "这次运行没有产出「%s」" % key}), 404
+    summary = _read(d / "summary.json") or {}
+    disp = ((summary.get("files") or {}).get(key) or {}).get("name") or f.name
+    return send_from_directory(f.parent, f.name, as_attachment=True, download_name=disp)
+
+
+@app.route("/deck/<code>")
+def deck_view(code):
+    """在线预览演示稿: 默认给深度版(T6), ?v=old 才给模板版 —— 与主服务一致。"""
+    d = _run_dir(code)
+    if d is None:
+        return jsonify({"ok": False, "error": "没有这只基金的预置结果"}), 404
+    want_old = str(request.args.get("v", "")) == "old"
+    f = _deliverable(d, "deck" if want_old else "deckT6") or _deliverable(d, "deck")
+    if f is None:
+        return jsonify({"ok": False, "error": "这次运行没有产出演示稿"}), 404
+    return send_from_directory(f.parent, f.name)
+
+
+@app.route("/report/<code>")
+def report_view(code):
+    d = _run_dir(code)
+    f = _deliverable(d, "report") if d else None
+    if f is None:
+        return jsonify({"ok": False, "error": "这次运行没有产出报告"}), 404
+    md = f.read_text(encoding="utf-8")
+    body = _md_to_html(md)
+    code = re.sub(r"\D", "", code)[:6]
+    # 注意: 不要用 % 或 str.format 拼这段 —— CSS 里全是 "width:100%" 这种 %, 会被当成格式符炸掉。
+    page = (
+        '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'
+        + "<title>" + code + " 复盘报告</title>"
+        + '<style>body{max-width:940px;margin:0 auto;padding:40px 24px;font:16px/1.85 "Microsoft YaHei",sans-serif;color:#16202e}'
+        + "h1{font-size:26px;color:#0a2540}h2{color:#0a2540;border-bottom:3px solid #1d4ed8;padding-bottom:8px;margin-top:34px}"
+        + "h3{color:#14395f;margin-top:26px}table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}"
+        + "td,th{border:1px solid #d8e0ea;padding:6px 9px;text-align:left;vertical-align:top}"
+        + "th{background:#f3f6fa}blockquote{border-left:3px solid #cbd5e1;margin:14px 0;padding:4px 14px;color:#475569}"
+        + "code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:13px}"
+        + "a{color:#1d4ed8}hr{border:0;border-top:1px solid #e2e8f0;margin:26px 0}"
+        + "</style></head><body>"
+        + '<p style="font-size:13px;color:#7d8da3"><a href="/">← 返回基金复诊台</a> · '
+        + '<a href="/deck/' + code + '">看演示稿</a> · '
+        + '<a href="/api/download?code=' + code + '&amp;f=report">下载 Markdown</a></p>'
+        + body
+        + "</body></html>"
+    )
+    return page, 200, {"Content-Type": "text/html; charset=utf-8"}
+
+
+def _md_to_html(md):
+    """极简 Markdown → HTML: 标题 / 表格 / 列表 / 引用 / 粗体 / 行内代码 / 段落。
+    够用就行 —— 展台上这份报告的主要结构就是这几样。"""
+    import html as _html
+
+    def inline(t):
+        t = _html.escape(t)
+        t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+        t = re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
+        t = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r'<a href="\2" target="_blank" rel="noopener">\1</a>', t)
+        return t
+
+    out, i, lines = [], 0, md.splitlines()
+    while i < len(lines):
+        ln = lines[i]
+        s = ln.strip()
+        if not s:
+            i += 1
+            continue
+        m = re.match(r"^(#{1,4})\s+(.*)$", s)
+        if m:
+            n = len(m.group(1))
+            out.append("<h%d>%s</h%d>" % (n, inline(m.group(2)), n))
+            i += 1
+            continue
+        if s.startswith("|"):
+            rows = []
+            while i < len(lines) and lines[i].strip().startswith("|"):
+                rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")])
+                i += 1
+            if len(rows) >= 2 and re.match(r"^:?-{2,}:?$", rows[1][0] or "-"):
+                head, body = rows[0], rows[2:]
+            else:
+                head, body = None, rows
+            out.append("<table>")
+            if head:
+                out.append("<tr>" + "".join("<th>%s</th>" % inline(c) for c in head) + "</tr>")
+            for r in body:
+                out.append("<tr>" + "".join("<td>%s</td>" % inline(c) for c in r) + "</tr>")
+            out.append("</table>")
+            continue
+        if re.match(r"^[-*]\s+", s):
+            out.append("<ul>")
+            while i < len(lines) and re.match(r"^[-*]\s+", lines[i].strip()):
+                out.append("<li>%s</li>" % inline(re.sub(r"^[-*]\s+", "", lines[i].strip())))
+                i += 1
+            out.append("</ul>")
+            continue
+        if s.startswith(">"):
+            out.append("<blockquote>%s</blockquote>" % inline(s.lstrip("> ")))
+            i += 1
+            continue
+        if re.match(r"^-{3,}$", s):
+            out.append("<hr>")
+            i += 1
+            continue
+        out.append("<p>%s</p>" % inline(s))
+        i += 1
+    return "\n".join(out)
 
 
 # ---------------------------------------------------------------- 其它
