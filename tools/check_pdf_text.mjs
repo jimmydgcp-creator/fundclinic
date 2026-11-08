@@ -67,7 +67,7 @@ const PRINT_HIDDEN = [
      不加这一条的话, 每次往空状态里多写一句提示语, PDF 覆盖率就会"凭空"掉一截。
      注意正则要容忍 JS 后加的属性 —— dump 出来的 DOM 是 `<div id="report-empty" class="hidden">`,
      写死成 `<div id="report-empty">` 匹配不到(踩过)。 */
-  ['div#report-empty', /<div id="report-empty"[^>]*>[\s\S]*?(?=<div class="report-layout)/, '空状态提示'],
+  ['div#report-empty', /<div id="report-empty"[^>]*>[\s\S]*?(?=<div id="report-layout")/, '空状态提示'],
   ['div.gate', /<div class="gate[^"]*"[\s\S]*?(?=<section class="rsec")/, '门禁交互框(勾选框/单选框)'],
   ['div.btn-row', /<div class="btn-row"[\s\S]*?<\/div>/, '按钮行'],
   ['div.toast', /<div class="toast"[^>]*><\/div>/, '提示条'],

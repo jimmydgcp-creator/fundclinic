@@ -71,11 +71,71 @@ window.FC = window.FC || {};
 
   /* ============================================================ 视图切换 */
   var VIEWS = ['input', 'report', 'ledger', 'audit', 'compare', 'about'];
+  var VIEW_LABEL = {
+    input: '开工台', report: '复盘报告', ledger: '数据底稿',
+    audit: '质检与 AI 记录', compare: '横向对比', about: '这个网页做了什么'
+  };
+
+  /** 左栏中段在同一时刻只摆一件事:
+   *    读报告时 -> 摆这份报告的目录(正文里不再有第二个目录);
+   *    其他时候 -> 摆"已复盘"(这个产品的对话历史)。
+   *  两段都常驻会让左栏一屏放不下, 而"读的时候想跳章节"是即时需求, "换一只基金"可以晚一步。 */
+  function syncRailPanels(view) {
+    var histBlock = $('#rail-history') && $('#rail-history').closest ? $('#rail-history').closest('.rb') : null;
+    var dirBlock = $('#rail-dir-block');
+    var showDir = view === 'report' && !!state.analysis;
+    if (histBlock) histBlock.classList.toggle('hidden', showDir);
+    if (dirBlock) dirBlock.classList.toggle('hidden', !showDir);
+  }
+
+  /** 顶栏那行"现在看的是哪只基金的哪一面"。有结果时显示基金, 没结果时显示视图名。 */
+  function syncStagebar(view) {
+    var a = state.analysis;
+    var title = $('#sb-title'), code = $('#sb-code'), prog = $('#doc-prog');
+    if (title) title.textContent = a ? a.fund.name : (VIEW_LABEL[view] || '开工台');
+    if (code) {
+      code.textContent = a
+        ? (a.fund.code + ' · ' + a.range + ' · ' + a.quarterCount + ' 期')
+        : (view === 'input' ? '' : VIEW_LABEL[view] || '');
+    }
+    if (prog) prog.classList.toggle('hidden', !(view === 'report' && a));
+    syncRailPanels(view);
+    syncProgress();
+    syncDirActive();
+  }
+
+  /** 阅读进度线: 两条 CSS 就能做的事, 不引滚动监听库 —— 直接按 .stage-main 的 scrollTop 算。 */
+  function syncProgress() {
+    var sm = $('#stage-main'), bar = $('#doc-prog-i');
+    if (!sm || !bar) return;
+    var max = sm.scrollHeight - sm.clientHeight;
+    var pct = max > 8 ? Math.min(1, Math.max(0, sm.scrollTop / max)) * 100 : 100;
+    bar.style.width = pct.toFixed(1) + '%';
+  }
+
+  /** 左栏目录的"读到哪一节了": 滚到一半的章节算当前章节。 */
+  function syncDirActive() {
+    var host = $('#rail-dir'), block = $('#rail-dir-block');
+    if (!host || !block || block.classList.contains('hidden')) return;
+    var sm = $('#stage-main');
+    if (!sm) return;
+    var top = sm.getBoundingClientRect().top + 120;
+    var cur = null;
+    $$('#report-body .rsec').forEach(function (sec) {
+      if (sec.getBoundingClientRect().top <= top) cur = sec.id.replace(/^sec-/, '');
+    });
+    $$('#rail-dir a').forEach(function (a) { a.classList.toggle('on', a.dataset.sec === cur); });
+  }
+
   function show(view) {
     if (VIEWS.indexOf(view) < 0) view = 'input';
     $$('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-' + view); });
-    $$('.tab').forEach(function (t) { t.classList.toggle('active', t.dataset.view === view); });
+    $$('[data-view]').forEach(function (t) { t.classList.toggle('active', t.dataset.view === view); });
+    var sm = $('#stage-main');
+    if (sm) sm.scrollTop = 0;
+    document.body.classList.remove('rail-open');
     if (location.hash.slice(1) !== view) { try { history.replaceState(null, '', '#' + view); } catch (e) { location.hash = view; } }
+    syncStagebar(view);
     window.scrollTo(0, 0);
   }
   FC.show = show;
@@ -143,6 +203,8 @@ window.FC = window.FC || {};
   }
 
   function updateStatus() {
+    var dot = $('#rail-dot');
+    if (dot) dot.className = 'dot' + (state.check && state.check.summary && state.check.summary.fail ? ' warn' : '');
     if (!state.analysis) { setStatus('就绪'); return; }
     var a = state.analysis;
     var bits = [a.fund.code + ' ' + a.range, a.quarterCount + ' 期', '形态: ' + a.form.tag];
@@ -182,14 +244,84 @@ window.FC = window.FC || {};
   FC.setStatus = setStatus;
 
   /* ============================================================ 报告页 */
+  /** 报告区间末季 → 数据截止日。季报按季末披露, 所以这一格不用再引第二个来源。
+   *  ⚠️ 区间是 "2020Q4–2026Q3" 这种两头都带季度的写法, 必须取**最后一个**季度 ——
+   *  取第一个会得到 2020-12-31, 那是起始季不是截止日(第一版就这么错的, 截图里抓出来的)。 */
+  function rangeToCutoff(range) {
+    var all = String(range || '').match(/(\d{4})\s*Q([1-4])/g);
+    if (!all || !all.length) return '—';
+    var m = /(\d{4})\s*Q([1-4])/.exec(all[all.length - 1]);
+    if (!m) return '—';
+    return m[1] + '-' + ['03-31', '06-30', '09-30', '12-31'][Number(m[2]) - 1];
+  }
+
+  /** 左栏的"当前口径"摘要。完整的八格在右栏(表格塞不进 288px, 硬塞会变成一堆换行的标签)。 */
+  function renderRailKv() {
+    var kv = $('#rail-kv');
+    if (!kv) return;
+    var a = state.analysis;
+    if (!a) {
+      kv.innerHTML = '<dt>复盘对象</dt><dd class="rail-muted">还没跑过</dd>' +
+        '<dt>复盘区间</dt><dd class="rail-muted">—</dd>' +
+        '<dt>数据截止</dt><dd class="rail-muted">—</dd>' +
+        '<dt>收益口径</dt><dd>分红再投总回报</dd>' +
+        '<dt>持仓范围</dt><dd>前十大 <span class="dim">期末快照</span></dd>';
+      return;
+    }
+    var f = a.fund || {};
+    var rows = [
+      ['复盘对象', esc(f.manager || '—') + (f.managerSince ? ' <span class="dim">' + esc(f.managerSince) + '</span>' : '')],
+      ['复盘区间', esc(a.range) + ' <span class="dim">' + a.quarterCount + ' 期</span>'],
+      ['数据截止', esc((state.dataset && state.dataset.dataCutoff) || rangeToCutoff(a.range))],
+      ['收益口径', '分红再投总回报'],
+      ['持仓范围', '前十大 <span class="dim">期末快照</span>']
+    ];
+    kv.innerHTML = rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('');
+  }
+
+  /** 报告抬头: 谁、哪一段、什么标签、质检几分。原来这一堆散在状态条和结论卡里。 */
+  function renderDocHead() {
+    var dh = $('#doc-head'), a = state.analysis;
+    if (!dh || !a) return;
+    var secs = a.report.sections;
+    var f = a.fund || {};
+    var chips = [];
+    if (a.form && a.form.tag) chips.push('<span class="chip brass">' + esc(a.form.tag) + (a.form.confidence ? ' · 置信度' + esc(a.form.confidence) : '') + '</span>');
+    chips.push('<span class="chip">' + esc(a.range) + ' · ' + a.quarterCount + ' 个报告期</span>');
+    chips.push('<span class="chip">' + secs.length + ' 节</span>');
+    if (state.check && state.check.summary) {
+      var c = state.check.summary;
+      chips.push('<span class="chip ' + (c.fail ? '' : 'ok') + '">质检 ' + c.pass + '/' + c.total + ' 通过' + (c.warn ? ' · ' + c.warn + ' 项待人工确认' : '') + '</span>');
+    }
+    if (a.perf) {
+      var up = FC.dirCls(a.perf.cumReturn), dn = FC.dirCls(a.perf.maxDrawdown);
+      chips.push('<span class="chip">区间收益 <b' + (up ? ' class="' + up + '"' : '') + '>' + (a.perf.cumReturn > 0 ? '+' : '') + a.perf.cumReturn + '%</b> · 最大回撤 <b' + (dn ? ' class="' + dn + '"' : '') + '>' + a.perf.maxDrawdown + '%</b></span>');
+    }
+    chips.push('<span class="chip">' + (state.source === 'crawled' ? '本次在线采集' : '内置样例 / 历史结果') + '</span>');
+    dh.innerHTML =
+      '<p class="doc-eyebrow">持仓回溯复盘 · 每个数字都能追到出处</p>' +
+      '<h1>' + esc(f.name || '') + '（' + esc(f.code || '') + '）· ' + esc(f.manager || '') + '任内前十大持仓复盘</h1>' +
+      '<div class="doc-meta">' + chips.join('') + '</div>';
+  }
+
+  /** 报告目录搬进左栏 —— 正文里再放一个左目录, 就会和左栏并排成"两个左栏"。
+   *  这里只负责填内容, 显示/收起交给 syncRailPanels(它按当前视图决定)。 */
+  function renderRailDir() {
+    var dir = $('#rail-dir'), cnt = $('#rail-dir-count');
+    var a = state.analysis;
+    if (!dir || !a) return;
+    var secs = a.report.sections;
+    dir.innerHTML = secs.map(function (s, i) {
+      var t = String(s.title).replace(/^[一二三四五六七八九十]+、\s*/, '');
+      return '<a href="#" data-sec="' + esc(s.id) + '"><span class="n">' + (i + 1) + '</span><span>' + esc(t) + '</span></a>';
+    }).join('');
+    if (cnt) cnt.textContent = secs.length + ' 节';
+  }
+
   function renderReport() {
     var a = state.analysis;
     if (!a) return;
     var secs = a.report.sections;
-
-    $('#report-toc').innerHTML = '<h4>目录</h4>' + secs.map(function (s) {
-      return '<a href="#sec-' + s.id + '">' + esc(s.title) + '</a>';
-    }).join('');
 
     /* 门禁 2 原来是"请确认或改判"的单选 + 两个输入框 + 确认按钮 —— 已收掉(见 renderAudit 顶部注释)。
        留下的是判断结果本身: 引擎给了什么标签、置信度多少、证据级别、次优解释是什么,
@@ -205,7 +337,17 @@ window.FC = window.FC || {};
     $('#report-body').innerHTML = gate + secs.map(function (s) {
       return '<section class="rsec" id="sec-' + s.id + '"><h3>' + esc(s.title) + '</h3>' + s.html + '</section>';
     }).join('');
+    renderDocHead();
+    renderRailDir();
+    renderRailKv();
     markDrawn('report');
+    syncStagebar(curView());
+  }
+
+  /** 当前在哪个视图 —— 由 DOM 说话, 不在全局再存一份状态去跟它同步。 */
+  function curView() {
+    var v = document.querySelector('.view.active');
+    return v ? v.id.replace(/^view-/, '') : 'input';
   }
 
   function renderLedger() {
@@ -486,7 +628,80 @@ window.FC = window.FC || {};
 
   /* ============================================================ 事件绑定 */
   function bind() {
-    $$('.tab').forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.view); }); });
+    /* 视图切换: 左栏条目(横向对比 / 说明)和顶栏分段控件都用 data-view 说话, 由同一个处理函数接住 ——
+       原来只认 .tab, 现在任何带 data-view 的元素都能跳, 不许出现"点了没反应"的入口。 */
+    $$('[data-view]').forEach(function (t) {
+      t.addEventListener('click', function (e) {
+        if (t.tagName === 'A') e.preventDefault();
+        show(t.dataset.view);
+      });
+    });
+
+    /* ---------------------------------------------------------- 左栏交互 */
+    function toggleRail() {
+      if (window.innerWidth <= 900) document.body.classList.toggle('rail-open');
+      else document.body.classList.toggle('rail-collapsed');
+    }
+    var fold = $('#rail-fold'); if (fold) fold.addEventListener('click', toggleRail);
+    var menu = $('#sb-menu'); if (menu) menu.addEventListener('click', toggleRail);
+    var scrim = $('#rail-scrim');
+    if (scrim) scrim.addEventListener('click', function () { document.body.classList.remove('rail-open'); });
+
+    /* 新建复盘 = AI 界面里的"新对话": 清空代码框并聚焦; 离线(代码框被收掉)时滚到内置样例 */
+    var newRun = $('#btn-new-run');
+    function startNew() {
+      show('input');
+      document.body.classList.remove('rail-open');
+      var vi = $('#view-input'); if (vi) vi.classList.remove('gate-open');
+      var block = $('#rail-input'), codeIn = $('#online-code');
+      if (block && !block.classList.contains('hidden') && codeIn) {
+        codeIn.value = '';
+        if (FC.syncRunButton) FC.syncRunButton();
+        codeIn.focus();
+      } else {
+        var off = $('#offline-panel');
+        if (off) off.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    if (newRun) newRun.addEventListener('click', startNew);
+
+    var builtin = $('#btn-rail-builtin');
+    if (builtin) builtin.addEventListener('click', function (e) {
+      e.preventDefault(); show('input');
+      var off = $('#offline-panel');
+      if (off) off.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* 「问一句」的抽屉由 chat.js 管, 这里只替它点一下那个已被收起来的悬浮球 —— 不改 chat.js 一行 */
+    var askBtn = $('#btn-ask');
+    if (askBtn) askBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var fab = document.getElementById('ask-fab');
+      if (fab) fab.click();
+    });
+
+    /* 左栏目录: 自己滚, 不用 location.hash —— 那个 hash 是视图路由, 点目录会被判成"切到 input" */
+    var dirBox = $('#rail-dir');
+    if (dirBox) dirBox.addEventListener('click', function (e) {
+      var a2 = e.target.closest('a[data-sec]');
+      if (!a2) return;
+      e.preventDefault();
+      var sec = document.getElementById('sec-' + a2.dataset.sec);
+      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* 阅读进度与目录高亮: 只监听 .stage-main(整页不滚), passive 避免拖慢滚动 */
+    var sm = $('#stage-main');
+    if (sm) sm.addEventListener('scroll', function () { syncProgress(); syncDirActive(); }, { passive: true });
+    window.addEventListener('resize', function () { syncProgress(); });
+
+    /* 快捷键 N = 新建复盘(正在输入框里打字时不抢) */
+    document.addEventListener('keydown', function (e) {
+      if ((e.key !== 'n' && e.key !== 'N') || e.ctrlKey || e.metaKey || e.altKey) return;
+      var t2 = e.target;
+      if (t2 && (/^(INPUT|TEXTAREA|SELECT)$/.test(t2.tagName) || t2.isContentEditable)) return;
+      if (newRun) { e.preventDefault(); newRun.click(); }
+    });
 
     $('#builtin-list').addEventListener('click', function (e) {
       var b = e.target.closest('.btn-run');

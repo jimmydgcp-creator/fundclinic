@@ -140,6 +140,12 @@ window.FC = window.FC || {};
     if (!panel) return;
     if (location.protocol === 'file:') {
       panel.classList.add('offline-only');
+      /* 左栏的"输入"块在离线状态下没有意义(没有本地服务就抓不到数据), 收掉免得点出一堆红叉;
+         Key 表单同理 —— 直接打开 HTML 时那条路本来就不通, 摆在上面只会误导。 */
+      var ri = $('#rail-input'); if (ri) ri.classList.add('hidden');
+      /* "已复盘"是靠服务端 /api/history 喂的, 离线时它永远是空的 —— 留一个 0 在那儿只会误导 */
+      var rh = $('#rail-history-block'); if (rh) rh.classList.add('hidden');
+      var ab0 = $('#ai-block'); if (ab0) ab0.classList.add('hidden');
       $('#online-hint').innerHTML =
         '<strong>当前是离线模式(直接打开 HTML 文件)。</strong><br>' +
         '浏览器不允许网页从本地文件跨域抓取天天基金的数据, 也不允许直连大模型接口(CORS)。' +
@@ -184,19 +190,26 @@ window.FC = window.FC || {};
           var ab = $('#ai-block'); if (ab) ab.classList.add('hidden');
           var skn = $('#server-key-note');
           if (skn) {
-            skn.classList.remove('hidden');
-            skn.innerHTML = 'AI 模块由<strong>本站服务端</strong>提供 —— 你只需要输入基金代码, 不用申请、也不用填写任何 Key。' +
-              '大模型只做语言类的事(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗), 抓取、计算、对账、质检全部由脚本完成; ' +
-              '它的每一份输出都要过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒)才允许进报告, 不通过一律拦截。' +
-              '你提供的只有那 6 位基金代码, 本站没有你的任何账号信息。';
+            if (h.cloud) {
+              skn.classList.remove('hidden');
+              skn.innerHTML = 'AI 模块由<strong>本站服务端</strong>提供 —— 你只需要输入基金代码, 不用申请、也不用填写任何 Key。' +
+                '大模型只做语言类的事(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗), 抓取、计算、对账、质检全部由脚本完成; ' +
+                '它的每一份输出都要过校验(数字回查 / 覆盖率 / 违禁词 / 数字守恒)才允许进报告, 不通过一律拦截。' +
+                '你提供的只有那 6 位基金代码, 本站没有你的任何账号信息。';
+            } else {
+              /* 本机形态: Key 已经在 llm.local.json 里配好, 页面上一句都不提 —— 提了也是让人找"哪里填"。
+                 真想知道 AI 从哪来, README 和"它做什么"那一节都写着。 */
+              skn.classList.add('hidden');
+              skn.innerHTML = '';
+            }
           }
         } else {
           setAiStatus(null, '② 需要你自己填一个 API Key(见下方)');
         }
       }
-      // 本机浏览器记住过就直接填回来
+      // 本机浏览器记住过就直接填回来(服务端已经有 Key 时不必再碰它)
       var saved = loadRemembered();
-      if (saved && saved.apiKey && !$('#ai-key').value) {
+      if (!online.serverKey && saved && saved.apiKey && !$('#ai-key').value) {
         $('#ai-base').value = saved.baseUrl || $('#ai-base').value;
         $('#ai-model').value = saved.model || $('#ai-model').value;
         $('#ai-key').value = saved.apiKey;
@@ -225,10 +238,10 @@ window.FC = window.FC || {};
       online.popplerHint = h.popplerHint || '';
       online.env = { pdftotext: !!h.pdftotext, edge: !!h.edge };
       $('#online-hint').innerHTML =
-        '数据来源: <strong>六类公开来源</strong>(官方定期报告 PDF 为最高权威, 第三方平台只做交叉验证)。' +
+        '<span class="hint-lead">数据来源: <strong>六类公开来源</strong>(官方定期报告 PDF 为最高权威, 第三方平台只做交叉验证)。</span>' +
         '<span class="envchk">官方 PDF 解析 ' + (h.pdftotext ? '✓ ' + base(h.pdftotextPath) : '✗ 未安装 Poppler, 官方对账会标记为未完成') + '</span>' +
         '<span class="envchk">PDF 导出 ' + (h.edge ? '✓ ' + base(h.edge) : '✗ 未找到 Edge/Chrome') + '</span>' +
-        '<span class="envchk">AI 模块 ' + (online.serverKey ? '由本站服务端提供' : '<strong>需自带 Key</strong>') + '</span>' +
+        '<span class="envchk">AI 模块 ' + (online.serverKey ? '✓ ' + (h.cloud ? '由本站服务端提供' : '本机已配置') : '<strong>需自带 Key</strong>') + '</span>' +
         /* 缺 Poppler 时直接把**本机对应的**安装命令摆出来, 不让用户自己去猜去搜 */
         (!h.pdftotext && h.popplerHint
           ? '<div class="note" style="margin-top:8px">装上它能让报告多出最关键的一栏(官方季报逐行对账)。在' +
@@ -317,18 +330,36 @@ window.FC = window.FC || {};
         var lbl = m.managers.join('+') + '(' + m.start + ' ~ ' + m.end + ')' + (m.coManaged ? '【共管期】' : '') + ' 任职' + (m.tenure || '') + (m.returnPct !== null && m.returnPct !== undefined ? ' 任内' + m.returnPct + '%' : '');
         return '<option value="m' + i + '"' + (i === 0 ? ' selected' : '') + '>' + FC.esc(lbl) + '</option>';
       }).join('') + '</select>' +
-      (p.managers.some(function (m) { return m.coManaged; }) ? '<div class="flag">检出共管期: ' + p.managers.filter(function (m) { return m.coManaged; }).map(function (m) { return m.managers.join('+') + '(' + m.start + '~' + m.end + ')'; }).join('、') + ' —— 这段时间的操作不能全归功于单人</div>' : '') +
+      (function () {
+        var co = p.managers.filter(function (m) { return m.coManaged; });
+        if (!co.length) return '';
+        /* 共管期可能有好几段(老基金 5~6 段很常见)。全列出来这一格就 3 行, 把口径表和开跑按钮往下顶;
+           列前两段 + "等 N 段"既保住了"这不是单人战绩"这个信号, 也不让高度随基金变化乱跳。 */
+        var shown = co.slice(0, 2).map(function (m) { return m.managers.join('+') + '(' + m.start + '~' + m.end + ')'; }).join('、');
+        return '<div class="flag">检出共管期 ' + co.length + ' 段: ' + shown +
+          (co.length > 2 ? ' 等 ' + (co.length - 1) + ' 段' : '') + ' —— 这段时间的操作不能全归功于单人</div>';
+      })() +
       '</td></tr>');
 
     /* 3 复盘区间 —— 候选直接列出来让用户点 */
-    var candRows = p.candidates.map(function (c) {
+    /* 候选区间可能有 6~7 个(每段任期一个), 全摊开光这一格就 400px。
+       默认只摆"推荐的那个", 其余收在"其他 N 个候选"里 —— 人多数时候直接按推荐走,
+       要改再展开。这样"按此口径开跑"才可能留在第一屏。 */
+    function candCard(c) {
       return '<label class="cand' + (c.recommended ? ' cand-rec' : '') + '">' +
         '<input type="radio" name="g1cand" value="' + FC.esc(c.id) + '"' + (c.recommended ? ' checked' : '') + '>' +
         '<span>' + FC.esc(c.label) + '<br><b>' + c.from + ' ~ ' + c.to + '</b> · ' + c.n + ' 期' +
         (c.coManaged ? ' <span class="flag-inline">共管期</span>' : '') + '</span></label>';
-    }).join('');
+    }
+    var recCand = p.candidates.filter(function (c) { return c.recommended; })[0] || p.candidates[0];
+    var otherCands = p.candidates.filter(function (c) { return c !== recCand; });
+    var candRows = recCand ? candCard(recCand) : '';
+    var candRest = otherCands.length
+      ? '<div class="cand-others hidden">' + otherCands.map(candCard).join('') + '</div>' +
+        '<button type="button" class="cand-more" id="btn-cand-more">其他 ' + otherCands.length + ' 个候选区间 ▾</button>'
+      : '';
     rows.push('<tr><th>③ 复盘区间(起点季度)<span class="req">*</span><div class="note">SOP: 默认经理上任季度;跨度过长可截断</div></th><td>' +
-      '<div class="cands">' + candRows + '</div>' +
+      '<div class="cands">' + candRows + '</div>' + candRest +
       '<div class="note" id="g1-range-reason">推荐理由: ' + FC.esc(p.recommendReason) + '</div>' +
       '<div class="note">也可手工微调: <input type="text" id="g1-from" value="' + FC.esc(d.rangeFrom) + '" style="width:110px"> ~ <input type="text" id="g1-to" value="' + FC.esc(d.rangeTo) + '" style="width:110px"></div>' +
       '</td></tr>');
@@ -357,10 +388,29 @@ window.FC = window.FC || {};
     rows.push('<tr><th>⑧ 产出目录<span class="req">*</span></th><td><input type="text" id="g1-outdir" value="' + FC.esc(d.outputDir) + '" readonly>' +
       '<div class="note">结果按基金代码存在本机项目目录下, 页面上一键下载。</div></td></tr>');
 
-    box.innerHTML = rows.join('');
+    /* 八格全摊开有 600~700px 高, 而人真正要决定的只有前三格(哪只基金 / 哪一任经理 / 哪段区间)。
+       后五格默认填好、折成一行摘要, 需要时展开改 —— 这样"按此口径开跑"不会被推到第二屏。
+       折起来不等于跳过: 五格照样在 DOM 里, 校验照旧逐格查空(syncGate1Table 只认 input 的值)。 */
+    var core = rows.slice(0, 3), restRows = rows.slice(3);
+    var summary = '<span>另外 <b>' + restRows.length + '</b> 格已按 SOP 默认填好，要改可以展开 ——</span>' +
+      '<span>④ 数据截止日 <b>' + esc(d.dataCutoff) + '</b></span><span class="sep">·</span>' +
+      '<span>⑤ 业绩比较基准 <b>' + esc(d.benchmark) + '</b></span><span class="sep">·</span>' +
+      '<span>⑥ 收益口径 <b>分红再投总回报</b></span><span class="sep">·</span>' +
+      '<span>⑦ 持仓范围 <b>' + esc(d.scope) + '</b></span><span class="sep">·</span>' +
+      '<span>⑧ 产出目录 <b>' + esc(d.outputDir) + '</b></span>' +
+      '<button type="button" id="btn-gate-more">展开 ④ ~ ⑧</button>';
+    var moreRow = '<tr class="gate-more-tr"><td colspan="2"><div class="gate-more">' + summary + '</div></td></tr>';
+
+    box.innerHTML = core.join('') + moreRow + restRows.map(function (r) {
+      return r.replace('<tr>', '<tr class="gate-rest hidden">');
+    }).join('');
     $('#probe-summary').innerHTML = '探路结果: <strong>' + FC.esc(p.fund.name) + '(' + p.code + ')</strong> · 报告期网格 ' + p.periods.length +
       ' 期(' + p.periods[0].period + '~' + p.periods[p.periods.length - 1].period + ') · 历任经理 ' + p.managers.length + ' 任 · 用时 ' + p.probeMs + ' ms' +
-      '<br>' + p.notes.map(function (n) { return '· ' + FC.esc(n); }).join('<br>');
+      /* 说明收成可点开的一行: 探路的几条提示很重要, 但它们是"要读的注", 不该把口径表和开跑按钮往下推 */
+      ((p.notes && p.notes.length)
+        ? ' <details class="probe-notes"><summary>' + p.notes.length + ' 条说明</summary>' +
+          p.notes.map(function (n) { return '<div>· ' + FC.esc(n) + '</div>'; }).join('') + '</details>'
+        : '');
 
     // 点候选区间 => 自动回填起止
     document.querySelectorAll('input[name=g1cand]').forEach(function (r) {
@@ -375,8 +425,21 @@ window.FC = window.FC || {};
     });
 
     $('#gate1-table').classList.remove('hidden');
+    foldKeyBlock();
+    /* 进到"确认口径"这一步之后, 首屏那段介绍就该让位 —— 否则光标题 + 三个按钮就占掉 300px */
+    var vi = $('#view-input'); if (vi) vi.classList.add('gate-open');
+    /* 滚动必须放在"折起来 / 收起首屏"**之后**: 先滚再收, 页面会矮一截, 视口就落到表格中段去了。 */
     $('#gate1-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
     syncGate1Table();
+  }
+
+  /** 把 Key 表单折成一行(探路成功后自动做); 点"改 Key"再放回来 */
+  function foldKeyBlock() {
+    var block = $('#ai-block'), hint = $('#key-fold-hint'), model = $('#key-fold-model');
+    if (!block || block.classList.contains('hidden')) return;
+    if (model) model.textContent = ($('#ai-model').value || 'deepseek-v4-flash');
+    block.classList.add('folded');
+    if (hint) hint.classList.remove('hidden');
   }
 
   /** 八格全填才放行 —— 这是 SOP 的"任何一格留空不许开跑" */
@@ -435,21 +498,27 @@ window.FC = window.FC || {};
   };
 
   function renderHistory() {
-    var box = $('#online-history');
+    var box = $('#rail-history'), cnt = $('#rail-count');
     if (!box) return;
-    if (!HISTORY.length) { box.innerHTML = ''; box.classList.add('hidden'); return; }
-    box.classList.remove('hidden');
-    box.innerHTML =
-      '<h4 style="margin:0 0 8px;font-size:13.5px;color:var(--navy)">最近的复盘记录(跑过就存下来了, 刷新、关浏览器、重启服务都还在)</h4>' +
-      '<table class="tbl tbl-compact"><thead><tr><th>时间</th><th>基金</th><th>区间 / 期数</th><th>形态</th><th>质检</th><th>操作</th></tr></thead><tbody>' +
-      HISTORY.slice(0, 12).map(function (h) {
-        return '<tr><td class="mono">' + String(h.at || '').slice(0, 16).replace('T', ' ') + '</td>' +
-          '<td><strong>' + FC.esc(h.name) + '</strong><br><span class="mono">' + FC.esc(h.code) + '</span></td>' +
-          '<td>' + FC.esc(h.range) + ' · ' + h.quarters + ' 期</td>' +
-          '<td>' + FC.esc(h.formTag) + '</td>' +
-          '<td>' + FC.esc(h.check || '—') + '</td>' +
-          '<td><button class="btn btn-sm btn-load-run" data-code="' + FC.esc(h.code) + '">载入</button></td></tr>';
-      }).join('') + '</tbody></table>';
+    if (cnt) cnt.textContent = HISTORY.length || 0;
+    if (!HISTORY.length) {
+      box.innerHTML = '<p class="rail-hint" style="margin:0 4px">还没有跑过。在上面填 6 位代码，点「探路」。</p>';
+      return;
+    }
+    var lastCode = '';
+    try { lastCode = localStorage.getItem('fundclinic.lastCode') || ''; } catch (e) {}
+    var cur = (online.summary && online.summary.code) || lastCode;
+    box.innerHTML = HISTORY.slice(0, 20).map(function (h) {
+      var when = String(h.at || '').slice(5, 16).replace('T', ' ');
+      var meta = [
+        h.quarters ? h.quarters + ' 期' : '',
+        h.formTag || '',
+        h.seeded ? '<span class="seeded">种子</span>' : when
+      ].filter(Boolean).join(' · ');
+      return '<a class="rl-i' + (h.code === cur ? ' on' : '') + '" data-code="' + FC.esc(h.code) + '" title="载入这次的结果（不重跑）">' +
+        '<div class="t"><b>' + FC.esc(h.code) + '</b><i>' + FC.esc(h.name) + '</i></div>' +
+        '<div class="m">' + meta + '</div></a>';
+    }).join('');
   }
 
   /** 把某次运行的结果重新画到页面上(不重跑, 直接读服务端存下来的结果) */
@@ -464,11 +533,13 @@ window.FC = window.FC || {};
       online.summary = j.summary;
       gate1 = null;
       var gt = $('#gate1-table'); if (gt) gt.classList.add('hidden');
+      var vi2 = $('#view-input'); if (vi2) vi2.classList.remove('gate-open');
       clearLog();
       log('已载入 ' + code + ' 的历史结果(' + String((j.summary && j.summary.range) || '') + ')', 'ok');
       renderResult(j.summary);
       renderCtxbar(j.summary);
       FC.applyServerResult(j.analysis, j.check, j.datasetMeta, j.summary);
+      renderHistory();
       try { localStorage.setItem('fundclinic.lastCode', code); } catch (e) {}
       if (opts.silent) { FC.setStatus('已恢复上次复盘: ' + code + '(' + ((j.summary && j.summary.range) || '') + ')'); }
       else { FC.toast('已恢复 ' + (j.summary && j.summary.name) + ' 的复盘结果', 'ok'); FC.show('report'); }
@@ -851,6 +922,7 @@ window.FC = window.FC || {};
   /* ------------------------------------------------------------ 绑定 */
   FC.initOnline = function () {
     FC.detectOnline();
+    FC.syncRunButton = syncRunButton;
     var probe = $('#btn-online-probe');
     if (probe) probe.addEventListener('click', FC.probe);
     var again = $('#btn-probe-again');
@@ -859,6 +931,15 @@ window.FC = window.FC || {};
     if (btn) btn.addEventListener('click', FC.runOnline);
     var ping = $('#btn-ai-ping');
     if (ping) ping.addEventListener('click', FC.pingAi);
+    /* "改 Key": 把折起来的表单放回来 */
+    var unfold = $('#btn-key-unfold');
+    if (unfold) unfold.addEventListener('click', function () {
+      var block = $('#ai-block'), hint = $('#key-fold-hint');
+      if (block) block.classList.remove('folded');
+      if (hint) hint.classList.add('hidden');
+      var k = $('#ai-key');
+      if (k) k.focus();
+    });
     ['#online-code', '#ai-key', '#ai-base', '#ai-model', '#online-years'].forEach(function (sel) {
       var el = $(sel);
       if (el) el.addEventListener('input', syncRunButton);
@@ -868,6 +949,32 @@ window.FC = window.FC || {};
     if (t) {
       t.addEventListener('input', syncGate1Table);
       t.addEventListener('change', syncGate1Table);
+      /* 折起来的 ④~⑧, 点一下展开/收起。用 class 记状态, 不依赖内联 style。 */
+      t.addEventListener('click', function (e) {
+        /* 其他候选区间 */
+        var cm = e.target.closest('#btn-cand-more');
+        if (cm) {
+          var box = t.querySelector('.cand-others');
+          if (box) {
+            var open = box.classList.toggle('hidden');
+            cm.textContent = open ? '其他 ' + box.querySelectorAll('.cand').length + ' 个候选区间 ▾'
+              : '收起其他候选 ▴';
+          }
+          return;
+        }
+        var b = e.target.closest('#btn-gate-more');
+        if (!b) return;
+        var open = t.classList.toggle('gate-open');
+        Array.prototype.forEach.call(t.querySelectorAll('tr.gate-rest'), function (tr) {
+          tr.classList.toggle('hidden', !open);
+        });
+        b.textContent = open ? '收起 ④ ~ ⑧' : '展开 ④ ~ ⑧';
+        if (open) {
+          var first = t.querySelector('tr.gate-rest input, tr.gate-rest select');
+          if (first) first.focus();
+        }
+        syncGate1Table();
+      });
     }
 
     /* 下载 / 载入历史 都走事件委托(结果面板是动态生成的) */
@@ -881,6 +988,9 @@ window.FC = window.FC || {};
       }
       var l = e.target.closest('.btn-load-run');
       if (l) { FC.loadRun(l.getAttribute('data-code')); return; }
+      /* 左栏"已复盘"列表: 点一下就把那次结果重新画出来(不重跑、不花额度) */
+      var row = e.target.closest('.rl-i[data-code]');
+      if (row) { FC.loadRun(row.getAttribute('data-code')); return; }
     });
 
     var codeInput = $('#online-code');

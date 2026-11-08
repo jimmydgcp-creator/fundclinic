@@ -17,16 +17,15 @@ const before = html;
 
 const REPL = [
   [/<title>[^<]*<\/title>/, '<title>基金复诊台 · 复盘台</title>'],
-  // 页签文案：去掉序号，改成工作台口径
-  ['① 输入与口径', '复盘台'],
-  ['② 复盘报告', '报告'],
-  ['③ 数据底稿', '底稿'],
-  ['④ 质检与 AI 记录', '质检'],
-  ['⑥ 横向对比', '横向对比'],
-  ['⑤ 这个网页做什么', '说明'],
-  // 样式层：接在原有两张表后面
-  ['<link rel="stylesheet" href="app/workbench.css">',
-    '<link rel="stylesheet" href="app/workbench.css">\n<link rel="stylesheet" href="app/variant.css">'],
+  /* 文案：顶部横排标签已换成"左栏 + 顶栏分段控件"(2026-11-08), 这里跟着换新外壳上的字。
+     每一条找不到都会打警告, 不会静默失败 —— 但允许某条不存在(文案可能再调)。 */
+  ['>开工台<', '>复盘台<'],
+  ['>复盘报告<', '>报告<'],
+  ['>数据底稿<', '>底稿<'],
+  ['这个网页做什么<span class="k">↗</span>', '说明<span class="k">↗</span>'],
+  // 样式层：接在 shell.css 之后
+  ['<link rel="stylesheet" href="app/shell.css">',
+    '<link rel="stylesheet" href="app/shell.css">\n<link rel="stylesheet" href="app/variant.css">'],
   // 脚本层：接在最后
   ['<script src="app/chat.js"></script>',
     '<script src="app/chat.js"></script>\n<script src="app/variant.js"></script>']

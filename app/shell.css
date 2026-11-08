@@ -1,0 +1,434 @@
+/* ============================================================================
+   基金复诊台 FundClinic · 工作台外壳 (shell)
+   ----------------------------------------------------------------------------
+   为什么改: 顶部 6 个横排标签在 1440px 下已经折成两行(实测截图), 字都被压成竖排;
+   而"输入一个代码、看一眼口径"是反复要做的事, 却被埋在下半页的表单里。
+   改成 AI 产品通用的两栏外形:
+
+     左栏 288px = 新建复盘 / 基金代码输入 / 当前口径摘要 / 已复盘的基金 / 工具
+     右栏       = 工作区(开工台 或 一份报告), 自己滚, 不再整页滚
+
+   分工写死一句话: 外壳只管"东西放在哪", 不管"长什么样" ——
+   内容样式一行不改, 全部沿用 styles.css, 所以报告、底稿、质检的排版一个字都不会动。
+
+   工程约束(不能破):
+     · 只新增类名 .rail* .stage* .doc* .seg 等; styles.css 已有的 104 个类一个不改
+     · 打印/导 PDF 时外壳整体退场, 回到原来的单栏版面(见文件末尾 @media print)
+     · DOM 顺序 = 焦点顺序: 左栏在内容之前, 键盘 Tab 先走导航再进正文
+   ============================================================================ */
+
+:root {
+  --rail-w: 288px;
+  --rail-w-mini: 68px;
+  --stagebar-h: 52px;
+}
+
+/* ---------------------------------------------------------------- 两栏骨架 */
+body.shelled {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  height: 100vh;
+  overflow: hidden;
+}
+body.shelled.rail-mini { grid-template-columns: var(--rail-w-mini) minmax(0, 1fr); }
+
+/* ---------------------------------------------------------------- 左栏 */
+.rail {
+  position: relative; display: flex; flex-direction: column; min-height: 0;
+  background: var(--paper-2); border-right: 1px solid var(--line);
+}
+
+.rail-head {
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 15px 12px 12px 16px;
+}
+.rail-brand {
+  display: flex; align-items: baseline; gap: 8px; min-width: 0;
+  font-size: 15px; font-weight: 600; color: var(--navy); letter-spacing: .04em;
+  white-space: nowrap;
+}
+.rail-brand::before {
+  content: ""; width: 3px; height: 14px; border-radius: 2px;
+  background: var(--brass); flex: none; transform: translateY(1px);
+}
+.rail-brand span {
+  font-size: 9.5px; font-weight: 400; letter-spacing: .18em;
+  color: var(--ink-4); text-transform: uppercase;
+}
+/* 收起/展开: 只留按钮位置, 图标用两条斜杠示意(不引外部图标库) */
+.rail-fold {
+  margin-left: auto; width: 26px; height: 26px; flex: none;
+  display: grid; place-items: center; border: 0; border-radius: 6px;
+  background: none; color: var(--ink-3); cursor: pointer;
+}
+.rail-fold:hover { background: rgba(21, 27, 35, .05); color: var(--navy); }
+.rail-fold svg { width: 15px; height: 15px; }
+
+/* 新建: 全栏唯一的主行动, 学 AI 界面的 "新对话" */
+.rail-new {
+  display: flex; align-items: center; gap: 8px; width: calc(100% - 24px); margin: 0 12px 6px;
+  height: 36px; padding: 0 11px; border: 0; border-radius: 8px; cursor: pointer;
+  background: var(--navy); color: #fff; font: inherit; font-size: 13.5px; font-weight: 500;
+  box-shadow: var(--sh-1); transition: background var(--t) var(--ease);
+}
+.rail-new:hover { background: #24384b; }
+.rail-new svg { width: 14px; height: 14px; flex: none; opacity: .9; }
+.rail-new kbd {
+  margin-left: auto; font: 400 10.5px/16px var(--mono);
+  color: rgba(255, 255, 255, .45); border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 4px; padding: 0 5px;
+}
+
+.rail-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 10px 12px; scrollbar-width: thin; }
+
+/* 一段 = 一个标题 + 一组控件 */
+.rb { padding: 11px 2px 12px; border-top: 1px solid var(--line); }
+.rb:first-child { border-top: 0; padding-top: 6px; }
+.rb-h {
+  display: flex; align-items: center; gap: 6px; margin: 0 4px 9px;
+  font-size: 10.5px; letter-spacing: .13em; color: var(--ink-3);
+}
+.rb-h .cnt {
+  font-size: 10px; letter-spacing: 0; color: var(--ink-3);
+  background: var(--surface-3); border-radius: 999px; padding: 1px 6px;
+  font-variant-numeric: tabular-nums;
+}
+.rb-h button {
+  margin-left: auto; border: 0; background: none; padding: 0 2px; cursor: pointer;
+  font: inherit; font-size: 11px; letter-spacing: 0; color: var(--ink-3);
+}
+.rb-h button:hover { color: var(--brass); }
+
+/* 代码输入: 一行放完, 输入框吃满, 年数收成小下拉 */
+.rb-row { display: flex; gap: 6px; }
+.rb-row input[type=text] {
+  flex: 1; min-width: 0; height: 36px; padding: 0 10px;
+  font: 600 15px/36px var(--num); letter-spacing: .1em;
+  border-radius: 7px; background: var(--surface);
+}
+.rb-row input[type=text]::placeholder {
+  font: 400 12.5px var(--font-sans); letter-spacing: .02em; color: var(--ink-4);
+}
+.rb-row select {
+  width: 84px; flex: none; height: 36px; padding: 0 6px;
+  font-size: 12px; border-radius: 7px; background: var(--surface);
+  font-variant-numeric: tabular-nums;
+}
+.rb-go {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  width: 100%; height: 31px; margin-top: 7px; cursor: pointer;
+  border: 1px solid var(--line-strong); border-radius: 7px;
+  background: var(--surface); color: var(--navy); font: inherit; font-size: 12.5px;
+  transition: border-color var(--t) var(--ease), color var(--t) var(--ease);
+}
+.rb-go:hover { border-color: var(--brass); color: var(--brass); background: var(--brass-soft); }
+.rb-go[disabled] { color: var(--ink-4); cursor: not-allowed; background: var(--surface-2); }
+.rb-go svg { width: 13px; height: 13px; }
+
+/* 口径摘要: 左边窄标签, 右边值 —— 两栏并排, 一行一条, 不用换行也不占高度 */
+.kv {
+  margin: 0; display: grid; grid-template-columns: 52px minmax(0, 1fr);
+  row-gap: 7px; column-gap: 6px; align-items: baseline;
+}
+.kv dt { font-size: 11px; color: var(--ink-3); line-height: 1.5; }
+.kv dd {
+  margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--ink);
+  font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+}
+.kv dd b { font-weight: 600; }
+.kv dd .dim { color: var(--ink-3); }
+
+/* 已复盘的基金 = 对话历史 */
+.rl { display: flex; flex-direction: column; gap: 1px; margin: 0 -4px; }
+.rl-i {
+  display: block; padding: 6px 8px 7px 9px; border-radius: 7px; cursor: pointer;
+  border-left: 2px solid transparent; text-decoration: none; color: inherit;
+}
+.rl-i:hover { background: rgba(21, 27, 35, .045); }
+.rl-i.on { background: var(--surface); border-left-color: var(--brass); box-shadow: var(--sh-1); }
+.rl-i .t {
+  display: flex; align-items: baseline; gap: 6px; min-width: 0;
+  font-size: 12.8px; color: var(--ink); line-height: 1.45;
+}
+.rl-i .t b {
+  flex: none; font: 600 11.5px var(--num); letter-spacing: .04em; color: var(--ink-2);
+}
+.rl-i.on .t b { color: var(--brass); }
+.rl-i .t i {
+  font-style: normal; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rl-i .m {
+  margin-top: 1px; font-size: 10.5px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.rl-i .m .seeded { color: var(--brass); }
+
+/* 报告目录: 读一份东西的时候, 左栏就换成它的目录(不再和正文里的目录打架) */
+.dir { display: flex; flex-direction: column; gap: 0; margin: 0 -2px; }
+.dir a {
+  display: flex; gap: 7px; padding: 4px 6px; border-radius: 6px;
+  font-size: 12.3px; line-height: 1.5; color: var(--ink-2); text-decoration: none;
+}
+.dir a .n {
+  flex: none; width: 13px; padding-top: 1px; text-align: right;
+  font: 400 10.5px var(--num); color: var(--ink-4);
+}
+.dir a:hover { background: rgba(21, 27, 35, .045); color: var(--navy); }
+.dir a.on { background: var(--surface); color: var(--navy); font-weight: 600; box-shadow: var(--sh-1); }
+.dir a.on .n { color: var(--brass); }
+
+/* 左栏最下面那段: 原来放在首屏右栏的"边界与纪律", 现在缩成一小段常驻文字 ——
+   首屏 hero 收掉之后, "这份复盘的边界"不能跟着一起消失, 它得一直在视线里。 */
+.rail-note {
+  margin: 4px 6px 0; padding: 10px 2px 2px;
+  border-top: 1px solid var(--line);
+  font-size: 11px; line-height: 1.75; color: var(--ink-3); text-wrap: pretty;
+}
+.rail-note b { font-weight: 600; color: var(--ink-2); }
+
+/* 左栏底部: 工具 + 状态 */
+.rail-foot { flex: none; border-top: 1px solid var(--line); padding: 8px 10px 10px; }
+.rf-i {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px;
+  font-size: 12.3px; color: var(--ink-2); text-decoration: none; cursor: pointer;
+}
+.rf-i:hover { background: rgba(21, 27, 35, .045); color: var(--navy); }
+.rf-i svg { width: 13px; height: 13px; flex: none; opacity: .55; }
+.rf-i .k {
+  margin-left: auto; font: 400 10.5px var(--mono); color: var(--ink-4);
+}
+.rf-state {
+  display: flex; align-items: center; gap: 6px; margin: 6px 2px 0; padding: 0 8px;
+  font-size: 10.5px; color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+.rf-state .dot { width: 5px; height: 5px; border-radius: 999px; background: var(--ok); flex: none; }
+.rf-state .dot.warn { background: var(--warn); }
+
+/* ---------------------------------------------------------------- 右栏 */
+.stage { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--paper); }
+
+.stagebar {
+  flex: none; display: flex; align-items: center; gap: 12px; height: var(--stagebar-h);
+  padding: 0 18px 0 22px; border-bottom: 1px solid var(--line);
+  background: rgba(250, 248, 244, .92);
+}
+.sb-title { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.sb-title b {
+  font-size: 14px; font-weight: 600; color: var(--navy);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sb-title .code {
+  flex: none; font: 600 12px var(--num); letter-spacing: .06em; color: var(--ink-3);
+}
+.sb-sp { flex: 1; }
+
+/* 窄屏的汉堡: 左栏收成抽屉之后, 这是唯一能把它叫回来的东西(桌面端不出现) */
+.sb-menu {
+  display: none; width: 30px; height: 30px; flex: none; place-items: center;
+  border: 1px solid var(--line-strong); border-radius: 7px;
+  background: var(--surface); color: var(--ink-2); cursor: pointer;
+}
+.sb-menu:hover { border-color: var(--brass); color: var(--brass); }
+.sb-menu svg { width: 14px; height: 14px; }
+
+/* 分段控件: 报告 / 底稿 / 质检 —— 同一只基金的三种读法 */
+.seg { display: flex; gap: 2px; padding: 3px; background: var(--surface-3); border-radius: 8px; }
+.seg button {
+  border: 0; background: none; padding: 4px 11px; border-radius: 6px; cursor: pointer;
+  font: inherit; font-size: 12.3px; color: var(--ink-2); white-space: nowrap;
+}
+.seg button:hover { color: var(--navy); }
+.seg button.on, .seg button.active { background: var(--surface); color: var(--navy); font-weight: 600; box-shadow: var(--sh-1); }
+
+.sb-btn {
+  display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px;
+  border: 1px solid var(--line-strong); border-radius: 7px; background: var(--surface);
+  color: var(--navy); font: inherit; font-size: 12.3px; cursor: pointer;
+}
+.sb-btn:hover { border-color: var(--brass); color: var(--brass); }
+.sb-btn svg { width: 12px; height: 12px; opacity: .6; }
+
+/* 阅读进度: 一条 2px 的铜色线, 只在读报告时出现 */
+.stage-main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.doc { max-width: 1010px; margin: 0 auto; padding: 24px 40px 120px; }
+
+/* 一份东西的抬头: 谁、什么时候、几节、什么标签 */
+.doc-head { margin: 0 0 22px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.doc-eyebrow {
+  margin: 0 0 9px; font-size: 10.5px; letter-spacing: .18em;
+  color: var(--brass); text-transform: uppercase;
+}
+.doc-head h1 {
+  margin: 0 0 11px; font-size: 26px; line-height: 1.32; font-weight: 700;
+  letter-spacing: -.02em; color: var(--navy); text-wrap: balance;
+}
+.doc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; font-size: 11.5px; color: var(--ink-2); }
+.chip {
+  padding: 2px 9px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--surface); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.chip.brass { border-color: #e3d5bb; background: var(--brass-soft); color: var(--brass); }
+.chip.ok { border-color: #cfe0d5; background: var(--ok-bg); color: var(--ok); }
+
+/* 开工台首屏: 原来是一段 hero 大标题 + 一段"它怎么做的"说明。说明那段已经删了 ——
+   同一件事下面面板里写得更准(六类来源 / 环境自检 / 内置样例口径), 首屏只留一句主张和两个入口。 */
+.page-head { margin: 0 0 22px; }
+.page-head h1 {
+  margin: 0 0 16px; font-size: 27px; line-height: 1.34; font-weight: 800;
+  letter-spacing: -.024em; color: var(--navy); text-wrap: balance; max-width: 30ch;
+}
+.page-head h1 em { font-style: normal; color: var(--brass); }
+
+/* 左栏输入块下面的那句提示(原来在在线面板里) */
+.rail-hint { margin: 6px 2px 0; font-size: 10.5px; line-height: 1.55; color: var(--ink-4); min-height: 16px; }
+.kv .rail-muted { color: var(--ink-4); }
+
+/* 读报告时右栏顶部那条进度线 */
+.doc-prog { flex: none; height: 2px; background: var(--line); }
+.doc-prog i { display: block; height: 2px; width: 0; background: var(--brass); transition: width .12s linear; }
+
+/* 探路结果: 开跑前先看"机器查到了什么" */
+.probe {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px;
+  padding: 13px 16px; margin: 0 0 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  box-shadow: var(--sh-1); font-size: 12.5px; color: var(--ink-2);
+}
+.probe b { color: var(--navy); font-weight: 600; }
+.probe .sep { color: var(--line-strong); }
+.probe .tag {
+  font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  background: var(--ok-bg); color: var(--ok); border: 1px solid #cfe0d5;
+}
+
+/* 口径表折起来的那 4 格: 八格全摊开有 700px 高, 而人真正要决定的只有前四格。
+   默认填好的四格收成一行(展开可改), 让"开跑"这个按钮回到一屏之内。 */
+.gate-more {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+  margin-top: 12px; padding: 9px 12px;
+  background: var(--surface-2); border: 1px dashed var(--line-strong); border-radius: var(--r-sm);
+  font-size: 12px; line-height: 1.7; color: var(--ink-3);
+}
+.gate-more b { font-weight: 600; color: var(--ink-2); }
+.gate-more .sep { color: var(--line-strong); }
+.gate-more button {
+  margin-left: auto; border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 11.5px; color: var(--brass);
+}
+.gate-more button:hover { text-decoration: underline; }
+
+/* 折起来那一行放在表格里: 单元格自身的内边距会把虚线框挤歪, 交给 .gate-more 自己排 */
+.gate-more-tr td { padding: 0 !important; }
+.gate-more-tr .gate-more { margin: 12px 0 4px; }
+
+/* 7 列步骤条: 原来铺满 1340 的画布, 现在画布只有约 940, 说明文字会挤成三四行。
+   收窄内边距 + 降一档字号, 让每一步的说明稳定落在两行以内。 */
+body.shelled .steps { margin-bottom: 0; }
+body.shelled .step { padding: 9px 10px 9px 15px; }
+body.shelled .step-name { font-size: 12px; }
+body.shelled .step-note { font-size: 10px; line-height: 1.45; }
+
+/* 开跑按钮行: 主行动放右, 与 AI 界面的"发送"位置一致 */
+.act-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.act-row .sp { flex: 1; }
+
+/* 口径确认表出现时, 首屏介绍整块让位 —— 人已经进到"确认这一步"了, 不需要再读一遍"这是什么"。 */
+#view-input.gate-open .page-head { display: none; }
+/* 同理, "数据来源: 六类公开来源"那句是开跑前的科普, 进到口径确认这一步就收起来;
+   环境自检那三个 ✓(pdftotext / Edge / AI 模块)仍然留着 —— 它们直接影响这次能跑出什么。 */
+#view-input.gate-open .hint-lead { display: none; }
+#view-input.gate-open #online-panel > h3 { margin-bottom: 2px; }
+
+/* 探路说明收成可点开的一行 */
+.probe-notes { margin-top: 4px; font-size: 12px; }
+.probe-notes summary { cursor: pointer; color: var(--brass); }
+.probe-notes summary:hover { text-decoration: underline; }
+.probe-notes div { margin-top: 3px; color: var(--ink-2); line-height: 1.7; }
+
+/* 候选区间从竖排改横排: 竖排两张卡片要占 180px, 而它们本来就是在二选一, 横排一眼就能比 */
+body.shelled .cands { flex-direction: row; flex-wrap: wrap; gap: 10px; }
+body.shelled .cand { flex: 1 1 44%; margin-bottom: 0; }
+body.shelled .cand.cand-rec { flex: 1 1 100%; }
+body.shelled .cand-others { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+body.shelled .cand-more {
+  margin: 8px 0 0; border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 12px; color: var(--brass);
+}
+body.shelled .cand-more:hover { text-decoration: underline; }
+@media (max-width: 720px) { body.shelled .cand { flex: 1 1 100%; } }
+
+/* 填过一次 Key 之后, 表单折成一行 —— 探路成功时人要看的是口径表, 不是 Key 输入框。
+   只在"本机自带 Key"这条路上有意义; 公网形态下整块 Key 区本来就被收掉了。 */
+.gate.folded .grid3, .gate.folded .btn-row, .gate.folded .note { display: none; }
+.gate.folded { padding-bottom: 12px; }
+.gate-fold-hint { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-2); }
+.gate-fold-hint code { font-family: var(--mono); font-size: 12px; color: var(--navy); }
+.gate-fold-hint button {
+  border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 12px; color: var(--brass);
+}
+.gate-fold-hint button:hover { text-decoration: underline; }
+
+/* 左栏底部被点中的那一条(横向对比 / 说明页) */
+.rf-i.active { background: rgba(21, 27, 35, .06); color: var(--navy); font-weight: 600; }
+.rf-state #topstatus {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 「问一句」原来是个右下角悬浮按钮, 有左栏之后它有了常驻位置; 悬浮球必须收掉,
+   否则会压在报告正文右下角(截图里那块空白本来就没有内容, 但挡住数字的锅得算在它头上)。 */
+body.shelled .ask-fab { display: none; }
+
+/* 运行语境条(深蓝)与顶栏重复: 现在"在看哪只基金"写在顶栏 #sb-title 里。 */
+body.shelled .ctxbar { display: none; }
+
+/* 桌面端把左栏收起来: 主区吃满整个宽度, 顶栏同时冒出汉堡 —— 收进去的东西必须能叫回来,
+   否则就是"点一下界面少一块, 再也回不去"。 */
+body.rail-collapsed { grid-template-columns: 0 minmax(0, 1fr); }
+body.rail-collapsed .rail { display: none; }
+body.rail-collapsed .sb-menu { display: grid; }
+
+/* 窄屏: 左栏变抽屉, 顶栏出汉堡 */
+.rail-scrim { display: none; }
+@media (max-width: 1120px) {
+  :root { --rail-w: 264px; }
+  .doc { padding-left: 26px; padding-right: 26px; }
+}
+@media (max-width: 900px) {
+  body.shelled { display: block; height: auto; overflow: visible; }
+  body.shelled .rail {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 70; width: 288px;
+    transform: translateX(-102%); transition: transform var(--t) var(--ease);
+    box-shadow: 12px 0 34px rgba(21, 27, 35, .16);
+  }
+  body.rail-open .rail { transform: none; }
+  body.rail-open .rail-scrim {
+    display: block; position: fixed; inset: 0; z-index: 69;
+    background: rgba(21, 27, 35, .32);
+  }
+  .stage { height: 100vh; }
+  .stagebar { padding-left: 10px; gap: 8px; }
+  .sb-menu { display: grid; }
+  .doc { padding: 18px 18px 90px; }
+  .seg button { padding: 4px 8px; font-size: 11.5px; }
+  .doc-head h1, .page-head h1 { font-size: 21px; }
+  .page-head h1 br { display: none; }
+}
+@media (max-width: 560px) {
+  .sb-btn .lbl { display: none; }
+  .stagebar .sb-title b { max-width: 34vw; }
+  .stagebar .sb-title .code { display: none; }
+}
+
+/* 打印 / 导 PDF: 外壳整体退场, 回到原来的单栏版面。
+   ⚠️ 这里必须显式写回 display/overflow —— 两栏用的是 100vh + overflow:hidden,
+   交给浏览器自动处理会把正文截在视口高度上(踩过一次, PDF 只有 3 页)。 */
+@media print {
+  body.shelled { display: block; height: auto; overflow: visible; }
+  .rail, .rail-scrim, .stagebar, .doc-prog { display: none !important; }
+  .stage { display: block; height: auto; }
+  .stage-main { overflow: visible; height: auto; }
+  .doc { max-width: none; padding: 0; }
+}

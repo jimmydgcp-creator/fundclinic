@@ -78,13 +78,24 @@ try {
   ok(!T.includes('直连大模型执行'), '公网形态不出现"直连大模型执行"');
   ok(!T.includes('粘贴到这里'), '公网形态不出现"粘贴大模型返回的 JSON"');
   ok(tagOf(H, 'ai-block').includes('hidden'), 'Key 表单整块被收掉(元素还在 DOM, 但带上 hidden 类)', tagOf(H, 'ai-block').slice(0, 90));
-  ok(T.includes('本站服务端'), '"AI 模块由本站服务端提供"的说明已显示');
-  ok(T.includes('不用申请'), '说明了访客不用申请 Key');
+  /* 2026-11-08: 本机也会"服务端持 Key"(llm.local.json), 但本机不该出现"本站服务端"这套话。
+     所以这三条按 health.cloud 分形态断言, 不再假定"有 Key = 公网"。 */
+  const isCloud = !!health.cloud;
+  if (isCloud) {
+    ok(T.includes('本站服务端'), '"AI 模块由本站服务端提供"的说明已显示');
+    ok(T.includes('不用申请'), '说明了访客不用申请 Key');
+  } else {
+    ok(tagOf(H, 'server-key-note').includes('hidden'), '本机形态不提 Key 来源(说明块收起)',
+      tagOf(H, 'server-key-note').slice(0, 90));
+    ok(!T.includes('本站服务端'), '本机形态不出现"本站服务端"字样(本机没有"本站")');
+  }
   /* 额度提示必须留在 ai-block 外面 —— 否则 Key 表单被收掉的同一次改动会把额度提示一起吞掉
      (它俩原来套在同一个 div 里)。这条是按位置断言的, 不然看不出区别。 */
   ok(H.indexOf('id="quota-note"') > 0 && H.indexOf('id="quota-note"') < H.indexOf('id="ai-block"'),
     '#quota-note 在 #ai-block 之外(不会被一起隐藏)');
-  ok(/AI 模块 由本站服务端提供/.test(T), '环境自检栏写的是"AI 模块 由本站服务端提供"');
+  ok(isCloud ? /AI 模块 由本站服务端提供/.test(T) : /AI 模块 ✓ 本机已配置/.test(T),
+    isCloud ? '环境自检栏写的是"AI 模块 由本站服务端提供"' : '环境自检栏写的是"AI 模块 ✓ 本机已配置"',
+    ((/AI 模块 [^ ]*[^]*?(?=\n)/.exec(T) || [])[0] || ''));
   /* 2026-10-10 二次收敛: 质检页那张「运行记录」表和它的导出按钮整块删掉了。
      删的理由在公网页上看得最清楚: 没有服务端结果时, 表里只有一行占位符
      「本次未调用大模型(全部由离线规则引擎完成)」—— 而公网形态下大模型确实在跑, 只是跑在服务端;

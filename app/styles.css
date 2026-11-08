@@ -100,7 +100,7 @@ body::before {
   opacity: .025;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.topbar, main, footer { position: relative; z-index: 1; }
+.rail, main, footer { position: relative; z-index: 1; }
 
 ::selection { background: var(--brass-soft); color: var(--navy); }
 
@@ -114,53 +114,10 @@ a:hover { color: var(--brass-2); }
   border-radius: 3px;
 }
 
-/* ---------------------------------------------------------------- 顶栏 */
-.topbar {
-  position: sticky; top: 0; z-index: 50;
-  display: flex; align-items: center; gap: 26px;
-  padding: 0 28px; height: 58px;
-  background: var(--navy);
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, .07);
-}
-.brand {
-  font-size: 16.5px; font-weight: 600; letter-spacing: .06em;
-  white-space: nowrap; display: flex; align-items: baseline; gap: 9px;
-}
-.brand::before {
-  content: ""; width: 3px; height: 16px; border-radius: 2px;
-  background: var(--brass-2); display: inline-block; transform: translateY(1px);
-}
-.brand span {
-  font-size: 10.5px; font-weight: 400; letter-spacing: .22em;
-  opacity: .5; text-transform: uppercase;
-}
-
-/* 导航: 细下划线指示器, 不再用"白块糊在导航条上" */
-.tabs { display: flex; gap: 2px; flex: 1; align-self: stretch; }
-.tab {
-  appearance: none; border: 0; cursor: pointer; position: relative;
-  background: transparent; color: rgba(255, 255, 255, .6);
-  padding: 0 15px; height: 100%;
-  font-size: 13.5px; font-family: inherit; letter-spacing: .02em;
-  transition: color var(--t) var(--ease), background var(--t) var(--ease);
-}
-.tab::after {
-  content: ""; position: absolute; left: 15px; right: 15px; bottom: 0; height: 2px;
-  background: var(--brass-2); transform: scaleX(0); transform-origin: left;
-  transition: transform var(--t) var(--ease);
-}
-.tab:hover { color: #fff; background: rgba(255, 255, 255, .05); }
-.tab:active { background: rgba(255, 255, 255, .09); }
-.tab.active { color: #fff; font-weight: 600; }
-.tab.active::after { transform: scaleX(1); }
-
-.topstatus {
-  font-size: 11.5px; letter-spacing: .08em; white-space: nowrap;
-  color: rgba(255, 255, 255, .62);
-  padding: 4px 11px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 999px;
-  font-variant-numeric: tabular-nums;
-}
+/* ---------------------------------------------------------------- 导航 */
+/* 2026-11-08 起导航不再是顶部横排标签: 左栏(.rail)与顶栏分段控件(.seg)全在 app/shell.css 里,
+   这里原来那套 .topbar/.brand/.tabs/.tab/.topstatus 已整体删除(死代码不留在主样式表)。
+   保留一句提醒: 内容样式只认本文件, 外壳样式只认 shell.css, 两边不要互相写对方的选择器。 */
 
 /* ---------------------------------------------------------------- 布局 */
 main { max-width: 1340px; margin: 0 auto; padding: 30px 28px 10px; }
@@ -200,43 +157,8 @@ main { max-width: 1340px; margin: 0 auto; padding: 30px 28px 10px; }
 .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 @media (max-width: 980px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
 
-/* 首屏 hero: 把"这是一件什么事"和"唯一该点的按钮"讲清楚 */
-.hero {
-  display: grid; grid-template-columns: 1.35fr 1fr; gap: 40px; align-items: center;
-  padding: 38px 34px 34px; margin-bottom: 20px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
-  box-shadow: var(--sh-2);
-}
-@media (max-width: 1000px) { .hero { grid-template-columns: 1fr; gap: 26px; } }
-.hero-eyebrow {
-  font-size: 11px; letter-spacing: .2em; color: var(--brass);
-  text-transform: uppercase; margin-bottom: 14px;
-}
-.hero h1 {
-  margin: 0 0 14px; font-size: 38px; line-height: 1.24; font-weight: 800;
-  letter-spacing: -.025em; color: var(--navy); text-wrap: balance;
-}
-.hero h1 em { font-style: normal; color: var(--brass); }
-.hero p {
-  margin: 0 0 22px; font-size: 15px; line-height: 1.85; color: var(--ink-2);
-  max-width: 52ch; text-wrap: pretty;
-}
-.hero-side {
-  border-left: 1px solid var(--line); padding-left: 32px;
-  display: flex; flex-direction: column; gap: 16px;
-}
-@media (max-width: 1000px) { .hero-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 22px; } }
-/* 首屏右侧那一栏。
-   2026-10-10 按用户要求改版: 原来是一组"大数字 + 小说明"的指标条(6 类 / 逐行 / 3 道 / 0 外链),
-   被判定太像模板 —— 四个数字排一列, 什么页面都能套。现在换成一段文字(边界与纪律),
-   和左栏互补: 左边讲"它怎么做的", 右边讲"它不许做什么"。 */
-.hero-note-title {
-  font-size: 15px; font-weight: 700; color: var(--navy);
-  margin: 0 0 12px; letter-spacing: .01em;
-}
-.hero-note { display: flex; flex-direction: column; gap: 11px; font-size: 13px; line-height: 1.85; color: var(--ink-2); }
-.hero-note p { margin: 0; }
-.hero-note strong { color: var(--navy); font-weight: 600; }
+/* 首屏 hero 那套样式(38px 双栏大标题 + 右栏边界说明)已随 2026-11-08 的两栏外壳退役:
+   现在首屏是 .page-head(样式在 shell.css), 边界说明常驻左栏 .rail-note。 */
 
 /* 运行上下文条: 跑完之后一直挂着, 随时知道"现在看的是哪只基金" */
 .ctxbar {
@@ -407,24 +329,8 @@ td.pos, .num.pos { color: var(--up); }
 td.neg, .num.neg { color: var(--down); }
 
 /* ---------------------------------------------------------------- 报告 */
-.report-layout { display: grid; grid-template-columns: 232px 1fr; gap: 26px; align-items: start; }
-@media (max-width: 1080px) { .report-layout { grid-template-columns: 1fr; } }
-.toc {
-  position: sticky; top: 80px;
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--r); padding: 18px 14px; box-shadow: var(--sh-1);
-}
-.toc h4 {
-  margin: 0 0 12px; font-size: 11px; letter-spacing: .14em;
-  color: var(--ink-3); text-transform: uppercase; padding-left: 8px;
-}
-.toc a {
-  display: block; padding: 7px 9px; border-radius: var(--r-sm);
-  color: var(--ink-2); text-decoration: none; font-size: 13px;
-  border-left: 2px solid transparent;
-  transition: background var(--t) var(--ease), color var(--t) var(--ease), border-color var(--t) var(--ease);
-}
-.toc a:hover { background: var(--surface-2); color: var(--navy); border-left-color: var(--brass); }
+/* 报告页原来自带一个 232px 的左侧目录(.report-layout + .toc),
+   2026-11-08 起目录搬进左栏 #rail-dir, 正文变成单栏满宽 —— 这两块样式已删。 */
 
 .rsec {
   background: var(--surface); border: 1px solid var(--line);
@@ -819,7 +725,7 @@ footer {
 @media print {
   body { background: #fff; }
   body::before { display: none; }
-  .topbar, .toc, .btn, .btn-row, .gate, footer, .toast, .toolbar, .ctxbar, .hero-side { display: none !important; }
+  .btn, .btn-row, .gate, footer, .toast, .toolbar, .ctxbar { display: none !important; }
   .view { display: none !important; }
   .view.active { display: block !important; animation: none !important; }
   /* 打印兜底: 任何动画/过渡都不许留下"初始态"(尤其是 opacity:0) */
@@ -828,7 +734,6 @@ footer {
     break-inside: avoid; box-shadow: none; border-color: #ccc;
     animation: none !important; padding: 16px 18px; margin-bottom: 12px;
   }
-  .report-layout { grid-template-columns: 1fr; }
   /* 关键: 任何 max-height/overflow 滚动容器在打印时都会裁掉内容, 必须放开。
      上一份交付物就是栽在"打印时内容被裁 / 被动画初始态隐藏"这一类问题上。 */
   .appendix, .prompt-box, textarea, pre, .runlog, .rule-ev { max-height: none !important; overflow: visible !important; }

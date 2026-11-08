@@ -16,7 +16,7 @@
   }
 
   function mount() {
-    var host = document.querySelector('#view-input .hero') || document.querySelector('#view-input');
+    var host = document.querySelector('#view-input .page-head') || document.querySelector('#view-input');
     if (!host || document.querySelector('.wb-kpis')) return;
     var box = document.createElement('div');
     box.className = 'wb-kpis';

@@ -355,7 +355,7 @@ console.log('  _runs 内容: ' + (runLeft === 0 ? '空(符合预期 —— 不�
 
 const must = ['启动_基金复诊台.bat', '启动_基金复诊台.cmd', '启动_基金复诊台.command',
   'server.mjs', 'index.html', '★先读我_怎么用.txt', '为什么要做这个.txt',
-  'app/engine.js', 'app/online.js', 'app/styles.css', 'data/funds.data.js',
+  'app/engine.js', 'app/online.js', 'app/styles.css', 'app/workbench.css', 'app/shell.css', 'data/funds.data.js',
   'server/pipeline.mjs', 'server/deckagent.mjs', 'server/sources.mjs', 'server/official.mjs',
   'skills/deck-kit.css', 'skills/html-ppt/assets/base.css', 'skills/html-ppt/assets/runtime.js',
   '基金复诊台_单文件版.html'];

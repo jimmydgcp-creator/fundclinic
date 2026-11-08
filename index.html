@@ -9,92 +9,156 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b2a3a'/%3E%3Cpath d='M9 21V11M13.7 21V15M18.3 21V9.5M23 21v-6.5' stroke='%23a8763e' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="app/styles.css">
 <link rel="stylesheet" href="app/workbench.css">
+<link rel="stylesheet" href="app/shell.css">
 </head>
-<body>
+<body class="shelled">
 
-<header class="topbar">
-  <div class="brand">基金复诊台<span>FundClinic</span></div>
-  <nav class="tabs" aria-label="主导航">
-    <button class="tab active" data-view="input">① 输入与口径</button>
-    <button class="tab" data-view="report">② 复盘报告</button>
-    <button class="tab" data-view="ledger">③ 数据底稿</button>
-    <button class="tab" data-view="audit">④ 质检与 AI 记录</button>
-    <button class="tab" data-view="compare">⑥ 横向对比</button>
-    <button class="tab" data-view="about">⑤ 这个网页做什么</button>
-  </nav>
-  <div class="topstatus" id="topstatus">就绪</div>
-</header>
+<!-- ==========================================================================
+     两栏外壳: 左边是"做什么"(新建 / 输入 / 当前口径 / 已复盘 / 工具), 右边是"在做的事"。
+     原来顶部那排 6 个横排标签在 1440px 下就会折行, 而且输入框被埋在首屏下半页 ——
+     这一版把它们都收到左栏, 右栏只负责当前这一件事。样式见 app/shell.css。
+     ==========================================================================-->
+<aside class="rail" id="rail">
+  <div class="rail-head">
+    <div class="rail-brand">基金复诊台 <span>FundClinic</span></div>
+    <button class="rail-fold" id="rail-fold" type="button" title="收起左栏(窄屏下是抽屉开关)" aria-label="收起左栏">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 4.6L6.2 8l3.4 3.4M13 4.6L9.6 8 13 11.4"/></svg>
+    </button>
+  </div>
 
-<main>
+  <button class="rail-new" id="btn-new-run" type="button">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 3.2v9.6M3.2 8h9.6"/></svg>
+    新建复盘<kbd>N</kbd>
+  </button>
 
-  <!-- ================================================== ① 输入 -->
-  <section class="view active" id="view-input">
-
-    <!-- 首屏: 先讲清"这是什么、输入什么、出什么", 再给唯一一个主行动 -->
-    <div class="hero">
-      <div>
-        <p class="hero-eyebrow">基金持仓回溯复盘 · Fund Manager Review</p>
-        <h1>输入一个基金代码,<br>出一份<em>每个数字都能追到出处</em>的复盘。</h1>
-        <p>
-          按 SOP 六类公开来源自动采集, 把官方季报 PDF 与第三方逐行对账, 再算绩效、拆持仓动作、校验经理言行。
-          抓取、计算、对账全部由脚本完成, 大模型只做语言类的判断与成文 —— 且每一份输出都必须过校验才允许进报告。
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btn-hero-start">开始复盘</button>
-          <button class="btn" id="btn-hero-how">它到底怎么做的</button>
-        </div>
+  <div class="rail-body">
+    <!-- 输入: 在线模式下代码框就住在这儿(#online-code 的 id 不能改, online.js 全靠它取值)。
+         离线(直接双击 HTML)时这一块被 detectOnline 收掉, 只剩"内置样例"。 -->
+    <div class="rb" id="rail-input">
+      <div class="rb-h">输入<span class="cnt">6 位代码</span></div>
+      <div class="rb-row">
+        <input type="text" id="online-code" placeholder="如 519191 / 005827" maxlength="6" inputmode="numeric" autocomplete="off" aria-label="基金代码">
+        <select id="online-years" aria-label="抓取年数">
+          <option value="5">5 年</option>
+          <option value="8">8 年</option>
+          <option value="10" selected>10 年</option>
+          <option value="15">15 年</option>
+        </select>
       </div>
-      <aside class="hero-side">
-        <p class="hero-note-title">这份复盘的边界, 写在每个结论旁边</p>
-        <div class="hero-note">
-          <p>所有数字来自公开定期报告, 或由这些数字<strong>加减乘除</strong>得到; 找不到出处的会被校验拦下, 不进报告。</p>
-          <p>持仓只看前十大, 且是<strong>期末快照</strong> —— 所以"新进前十"不等于当季买入, "退出前十"不等于清仓或最高点卖出。</p>
-          <p>证据分三级: <strong>披露事实 / 合理推断 / 事后解读</strong>。第一级直接陈述, 第二级标注推断依据, 第三级只作历史复盘、不冒充当时信号。</p>
-          <p>不评价基金经理个人, 不推荐任何基金, <strong>不构成投资建议</strong>。</p>
-        </div>
-      </aside>
+      <button class="rb-go" id="btn-online-probe" type="button" disabled>探路，起草口径 →</button>
+      <p class="rail-hint" id="probe-hint">填 6 位基金代码后即可点</p>
     </div>
 
-    <!-- 在线模式: 输入代码 -> 自动爬取 -> 出报告与演示稿 -->
+    <!-- 当前口径: 只放摘要。完整的八格确认表在右栏 —— 288px 装不下表格, 挤进去只会变成一堆换行的标签。 -->
+    <div class="rb">
+      <div class="rb-h">当前口径<button type="button" data-view="input">改</button></div>
+      <dl class="kv" id="rail-kv">
+        <dt>复盘对象</dt><dd class="rail-muted">还没跑过</dd>
+        <dt>复盘区间</dt><dd class="rail-muted">—</dd>
+        <dt>数据截止</dt><dd class="rail-muted">—</dd>
+        <dt>收益口径</dt><dd>分红再投总回报</dd>
+        <dt>持仓范围</dt><dd>前十大 <span class="dim">期末快照</span></dd>
+      </dl>
+    </div>
+
+    <!-- 已复盘 = 这个产品的"对话历史"。原来它藏在输入页最下面, 跑过几只要翻半天。 -->
+    <div class="rb" id="rail-history-block">
+      <div class="rb-h">已复盘<span class="cnt" id="rail-count">0</span></div>
+      <div class="rl" id="rail-history"></div>
+    </div>
+
+    <!-- 读报告时左栏换成这份报告的目录: 正文里不再放第二个目录, 免得左右两个左栏打架 -->
+    <div class="rb hidden" id="rail-dir-block">
+      <div class="rb-h">这份报告的目录<span class="cnt" id="rail-dir-count">0 节</span></div>
+      <div class="dir" id="rail-dir"></div>
+    </div>
+
+    <div class="rail-note">
+      持仓只看<b>前十大</b>，季报是<b>期末快照</b> ——「新进前十」不等于买入，「退出前十」不等于清仓。推算价不是成交价，全文不构成投资建议。
+    </div>
+  </div>
+
+  <div class="rail-foot">
+    <a class="rf-i" data-view="compare" href="#compare">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3.5 12.5V7M8 12.5V3.5M12.5 12.5V9"/></svg>
+      横向对比<span class="k">≤ 3 只</span>
+    </a>
+    <a class="rf-i" id="btn-ask" href="#ask" title="问一句：只答这份报告里已有的事">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.8 4.2h10.4v6.6H6.4L2.8 13z"/></svg>
+      问一句（BOT）<span class="k">会拒答</span>
+    </a>
+    <a class="rf-i" id="btn-rail-builtin" href="#offline-panel">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M8 2.8L14 6 8 9.2 2 6z"/><path d="M2 9.4L8 12.6 14 9.4"/></svg>
+      内置样例<span class="k">不用 Key</span>
+    </a>
+    <a class="rf-i" data-view="about" href="#about">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.6"/><path d="M8 7.3v3.6M8 5.1v.2"/></svg>
+      这个网页做什么<span class="k">↗</span>
+    </a>
+    <div class="rf-state"><i class="dot" id="rail-dot"></i><span id="topstatus">就绪</span></div>
+  </div>
+</aside>
+<div class="rail-scrim" id="rail-scrim"></div>
+
+<div class="stage">
+  <!-- 顶栏: 只回答"现在看的是哪只基金的哪一面"。基金名/区间由 ui.js 填, 分段控件切视图。 -->
+  <div class="stagebar">
+    <button class="sb-menu" id="sb-menu" type="button" aria-label="打开导航">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.8 4.4h10.4M2.8 8h10.4M2.8 11.6h10.4"/></svg>
+    </button>
+    <div class="sb-title"><b id="sb-title">开工台</b><span class="code" id="sb-code"></span></div>
+    <div class="sb-sp"></div>
+    <div class="seg" id="viewseg" role="tablist" aria-label="视图切换">
+      <button type="button" data-view="input" role="tab" class="active">开工台</button>
+      <button type="button" data-view="report" role="tab">复盘报告</button>
+      <button type="button" data-view="ledger" role="tab">数据底稿</button>
+      <button type="button" data-view="audit" role="tab">质检</button>
+    </div>
+  </div>
+  <div class="doc-prog hidden" id="doc-prog"><i id="doc-prog-i"></i></div>
+
+  <div class="stage-main" id="stage-main">
+  <main class="doc">
+
+  <!-- ================================================== ① 开工台 -->
+  <section class="view active" id="view-input">
+
+    <div class="page-head">
+      <h1>输入一个基金代码，<br>出一份<em>每个数字都能追到出处</em>的复盘。</h1>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-hero-start">开始复盘</button>
+        <button class="btn" id="btn-hero-how">它到底怎么做的</button>
+      </div>
+    </div>
+
+    <!-- 在线模式: 代码框在左栏, 这里只放"能不能跑"和"跑到哪一步" -->
     <div class="panel hidden" id="online-panel">
-      <h3>在线模式 · 输入基金代码, 自动采集并生成报告与演示稿</h3>
+      <h3>开跑前的确认与进度</h3>
       <p class="panel-sub" id="online-hint"></p>
 
-      <div class="grid3">
-        <label class="field"><span>① 基金代码(6 位)</span><input type="text" id="online-code" placeholder="如 519191 / 005827" maxlength="6" inputmode="numeric" autocomplete="off"></label>
-        <label class="field"><span>抓取年数</span>
-          <select id="online-years">
-            <option value="5">最近 5 年</option>
-            <option value="8">最近 8 年</option>
-            <option value="10" selected>最近 10 年</option>
-            <option value="15">最近 15 年</option>
-          </select>
-        </label>
-        <div class="field">
-          <span>② AI 模块状态</span>
-          <div class="kb-status" id="ai-status">检测中…</div>
-        </div>
-      </div>
-
-      <!-- 服务端已经持有 Key 时(公网部署 / 本机配了 llm.local.json), 用这一条替掉下面整块 Key 表单:
-           访客不需要知道 Key 这回事, 也不该被要求去申请一个。本机没配 Key 时这一条不出现。 -->
+      <!-- 服务端已经持有 Key 时(公网部署 / 本机配了 llm.local.json), 用这一条替掉下面整块 Key 表单 -->
       <p class="panel-sub hidden" id="server-key-note"></p>
-      <!-- 公网额度: 在点"开始复盘"之前就让访客知道今天还剩几次、为什么会被拦。
-           和 Key 表单无关 —— 它是本站的成本闸门, 所以放在 #ai-block 外面(否则会被一起收掉)。 -->
+      <!-- 公网额度: 在开跑之前就让访客知道今天还剩几次、为什么会被拦 -->
       <p class="panel-sub hidden" id="quota-note"></p>
 
       <div class="gate" id="ai-block">
-        <h4>② API Key(必填)· 在 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">platform.deepseek.com</a> 申请</h4>
+        <h4>API Key（必填）· 在 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">platform.deepseek.com</a> 申请</h4>
+        <!-- 填过一次之后(探路成功)自动折成一行: 这时候人要看的是口径表和"开跑", 不是 Key 表单 -->
+        <p class="gate-fold-hint hidden" id="key-fold-hint">
+          AI 模块已就绪 · <code id="key-fold-model">deepseek-v4-flash</code>
+          · <button type="button" id="btn-key-unfold">改 Key</button>
+        </p>
         <div class="grid3">
           <label class="field"><span>API Base(OpenAI 兼容)</span><input type="text" id="ai-base" value="https://api.deepseek.com"></label>
           <label class="field"><span>模型名</span><input type="text" id="ai-model" value="deepseek-v4-flash"></label>
           <label class="field"><span>API Key</span><input type="password" id="ai-key" placeholder="sk-..." autocomplete="off"></label>
         </div>
         <div class="btn-row">
-          <button class="btn btn-sm" id="btn-ai-ping">测试 Key 连通性</button>
+          <button class="btn btn-sm" id="btn-ai-ping" type="button">测试 Key 连通性</button>
           <label style="display:flex;gap:8px;align-items:center;font-size:13px;cursor:pointer">
             <input type="checkbox" id="ai-remember"> 记住(存在本机浏览器, 下次不用重填)
           </label>
+          <span class="kb-status" id="ai-status" style="margin-left:auto">检测中…</span>
         </div>
         <p class="note" style="margin-top:12px">
           为什么必填: <strong>主题归类</strong>这一步没有公开接口可替代(天天基金不提供"主题"字段),
@@ -105,28 +169,19 @@
         </p>
       </div>
 
-      <div class="btn-row" style="margin-bottom:4px">
-        <button class="btn btn-primary" id="btn-online-probe" disabled>③ 开始复盘(先探路 → 填口径 → 再开跑)</button>
-        <span class="hint" id="probe-hint">填 6 位基金代码后即可点</span>
-      </div>
-
       <!-- 第二阶段: 开跑前的口径确认表(SOP §0 八格, 人主做) -->
       <div class="gate hidden" id="gate1-table">
-        <h4>④ 开跑前口径确认表(人主做 · 任何一格留空不许开跑)</h4>
+        <h4>开跑前口径确认表（SOP §0 · 任何一格留空不许开跑）</h4>
         <p class="note" style="margin-top:0" id="probe-summary"></p>
         <table class="tbl tbl-compact gate1-tbl"><tbody id="gate1-body"></tbody></table>
         <div class="btn-row" style="margin-top:14px">
-          <button class="btn btn-primary" id="btn-online-run" disabled>按此口径开跑</button>
-          <button class="btn btn-sm" id="btn-probe-again">重新探路</button>
+          <button class="btn btn-primary" id="btn-online-run" type="button" disabled>按此口径开跑</button>
+          <button class="btn btn-sm" id="btn-probe-again" type="button">重新探路</button>
           <span class="hint" id="gate1-status"></span>
         </div>
       </div>
 
-      <!-- 步骤进度: 让"现在跑到哪一步了"可见, 而不是只滚日志。
-           这 7 步是**量出来的**, 不是拍的: tools/capture_progress.mjs 录了一次完整跑动,
-           33 条进度消息归并成 7 个阶段。原来我写了 8 步, "绩效与轮动"那一步
-           在实际流水线里**永远不亮**(它是规则引擎内部算的, 不单独发进度) —— 用户会以为卡住了。
-           另外从录到的耗时看: 官方对账约 4.5s、导出 PDF 约 3s, 是两条长尾, 其余都在 1s 内。 -->
+      <!-- 步骤进度: 7 步是**量出来的**(tools/capture_progress.mjs 录一次完整跑动, 33 条进度消息归并) -->
       <div class="steps hidden" id="run-steps">
         <div class="step" data-step="probe"><div class="step-name">探路</div><div class="step-note">元数据 / 报告期网格</div></div>
         <div class="step" data-step="crawl"><div class="step-name">六类来源采集</div><div class="step-note">官方 PDF 为最高权威</div></div>
@@ -138,7 +193,6 @@
       </div>
 
       <div id="online-log" class="runlog"></div>
-      <div class="panel hidden" id="online-history" style="margin-top:18px"></div>
       <div id="online-result"></div>
     </div>
 
@@ -151,8 +205,7 @@
       </p>
 
       <!-- 口径: 内置样例的口径是定死的。原来这里摆三个"必须勾满才允许开跑"的复选框,
-           2026-10-10 收掉了 —— 访客连数据都没提供, 让他确认"数据不含内部信息"是空勾,
-           填满它不能证明任何事。改成直接把口径摆出来给人看。 -->
+           2026-10-10 收掉了 —— 访客连数据都没提供, 让他确认"数据不含内部信息"是空勾。 -->
       <div class="gate" id="gate1">
         <h4>内置样例的口径(已经定好, 不需要你确认)</h4>
         <table class="tbl tbl-compact"><tbody>
@@ -177,31 +230,33 @@
       <div class="grid3">
         <div class="metric"><div class="metric-l">输入</div><div class="metric-v" style="font-size:14px">基金代码</div></div>
         <div class="metric"><div class="metric-l">AI 模块</div><div class="metric-v" style="font-size:14px">规则引擎 + 大模型(主题归类 / 判断起草 / 深度报告 / 演示稿编排 / 用词清洗)</div></div>
-        <div class="metric"><div class="metric-l">输出</div><div class="metric-v" style="font-size:14px">11 节复盘报告 + 结论卡 + 错误检查记录 + 来源清单 + 演示稿(HTML/PDF)</div></div>
+        <div class="metric"><div class="metric-l">输出</div><div class="metric-v" style="font-size:14px">复盘报告 + 结论卡 + 错误检查记录 + 来源清单 + 演示稿(HTML/PDF)</div></div>
       </div>
     </div>
   </section>
 
-  <!-- ================================================== ② 报告 -->
+  <!-- ================================================== ② 复盘报告 -->
   <section class="view" id="view-report">
     <div id="report-empty">
       <div class="empty">
         <div class="empty-art"><svg viewBox="0 0 24 24"><path d="M4 4h11l5 5v11H4z"/><path d="M15 4v5h5"/><path d="M8 13h8M8 16h5"/></svg></div>
         <h3>还没有跑过任何基金</h3>
-        <p>复盘报告会出现在这里: 11 节固定骨架, 先说结论, 每个数字带证据级别与推翻条件。</p>
+        <p>复盘报告会出现在这里: 固定骨架, 先说结论, 每个数字带证据级别与推翻条件。目录在左栏。</p>
         <div class="empty-actions">
           <button class="btn btn-primary" data-goto="input">去输入基金代码</button>
         </div>
         <div class="empty-hint">想马上看效果? 到 <a href="#offline-panel" data-goto="input">用内置样例</a> 也能看到完整报告</div>
       </div>
     </div>
-    <div class="report-layout hidden" id="report-layout">
-      <aside class="toc" id="report-toc"></aside>
+    <!-- 报告抬头(名称/区间/标签/质检)由 ui.js 填进 #doc-head; 正文由 #report-body 接住。
+         目录不再放在正文左侧 —— 它搬到左栏 #rail-dir, 免得两个左栏并排。 -->
+    <div id="report-layout" class="hidden">
+      <div class="doc-head" id="doc-head"></div>
       <div id="report-body"></div>
     </div>
   </section>
 
-  <!-- ================================================== ③ 底稿 -->
+  <!-- ================================================== ③ 数据底稿 -->
   <section class="view" id="view-ledger">
     <div id="ledger-empty">
       <div class="empty">
@@ -231,8 +286,7 @@
     <div id="audit-body"></div>
   </section>
 
-  <!-- ================================================== ⑤ 这个网页做什么 -->
-  <!-- ================================================== ⑥ 横向对比 -->
+  <!-- ================================================== ⑤ 横向对比 -->
   <section class="view" id="view-compare">
     <div class="panel">
       <h3>横向对比 · 最多 3 只</h3>
@@ -248,6 +302,8 @@
       <p class="muted cmp-tip">提示：被动 ETF / 指数基金与主动基金的「形态标签」不可比，看曲线和回撤就行。样本不足的会在表里标出来。</p>
     </div>
   </section>
+
+  <!-- ================================================== ⑥ 这个网页做什么 -->
   <section class="view" id="view-about">
     <div class="panel">
       <h3>一句话</h3>
@@ -308,7 +364,7 @@
         <tbody>
           <tr><th style="width:22%">门禁 1 · 口径确认</th><td>开跑前把八格口径摆出来: 复盘哪一任经理、哪个区间、数据截止日、业绩比较基准、收益口径、只看前十大、产出位置。这几格机器猜不出来(同一只基金往往有几任经理、还跨共管期), 所以由人定; <strong>任何一格留空不许开跑。</strong></td></tr>
           <tr><th>门禁 2 · 判断方向</th><td>形态标签由引擎给出候选与置信度, 报告按此方向成文; 人工改判要写理由, 并原样记进结论卡的 <code>humanOverride</code> 字段 —— 事后能看出来这条结论是谁定的。</td></tr>
-          <tr><th>门禁 3 · 终审三查</th><td>数字查(12 处抽检清单逐条给出官方原文链接)、结论查(每条结论找得到证据行)、合规查(违禁词扫描 + 免责声明)。三项都有规则在实际跑, 结果直接显示在「④ 质检与 AI 记录」页, 不需要访客替我们打勾。</td></tr>
+          <tr><th>门禁 3 · 终审三查</th><td>数字查(12 处抽检清单逐条给出官方原文链接)、结论查(每条结论找得到证据行)、合规查(违禁词扫描 + 免责声明)。三项都有规则在实际跑, 结果直接显示在「质检」页, 不需要访客替我们打勾。</td></tr>
         </tbody>
       </table>
     </div>
@@ -325,12 +381,14 @@
     </div>
   </section>
 
-</main>
+  <footer>
+    基金复诊台 FundClinic · 数据仅来自公开渠道(公募基金定期报告 / 天天基金 F10) · 只看前十大持仓, 季报为期末快照 ·
+    全部输出为回溯复盘, 不构成投资建议, 不评价基金经理个人。
+  </footer>
 
-<footer>
-  基金复诊台 FundClinic · 数据仅来自公开渠道(公募基金定期报告 / 天天基金 F10) · 只看前十大持仓, 季报为期末快照 ·
-  全部输出为回溯复盘, 不构成投资建议, 不评价基金经理个人。
-</footer>
+  </main>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 

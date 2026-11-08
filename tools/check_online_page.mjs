@@ -47,22 +47,36 @@ const aiBlockTag = (/<div[^>]*id="ai-block"[^>]*>/.exec(dom) || [''])[0];
 const serverNoteTag = (/<p[^>]*id="server-key-note"[^>]*>/.exec(dom) || [''])[0];
 console.log('  Key 形态: ' + (serverKey ? '服务端已持有(' + (health.llm.keySource || '') + ')' : '需要访客自己填'));
 
+const isCloud = !!health.cloud;
 if (serverKey) {
   /* 注意: 这段文字里"本站服务端"被 <strong> 包着, 剥标签后中间会多出空格 ——
      所以按"去掉所有空白"再比, 否则会得到一条假失败。 */
   const flat = text.replace(/\s+/g, '');
   ok(aiBlockTag.includes('hidden'), 'Key 表单整块收掉(#ai-block 带 hidden)', aiBlockTag.slice(0, 70));
-  ok(!serverNoteTag.includes('hidden'), '"AI 模块由本站服务端提供"的说明已展开');
-  ok(flat.includes('AI模块由本站服务端提供'), '页面写明 AI 模块由本站服务端提供');
-  ok(flat.includes('不用申请'), '页面写明访客不用申请 Key');
-  ok(/AI 模块 由本站服务端提供/.test(text), '环境自检栏写的是"AI 模块 由本站服务端提供"');
+  if (!isCloud) {
+    /* 本机形态(2026-11-08 起): Key 写在 llm.local.json 里, 页面上**一句都不提** ——
+       既没有表单, 也没有"由本站服务端提供"那段(本机没有"本站")。 */
+    ok(serverNoteTag.includes('hidden'), '本机形态下页面不提 Key(说明块也收起)');
+    ok(/AI 模块 ✓ 本机已配置/.test(text), '环境自检栏写的是"AI 模块 ✓ 本机已配置"',
+      ((/AI 模块 [✓✗][^ ]* [^ ]*/.exec(text) || [])[0] || ''));
+    /* 注意: 文本是从 DOM 取的, 会带上 display:none 的元素 —— 所以不能断言"文本里没有 Key 字样",
+       要断言"表单还在 DOM 里但整块收起(不占位也不需要填)"。删掉元素反而会让这条变成假通过。 */
+    ok(/API Key[（(]必填[）)]/.test(text) && aiBlockTag.includes('hidden'),
+      'Key 表单仍在 DOM 里, 但整块收起(不占位、不要求填写)');
+  } else {
+    ok(!serverNoteTag.includes('hidden'), '"AI 模块由本站服务端提供"的说明已展开');
+    ok(flat.includes('AI模块由本站服务端提供'), '页面写明 AI 模块由本站服务端提供');
+    ok(flat.includes('不用申请'), '页面写明访客不用申请 Key');
+    ok(/AI 模块 由本站服务端提供/.test(text), '环境自检栏写的是"AI 模块 由本站服务端提供"');
+  }
   ok(/填 6 位基金代码后即可点/.test(text) || /探路约 1 秒/.test(text), '提示语不再要求填 Key',
     ((/填 6 位基金代码后即可点|探路约 1 秒/.exec(text) || [])[0] || ''));
   /* 额度提示原来和 Key 表单套在同一个 div 里, 收掉 Key 表单会把它一起吞掉 —— 按位置断言。 */
   ok(dom.indexOf('id="quota-note"') > 0 && dom.indexOf('id="quota-note"') < dom.indexOf('id="ai-block"'),
     '额度提示 #quota-note 留在 #ai-block 之外(不会被一起隐藏)');
 } else {
-  ok(text.includes('② API Key(必填)'), '有明确的"API Key(必填)"区块');
+  /* 全角/半角括号都在用: 页面文案 2026-11-08 统一成全角（必填）, 断言跟着放宽, 不写死半角 */
+  ok(/API Key[（(]必填[）)]/.test(text), '有明确的"API Key(必填)"区块');
   ok(text.includes('platform.deepseek.com'), '页面给出官方申请 Key 的链接');
   ok(/https:\/\/api\.deepseek\.com/.test(dom), 'API Base 默认值为 https://api.deepseek.com');
   ok(/deepseek-v4-flash/.test(dom), '模型默认值为 deepseek-v4-flash');
@@ -83,8 +97,10 @@ if (hist.runs && hist.runs.length) {
   const first = hist.runs[0];
   console.log('  服务端历史: ' + hist.runs.length + ' 条, 最近 ' + first.code + ' ' + first.name);
   ok(text.includes(first.name), '页面已自动恢复最近一次复盘内容(«' + first.name + '» 出现在页面上)');
-  ok(/最近的复盘记录/.test(text), '页面显示"最近的复盘记录"面板');
-  ok(new RegExp('btn-load-run').test(dom), '每条历史带"载入"按钮');
+  /* 2026-11-08 两栏外壳: 历史记录从输入页底部的表格搬进左栏「已复盘」列表,
+     点一条就重画那次结果(仍是 FC.loadRun 那条路, 不重跑、不花额度)。 */
+  ok(/已复盘/.test(text), '左栏显示「已复盘」分组');
+  ok(/class="rl-i[^"]*" data-code="/.test(dom), '左栏每条历史都挂着 data-code(点得动)');
   /* 自动恢复会把上次的代码填回输入框 —— 填完必须重算按钮状态。
      这里踩过: 按钮只听 input/change 事件, 脚本赋值不触发事件, 于是代码明明填好了(还是自动填的),
      "开始复盘"却一直灰着, 得先手动碰一下输入框。disabled 是**反射属性**(btn.disabled=false 会从

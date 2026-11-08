@@ -100,7 +100,8 @@ window.addEventListener('load', function () {
       out.counts[c] = document.querySelectorAll('.' + c).length;
     });
     out.counts['report-section'] = document.querySelectorAll('.rsec').length;
-    out.counts['toc-link'] = document.querySelectorAll('.toc a').length;
+    /* 2026-11-08 两栏外壳: 报告目录从正文左侧搬进左栏 #rail-dir */
+  out.counts['toc-link'] = document.querySelectorAll('#rail-dir a').length;
     out.counts['ev-fact'] = document.querySelectorAll('.ev-fact').length;
     out.counts['ev-infer'] = document.querySelectorAll('.ev-infer').length;
 
