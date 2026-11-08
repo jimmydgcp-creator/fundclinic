@@ -109,10 +109,10 @@ const re = /<!-- CMP-SAMPLE:START[\s\S]*?<!-- CMP-SAMPLE:END -->/;
 if (re.test(html)) {
   html = html.replace(re, block);
 } else {
-  /* 首次插入：放在「横向对比」面板的提示语之前 */
-  const anchor = '      <p class="muted cmp-tip">提示：被动 ETF';
+  /* 首次插入：放在「对比结果区」之后、提示语之前（表单在上，样例在下） */
+  const anchor = '      <div id="cmp-result" class="hidden"></div>\n';
   if (!html.includes(anchor)) throw new Error('找不到插入点');
-  html = html.replace(anchor, block + '\n' + anchor);
+  html = html.replace(anchor, anchor + block + '\n');
 }
 fs.writeFileSync(IDX, html, 'utf8');
 console.log('已写入对比样例块 · 曲线 ' + svg.length + ' 字符 · 三只基金 · ' + years12 + ' 年');
