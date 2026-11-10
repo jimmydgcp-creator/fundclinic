@@ -31,6 +31,16 @@ window.FC = window.FC || {};
     var btn = $('#btn-online-probe');
     if (!btn) return;
     var code = ($('#online-code').value || '').trim();
+    /* 展台形态: 按钮是"载入预置复盘", 只要 6 位数字就该亮 —— 不看 Key, 也不提探路。 */
+    if (online.showcase) {
+      var okCode = /^\d{6}$/.test(code);
+      btn.disabled = !okCode || online.running;
+      var h0 = $('#probe-hint');
+      if (h0) h0.textContent = okCode
+        ? '按回车载入这份复盘（预置结果，不重新采集）'
+        : '展台预置件：' + (HISTORY || []).map(function (r) { return r.code; }).join(' / ');
+      return;
+    }
     var key = ($('#ai-key').value || '').trim();
     var base = ($('#ai-base').value || '').trim();
     var model = ($('#ai-model').value || '').trim();
@@ -301,12 +311,58 @@ window.FC = window.FC || {};
     }
   }
 
+  /** 展台上"输入代码"的真实能力: 只能把预置结果载进来, 不现场采集。
+   *  输不在预置清单里的代码时给一句人话, 而不是让它转圈或报一个 HTTP 404。 */
+  function showcaseLoad() {
+    var code = ($('#online-code').value || '').trim();
+    if (!/^\d{6}$/.test(code)) { FC.toast('基金代码必须是 6 位数字', 'err'); return; }
+    var known = (HISTORY || []).some(function (r) { return r.code === code; });
+    if (!known) {
+      var hint = $('#probe-hint');
+      var codes = (HISTORY || []).map(function (r) { return r.code; }).join(' / ') || '—';
+      if (hint) hint.innerHTML = '展台只预置了 ' + codes + ' 的复盘结果；任意代码的完整流水线要在本机跑（<code>启动_基金复诊台.bat</code>）。';
+      FC.toast('展台没有 ' + code + ' 的预置结果', 'err');
+      return;
+    }
+    /* loadRun 内部会 log("已载入 … 的历史结果") + 画"复盘完成"卡 + 切到报告视图 */
+    FC.loadRun(code);
+  }
+
   /** 有后端但能力不全(展台的 Python 薄后端): 能用哪些就说哪些, 用哪些就留哪些。 */
   function showcaseMode(caps) {
     document.body.classList.add('showcase');
     if (!caps.ask) document.body.classList.add('demo-no-ask');
     if (!caps.compare) document.body.classList.add('demo-no-compare');
-    var ri = $('#rail-input'); if (ri) ri.classList.add('hidden');
+    var ri = $('#rail-input');
+    var hasBackend = !!(caps.ask || caps.compare);
+    /* 有后端(展台薄后端)时, 左栏「输入」照常露出来 —— 只是它的按钮改成"载入预置复盘":
+       这里没有采集流水线, 但"输 6 位代码 → 看那份复盘"这件事是真能做的, 界面不必假装没有输入。
+       纯静态(双击 HTML)那条路没有 /api, 这一段保持收起。 */
+    if (hasBackend) {
+      if (ri) ri.classList.remove('hidden');
+      var goBtn = $('#btn-online-probe');
+      if (goBtn && !goBtn.dataset.rewired) {
+        /* 复制节点顶掉旧的: 连带卸掉 initOnline 绑在上面的 FC.probe(那条路要爬数据, 这里没有) */
+        var go2 = goBtn.cloneNode(true);
+        go2.dataset.rewired = '1';
+        goBtn.parentNode.replaceChild(go2, goBtn);
+        go2.textContent = '载入这份复盘 →';
+        go2.addEventListener('click', function () { if (!go2.disabled) showcaseLoad(); });
+      }
+      var codeIn = $('#online-code');
+      if (codeIn && !codeIn.dataset.rewired) {
+        codeIn.dataset.rewired = '1';
+        codeIn.addEventListener('keydown', function (e) {
+          var btn = $('#btn-online-probe');
+          if (e.key === 'Enter' && btn && !btn.disabled) { e.preventDefault(); showcaseLoad(); }
+        });
+      }
+      /* 年份是"跑"的参数, 展台跑不了 → 置灰并说明, 不留一个点了没反应的控件 */
+      var yrs = $('#online-years');
+      if (yrs) { yrs.disabled = true; yrs.title = '展台用预置区间；年份只在本机跑时生效'; }
+    } else if (ri) {
+      ri.classList.add('hidden');
+    }
     /* 展台上的"内置样例"是浏览器内算出来的那份(10 节, 没有产品类型/持仓拟合/该追问),
        和上面这份预置结果(14 节)不是一回事。手一点就把好报告换成差报告, 所以这块收起来 ——
        要看结果就看预置的那两份(左栏「已复盘」)。
