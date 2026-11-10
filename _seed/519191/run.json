@@ -1,964 +1,1014 @@
 {
- "code": "519191",
- "summary": {
   "code": "519191",
-  "name": "万家新利灵活配置混合",
-  "manager": "黄海",
-  "range": "2020Q4–2026Q3",
-  "quarters": 24,
-  "formTag": "个股稳定 + 主题切换型",
-  "perf": {
-   "cumReturn": 119.36,
-   "exBestQuarter": 68.1,
-   "maxDrawdown": -32.45
-  },
-  "check": {
-   "total": 18,
-   "pass": 17,
-   "warn": 1,
-   "fail": 0,
-   "verdict": "warn",
-   "verdictText": "通过, 有 1 项建议人工确认"
-  },
-  "official": {
-   "available": true,
-   "pdftotext": true,
-   "checks": [
-    {
-     "period": "2020Q4",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 5 处为时点名称差异(已按代码对齐)"
+  "summary": {
+    "code": "519191",
+    "name": "万家新利灵活配置混合",
+    "manager": "黄海",
+    "range": "2020Q4–2026Q3",
+    "quarters": 24,
+    "formTag": "个股稳定 + 主题切换型",
+    "perf": {
+      "cumReturn": 119.36,
+      "exBestQuarter": 68.1,
+      "maxDrawdown": -32.45
     },
-    {
-     "period": "2021Q1",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 4 处为时点名称差异(已按代码对齐)"
+    "check": {
+      "total": 18,
+      "pass": 17,
+      "warn": 1,
+      "fail": 0,
+      "verdict": "warn",
+      "verdictText": "通过, 有 1 项建议人工确认"
     },
-    {
-     "period": "2021Q2",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 4 处为时点名称差异(已按代码对齐)"
+    "official": {
+      "available": true,
+      "pdftotext": true,
+      "checks": [
+        {
+          "period": "2020Q4",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 5 处为时点名称差异(已按代码对齐)"
+        },
+        {
+          "period": "2021Q1",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 4 处为时点名称差异(已按代码对齐)"
+        },
+        {
+          "period": "2021Q2",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 4 处为时点名称差异(已按代码对齐)"
+        },
+        {
+          "period": "2021Q3",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 2 处为时点名称差异(已按代码对齐)"
+        },
+        {
+          "period": "2021Q4",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 1 处为时点名称差异(已按代码对齐)"
+        },
+        {
+          "period": "2022Q1",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2022Q2",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2022Q3",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2022Q4",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2023Q1",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2023Q2",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2023Q3",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2023Q4",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2024Q1",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2024Q2",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2024Q3",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2024Q4",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2025Q1",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2025Q2",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2025Q3",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2025Q4",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2026Q1",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2026Q2",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        },
+        {
+          "period": "2026Q3",
+          "reason": "全量取原文",
+          "parsedRows": 10,
+          "ok": true,
+          "maxDiff": 0,
+          "diffs": [],
+          "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
+        }
+      ],
+      "notes": [
+        "官方对账完成: 24/24 期逐行一致, 共解析 240 行官方持仓。"
+      ],
+      "talks": 24
     },
-    {
-     "period": "2021Q4",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp); 1 处为时点名称差异(已按代码对齐)"
-    },
-    {
-     "period": "2022Q1",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2022Q2",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2022Q3",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2022Q4",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2023Q1",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2023Q2",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2023Q3",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2023Q4",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2024Q1",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2024Q2",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2024Q3",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2024Q4",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2025Q1",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2025Q2",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2025Q3",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2025Q4",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2026Q1",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2026Q2",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    },
-    {
-     "period": "2026Q3",
-     "reason": "全量取原文",
-     "parsedRows": 10,
-     "ok": true,
-     "maxDiff": 0,
-     "diffs": [],
-     "note": "官方 10 行与第三方逐行一致(权重差 ≤0.011pp, 最大 0.000pp)"
-    }
-   ],
-   "notes": [
-    "官方对账完成: 23/23 期逐行一致, 共解析 230 行官方持仓。"
-   ],
-   "talks": 23
-  },
-  "sources": [
-   {
-    "type": "基金概况",
-    "url": "https://fundf10.eastmoney.com/jbgk_519191.html",
-    "fetchedAt": "2026-11-01T05:07:03.727Z",
-    "fields": [
-     "全称",
-     "类型",
-     "管理公司",
-     "基金经理",
-     "业绩比较基准"
-    ]
-   },
-   {
-    "type": "净值序列(日频)",
-    "url": "https://fund.eastmoney.com/pingzhongdata/519191.js",
-    "fetchedAt": "2026-11-01T05:07:03.873Z",
-    "points": 3082
-   },
-   {
-    "type": "基金经理履历",
-    "url": "https://fundf10.eastmoney.com/jjjl_519191.html",
-    "fetchedAt": "2026-11-01T05:07:04.072Z",
-    "rows": 9
-   },
-   {
-    "type": "天天基金 F10 历史前十大",
-    "url": "https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code=519191",
-    "fetchedAt": "2026-11-01T05:07:06.640Z",
-    "quarters": 27
-   },
-   {
-    "type": "天天基金 资产配置",
-    "url": "https://fundf10.eastmoney.com/zcpz_519191.html",
-    "fetchedAt": "2026-11-01T05:07:06.827Z",
-    "periods": 51
-   },
-   {
-    "type": "天天基金 规模变动",
-    "url": "https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=gmbd&code=519191",
-    "fetchedAt": "2026-11-01T05:07:06.958Z",
-    "rows": 60
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202101211452764500_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2020Q4",
-    "bytes": 558576,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202104211486807806_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2021Q1",
-    "bytes": 546872,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202108301513318494_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2021Q2",
-    "bytes": 1729432,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202201211541681514_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2021Q4",
-    "bytes": 481871,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202204211560595109_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2022Q1",
-    "bytes": 506663,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202207201576363585_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2022Q2",
-    "bytes": 366228,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202210251579428471_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2022Q3",
-    "bytes": 262862,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202301201582216877_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2022Q4",
-    "bytes": 367069,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202304211585665978_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2023Q1",
-    "bytes": 385335,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202307201592479021_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2023Q2",
-    "bytes": 530488,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202310241602897296_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2023Q3",
-    "bytes": 483101,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202401191617715120_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2023Q4",
-    "bytes": 463467,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202404191630639490_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2024Q1",
-    "bytes": 467171,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202407181638033198_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2024Q2",
-    "bytes": 468483,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202410241640450530_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2024Q3",
-    "bytes": 463852,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202501211642389748_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2024Q4",
-    "bytes": 468300,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202504211659803005_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2025Q1",
-    "bytes": 490087,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202507181711021844_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2025Q2",
-    "bytes": 494452,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202510251768595913_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2025Q3",
-    "bytes": 501725,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202601211818188258_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2025Q4",
-    "bytes": 505297,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202604211821366499_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2026Q1",
-    "bytes": 497120,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202607211827191142_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2026Q2",
-    "bytes": 537172,
-    "对账": "逐行一致"
-   },
-   {
-    "type": "官方定期报告 PDF",
-    "url": "https://pdf.dfcfw.com/pdf/H2_AN202610271830981433_1.pdf",
-    "fetchedAt": "2026-11-01T05:07:12.982Z",
-    "period": "2026Q3",
-    "bytes": 293103,
-    "对账": "逐行一致"
-   }
-  ],
-  "rangeInfo": {
-   "auto": true,
-   "basis": "现任经理任期(黄海(2020-11-17 ~ 至今))共 24 个报告期, 足以判定形态",
-   "from": "2020Q4",
-   "to": "2026Q3",
-   "humanConfirmed": false,
-   "candidates": [
-    {
-     "id": "tenure0",
-     "label": "黄海(2020-11-17 ~ 至今)",
-     "from": "2020Q4",
-     "to": "2026Q3",
-     "n": 24,
-     "isCurrent": true,
-     "coManaged": false,
-     "recommended": true
-    },
-    {
-     "id": "tenure1",
-     "label": "孙远慧+黄海(2020-09-23 ~ 2020-11-16)",
-     "from": "2020Q3",
-     "to": "2020Q3",
-     "n": 1,
-     "isCurrent": false,
-     "coManaged": true,
-     "recommended": false
-    },
-    {
-     "id": "tenure2",
-     "label": "孙远慧(2020-03-10 ~ 2020-09-22)",
-     "from": "2020Q1",
-     "to": "2020Q2",
-     "n": 2,
-     "isCurrent": false,
-     "coManaged": false,
-     "recommended": false
-    },
-    {
-     "id": "all",
-     "label": "全部可取报告期",
-     "from": "2020Q1",
-     "to": "2026Q3",
-     "n": 27,
-     "isCurrent": false,
-     "coManaged": false,
-     "recommended": false
-    }
-   ],
-   "candidatesTotal": 27,
-   "selected": 24,
-   "excludedBefore": 3
-  },
-  "cleanLog": [],
-  "aiLog": [
-   {
-    "task": "T1 · 主题归类",
-    "ok": true,
-    "latencyMs": 20729,
-    "usage": {
-     "prompt_tokens": 1072,
-     "completion_tokens": 4308,
-     "total_tokens": 5380,
-     "prompt_tokens_details": {
-      "cached_tokens": 896
-     },
-     "completion_tokens_details": {
-      "reasoning_tokens": 3869
-     },
-     "prompt_cache_hit_tokens": 896,
-     "prompt_cache_miss_tokens": 176
-    },
-    "issues": [
-     {
-      "level": "pass",
-      "msg": "覆盖率 100.0%, 映射 47 条, 超出清单 0 条。"
-     }
-    ]
-   },
-   {
-    "task": "T2 · 核心判断起草",
-    "ok": true,
-    "latencyMs": 10723,
-    "usage": {
-     "prompt_tokens": 716,
-     "completion_tokens": 1735,
-     "total_tokens": 2451,
-     "prompt_tokens_details": {
-      "cached_tokens": 384
-     },
-     "completion_tokens_details": {
-      "reasoning_tokens": 817
-     },
-     "prompt_cache_hit_tokens": 384,
-     "prompt_cache_miss_tokens": 332
-    },
-    "issues": [
-     {
-      "level": "info",
-      "msg": "数字回查: 共校验 24 个数字, 全部命中指标包。"
-     }
-    ]
-   },
-   {
-    "task": "T3 · 对外用词清洗",
-    "ok": true,
-    "latencyMs": 41200,
-    "usage": {
-     "prompt_tokens": 7228,
-     "completion_tokens": 10136,
-     "total_tokens": 17364,
-     "prompt_tokens_details": {
-      "cached_tokens": 128
-     },
-     "completion_tokens_details": {
-      "reasoning_tokens": 3218
-     },
-     "prompt_cache_hit_tokens": 128,
-     "prompt_cache_miss_tokens": 7100
-    },
-    "issues": [
-     {
-      "level": "pass",
-      "msg": "数字守恒校验通过: 744 个数字逐一比对, 清洗未改动任何数字。"
-     },
-     {
-      "level": "info",
-      "msg": "原文 10209 字符 → 清洗后 10209 字符, 替换 0 处。"
-     }
-    ]
-   },
-   {
-    "task": "T5 · 深度复盘报告成文(agent 主笔)",
-    "ok": false,
-    "latencyMs": 146868,
-    "usage": {
-     "prompt_tokens": 44955,
-     "completion_tokens": 31573,
-     "total_tokens": 76528,
-     "prompt_tokens_details": {
-      "cached_tokens": 768
-     },
-     "completion_tokens_details": {
-      "reasoning_tokens": 17597
-     },
-     "prompt_cache_hit_tokens": 768,
-     "prompt_cache_miss_tokens": 44187
-    },
-    "issues": [
-     {
-      "level": "pass",
-      "msg": "固定骨架 10 节齐全。"
-     },
-     {
-      "level": "fail",
-      "msg": "命中违禁词: 高点卖出"
-     },
-     {
-      "level": "fail",
-      "msg": "数字回查: 46 个数字未能在证据包中找到出处(超过 8 个, 判为疑似编造, 退回重写): 27.20、133.35、67.02、74.80、7.78、77.08、115、174、7.57、25.42、0.8514、0.9167"
-     },
-     {
-      "level": "info",
-      "msg": "正文 20401 字; 表格 118 行"
-     }
-    ]
-   },
-   {
-    "task": "T6 演示稿",
-    "ok": true,
-    "note": "8 页 / 9 次调用",
-    "issues": [
-     {
-      "level": "warn",
-      "msg": "第 4 页没有 .h2c 主张式标题"
-     },
-     {
-      "level": "warn",
-      "msg": "第 5 页没有 .h2c 主张式标题"
-     },
-     {
-      "level": "warn",
-      "msg": "第 6 页没有 .h2c 主张式标题"
-     },
-     {
-      "level": "warn",
-      "msg": "第 7 页没有 .h2c 主张式标题"
-     },
-     {
-      "level": "warn",
-      "msg": "以下数字未在证据包白名单中(可能被改写或臆造): 72.77%, -0.45pp, 74.3%, 3.54pp, 12.69%, 0.61pp"
-     }
-    ]
-   }
-  ],
-  "aiRequired": true,
-  "reportCleanGenerated": true,
-  "deepReportGenerated": false,
-  "deckT6": {
-   "ok": true,
-   "pages": 8,
-   "theme": "editorial-serif",
-   "calls": 9,
-   "slides": [
-    {
-     "kicker": "基金经理回溯复盘 · Fund Manager Review",
-     "title": "万家新利灵活配置混合(519191)：一只叫“灵活配置”的基金，五年只换过一次赛道",
-     "layout": "cover",
-     "section": "一、先说结论"
-    },
-    {
-     "kicker": "01 · 一页看全",
-     "title": "判断：不是主题漂移，是“个股稳定下的单次换挡”，且分散幅度温和",
-     "layout": "two-column",
-     "section": "一、先说结论"
-    },
-    {
-     "kicker": "02 · 成绩与代价",
-     "title": "119.36% 的复利里，四成以上来自同一个季度",
-     "layout": "kpi-grid",
-     "section": "三、总成绩也看清代价"
-    },
-    {
-     "kicker": "03 · 持仓结构演变",
-     "title": "24 个季度只有一次换挡，但换挡之后一直在缓慢松手",
-     "layout": "timeline",
-     "section": "五、持仓轮动主线"
-    },
-    {
-     "kicker": "04 · 方法论拆解",
-     "title": "框架五年不漂移，但“灵活配置”这个名义长期与实质错配",
-     "layout": "process-steps",
-     "section": "六、方法论拆解"
-    },
-    {
-     "kicker": "05 · 关键调仓案例",
-     "title": "同一套打法，赢在煤炭龙头，输在拿太久的小票",
-     "layout": "comparison",
-     "section": "七、关键调仓案例审计"
-    },
-    {
-     "kicker": "06 · 最新一期结构",
-     "title": "2026Q3 集中度回升 3.54pp，但前十换了四张新面孔",
-     "layout": "diff",
-     "section": "八、最新一期结构与变化"
-    },
-    {
-     "kicker": "07 · 结论与跟踪",
-     "title": "判断可以被推翻，先把推翻的条件写下来",
-     "layout": "todo-checklist",
-     "section": "九、跟踪清单与证伪方式"
-    }
-   ],
-   "check": {
-    "ok": true,
-    "issues": [
-     {
-      "level": "warn",
-      "msg": "第 4 页没有 .h2c 主张式标题"
-     },
-     {
-      "level": "warn",
-      "msg": "第 5 页没有 .h2c 主张式标题"
-     },
-     {
-      "level": "warn",
-      "msg": "第 6 页没有 .h2c 主张式标题"
-     },
-     {
-      "level": "warn",
-      "msg": "第 7 页没有 .h2c 主张式标题"
-     },
-     {
-      "level": "warn",
-      "msg": "以下数字未在证据包白名单中(可能被改写或臆造): 72.77%, -0.45pp, 74.3%, 3.54pp, 12.69%, 0.61pp"
-     }
+    "sources": [
+      {
+        "type": "基金概况",
+        "url": "https://fundf10.eastmoney.com/jbgk_519191.html",
+        "fetchedAt": "2026-11-01T06:36:13.211Z",
+        "fields": [
+          "全称",
+          "类型",
+          "管理公司",
+          "基金经理",
+          "业绩比较基准"
+        ]
+      },
+      {
+        "type": "净值序列(日频)",
+        "url": "https://fund.eastmoney.com/pingzhongdata/519191.js",
+        "fetchedAt": "2026-11-01T06:36:13.342Z",
+        "points": 3082
+      },
+      {
+        "type": "基金经理履历",
+        "url": "https://fundf10.eastmoney.com/jjjl_519191.html",
+        "fetchedAt": "2026-11-01T06:36:13.553Z",
+        "rows": 9
+      },
+      {
+        "type": "天天基金 F10 历史前十大",
+        "url": "https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code=519191",
+        "fetchedAt": "2026-11-01T06:36:16.874Z",
+        "quarters": 39
+      },
+      {
+        "type": "天天基金 资产配置",
+        "url": "https://fundf10.eastmoney.com/zcpz_519191.html",
+        "fetchedAt": "2026-11-01T06:36:17.074Z",
+        "periods": 51
+      },
+      {
+        "type": "天天基金 规模变动",
+        "url": "https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=gmbd&code=519191",
+        "fetchedAt": "2026-11-01T06:36:17.273Z",
+        "rows": 60
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202101211452764500_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.018Z",
+        "period": "2020Q4",
+        "bytes": 558576,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202104211486807806_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.018Z",
+        "period": "2021Q1",
+        "bytes": 546872,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202107201504953632_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.018Z",
+        "period": "2021Q2",
+        "bytes": 480981,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202110261525051278_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.018Z",
+        "period": "2021Q3",
+        "bytes": 474714,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202201211541681514_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.018Z",
+        "period": "2021Q4",
+        "bytes": 481871,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202204211560595109_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.018Z",
+        "period": "2022Q1",
+        "bytes": 506663,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202207201576363585_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.018Z",
+        "period": "2022Q2",
+        "bytes": 366228,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202210251579428471_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.018Z",
+        "period": "2022Q3",
+        "bytes": 262862,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202301201582216877_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.018Z",
+        "period": "2022Q4",
+        "bytes": 367069,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202304211585665978_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2023Q1",
+        "bytes": 385335,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202307201592479021_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2023Q2",
+        "bytes": 530488,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202310241602897296_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2023Q3",
+        "bytes": 483101,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202401191617715120_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2023Q4",
+        "bytes": 463467,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202404191630639490_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2024Q1",
+        "bytes": 467171,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202407181638033198_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2024Q2",
+        "bytes": 468483,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202410241640450530_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2024Q3",
+        "bytes": 463852,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202501211642389748_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2024Q4",
+        "bytes": 468300,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202504211659803005_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2025Q1",
+        "bytes": 490087,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202507181711021844_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2025Q2",
+        "bytes": 494452,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202510251768595913_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2025Q3",
+        "bytes": 501725,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202601211818188258_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2025Q4",
+        "bytes": 505297,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202604211821366499_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2026Q1",
+        "bytes": 497120,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202607211827191142_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2026Q2",
+        "bytes": 537172,
+        "对账": "逐行一致"
+      },
+      {
+        "type": "官方定期报告 PDF",
+        "url": "https://pdf.dfcfw.com/pdf/H2_AN202610271830981433_1.pdf",
+        "fetchedAt": "2026-11-10T11:14:07.019Z",
+        "period": "2026Q3",
+        "bytes": 293103,
+        "对账": "逐行一致"
+      }
     ],
-    "fails": 0,
-    "warns": 5,
-    "distinctPrints": 7,
-    "kinds": [
-     0,
-     3,
-     3,
-     2,
-     3,
-     2,
-     4,
-     3
+    "rangeInfo": {
+      "auto": true,
+      "basis": "现任经理任期(黄海(2020-11-17 ~ 至今))共 24 个报告期, 足以判定形态",
+      "from": "2020Q4",
+      "to": "2026Q3",
+      "humanConfirmed": false,
+      "candidates": [
+        {
+          "id": "tenure0",
+          "label": "黄海(2020-11-17 ~ 至今)",
+          "from": "2020Q4",
+          "to": "2026Q3",
+          "n": 24,
+          "isCurrent": true,
+          "coManaged": false,
+          "recommended": true
+        },
+        {
+          "id": "tenure1",
+          "label": "孙远慧+黄海(2020-09-23 ~ 2020-11-16)",
+          "from": "2020Q3",
+          "to": "2020Q3",
+          "n": 1,
+          "isCurrent": false,
+          "coManaged": true,
+          "recommended": false
+        },
+        {
+          "id": "tenure2",
+          "label": "孙远慧(2020-03-10 ~ 2020-09-22)",
+          "from": "2020Q1",
+          "to": "2020Q2",
+          "n": 2,
+          "isCurrent": false,
+          "coManaged": false,
+          "recommended": false
+        },
+        {
+          "id": "tenure3",
+          "label": "莫海波+孙远慧(2019-10-30 ~ 2020-03-09)",
+          "from": "2019Q4",
+          "to": "2019Q4",
+          "n": 1,
+          "isCurrent": false,
+          "coManaged": true,
+          "recommended": false
+        },
+        {
+          "id": "tenure4",
+          "label": "莫海波+李文宾(2017-06-24 ~ 2019-10-29)",
+          "from": "2017Q2",
+          "to": "2019Q3",
+          "n": 10,
+          "isCurrent": false,
+          "coManaged": true,
+          "recommended": false
+        },
+        {
+          "id": "tenure5",
+          "label": "高翰昆+莫海波(2015-12-24 ~ 2017-06-23)",
+          "from": "2017Q1",
+          "to": "2017Q1",
+          "n": 1,
+          "isCurrent": false,
+          "coManaged": true,
+          "recommended": false
+        },
+        {
+          "id": "all",
+          "label": "全部可取报告期",
+          "from": "2017Q1",
+          "to": "2026Q3",
+          "n": 39,
+          "isCurrent": false,
+          "coManaged": false,
+          "recommended": false
+        }
+      ],
+      "candidatesTotal": 39,
+      "selected": 24,
+      "excludedBefore": 15
+    },
+    "cleanLog": [],
+    "aiLog": [
+      {
+        "task": "T1 · 主题归类",
+        "ok": true,
+        "latencyMs": 14424,
+        "usage": {
+          "prompt_tokens": 1110,
+          "completion_tokens": 2710,
+          "total_tokens": 3820,
+          "prompt_tokens_details": {
+            "cached_tokens": 128
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 2381
+          },
+          "prompt_cache_hit_tokens": 128,
+          "prompt_cache_miss_tokens": 982
+        },
+        "issues": [
+          {
+            "level": "warn",
+            "msg": "模型自述 1 只无法确定: 建发股份 —— 需人工归类。"
+          },
+          {
+            "level": "pass",
+            "msg": "覆盖率 97.9%, 映射 46 条, 超出清单 0 条。"
+          }
+        ]
+      },
+      {
+        "task": "T2 · 核心判断起草",
+        "ok": true,
+        "latencyMs": 8936,
+        "usage": {
+          "prompt_tokens": 750,
+          "completion_tokens": 1443,
+          "total_tokens": 2193,
+          "prompt_tokens_details": {
+            "cached_tokens": 128
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 754
+          },
+          "prompt_cache_hit_tokens": 128,
+          "prompt_cache_miss_tokens": 622
+        },
+        "issues": [
+          {
+            "level": "info",
+            "msg": "数字回查: 共校验 23 个数字, 全部命中指标包。"
+          }
+        ]
+      },
+      {
+        "task": "T3 · 对外用词清洗",
+        "ok": true,
+        "latencyMs": 51557,
+        "usage": {
+          "prompt_tokens": 6574,
+          "completion_tokens": 14195,
+          "total_tokens": 20769,
+          "prompt_tokens_details": {
+            "cached_tokens": 128
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 7955
+          },
+          "prompt_cache_hit_tokens": 128,
+          "prompt_cache_miss_tokens": 6446
+        },
+        "issues": [
+          {
+            "level": "pass",
+            "msg": "数字守恒校验通过: 678 个数字逐一比对, 清洗未改动任何数字。"
+          },
+          {
+            "level": "info",
+            "msg": "原文 9123 字符 → 清洗后 9136 字符, 替换 0 处。"
+          }
+        ]
+      },
+      {
+        "task": "T5 · 深度复盘报告成文(agent 主笔)",
+        "ok": true,
+        "latencyMs": 150447,
+        "usage": {
+          "prompt_tokens": 45019,
+          "completion_tokens": 33612,
+          "total_tokens": 78631,
+          "prompt_tokens_details": {
+            "cached_tokens": 896
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 24113
+          },
+          "prompt_cache_hit_tokens": 896,
+          "prompt_cache_miss_tokens": 44123
+        },
+        "issues": [
+          {
+            "level": "pass",
+            "msg": "固定骨架 10 节齐全。"
+          },
+          {
+            "level": "pass",
+            "msg": "数字回查通过: 全文 1182 个数字全部可溯源到证据包。"
+          },
+          {
+            "level": "info",
+            "msg": "正文 13572 字; 表格 83 行"
+          }
+        ]
+      },
+      {
+        "task": "T6 演示稿",
+        "ok": true,
+        "note": "8 页 / 9 次调用",
+        "issues": [
+          {
+            "level": "warn",
+            "msg": "第 3 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "第 4 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "第 5 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "第 6 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "第 7 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "以下数字未在证据包白名单中(可能被改写或臆造): 72.77%, 26%"
+          },
+          {
+            "level": "warn",
+            "msg": "全篇加粗 71 处(参照 54, 上限 70) —— 到处都是重点等于没有重点"
+          }
+        ]
+      }
     ],
-    "metrics": {
-     "pages": 8,
-     "textChars": 5761,
-     "avgChars": 720,
-     "cards": 19,
-     "cardMax": 5,
-     "stats": 6,
-     "statMax": 4,
-     "bolds": 50,
-     "boldMax": 12,
-     "tables": 3,
-     "tableRows": 24,
-     "badTables": 0,
-     "longProsePages": 5,
-     "plainPages": [],
-     "noNotes": [],
-     "longNotes": [],
-     "noSecNote": [],
-     "distinctRecipes": 7
-    }
-   },
-   "error": null
-  },
-  "deepEvidence": {
-   "nav": 119.36,
-   "exBestQuarter": 68.1,
-   "maxDrawdown": -32.45,
-   "annualRows": 7,
-   "quarterlyRows": 23,
-   "talkPairs": 22,
-   "phases": 2,
-   "allowedNumbers": 1687,
-   "chainedGapPp": 20.58
+    "aiRequired": true,
+    "reportCleanGenerated": true,
+    "deepReportGenerated": true,
+    "deckT6": {
+      "ok": true,
+      "pages": 8,
+      "theme": "corporate-clean",
+      "calls": 9,
+      "slides": [
+        {
+          "kicker": "基金经理回溯复盘 · Fund Manager Review",
+          "title": "万家新利灵活配置混合（519191）持仓回溯复盘",
+          "layout": "cover",
+          "section": "二、口径与证据边界"
+        },
+        {
+          "kicker": "01 · 一页看全",
+          "title": "净值曲线由一次地产→煤炭换挡主导，超额只集中在两年",
+          "layout": "two-column",
+          "section": "一、先说结论"
+        },
+        {
+          "kicker": "02 · 成绩与代价",
+          "title": "赚的两年全在煤炭，亏的四年也是真的",
+          "layout": "kpi-grid",
+          "section": "三、绩效总览"
+        },
+        {
+          "kicker": "03 · 持仓结构演变",
+          "title": "23 个季度只换了两次挡，煤炭这一挡走了 19 季",
+          "layout": "timeline",
+          "section": "四、持仓结构演变"
+        },
+        {
+          "kicker": "04 · 方法论拆解",
+          "title": "框架五年不漂移，但“绝对收益”只在煤炭那两年兑现",
+          "layout": "two-column",
+          "section": "五、方法论拆解"
+        },
+        {
+          "kicker": "05 · 关键调仓案例",
+          "title": "同一套长持逻辑，晋控赚 79%，平煤亏 44%",
+          "layout": "comparison",
+          "section": "六、关键调仓案例审计"
+        },
+        {
+          "kicker": "06 · 最新一期结构",
+          "title": "煤炭仍是底仓，但前十开始长出游戏与玻纤",
+          "layout": "diff",
+          "section": "七、最新一期结构与变化"
+        },
+        {
+          "kicker": "07 · 结论与跟踪",
+          "title": "判断能不能站住，就看 2026 之后的那几个季度",
+          "layout": "todo-checklist",
+          "section": "九、结论与跟踪"
+        }
+      ],
+      "check": {
+        "ok": true,
+        "issues": [
+          {
+            "level": "warn",
+            "msg": "第 3 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "第 4 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "第 5 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "第 6 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "第 7 页没有 .h2c 主张式标题"
+          },
+          {
+            "level": "warn",
+            "msg": "以下数字未在证据包白名单中(可能被改写或臆造): 72.77%, 26%"
+          },
+          {
+            "level": "warn",
+            "msg": "全篇加粗 71 处(参照 54, 上限 70) —— 到处都是重点等于没有重点"
+          }
+        ],
+        "fails": 0,
+        "warns": 7,
+        "distinctPrints": 7,
+        "kinds": [
+          0,
+          3,
+          3,
+          2,
+          3,
+          2,
+          4,
+          3
+        ],
+        "metrics": {
+          "pages": 8,
+          "textChars": 6217,
+          "avgChars": 777,
+          "cards": 19,
+          "cardMax": 4,
+          "stats": 6,
+          "statMax": 4,
+          "bolds": 71,
+          "boldMax": 16,
+          "tables": 3,
+          "tableRows": 24,
+          "badTables": 0,
+          "longProsePages": 6,
+          "plainPages": [],
+          "noNotes": [],
+          "longNotes": [],
+          "noSecNote": [],
+          "distinctRecipes": 7
+        }
+      },
+      "error": null
+    },
+    "deepEvidence": {
+      "nav": 119.36,
+      "exBestQuarter": 68.1,
+      "maxDrawdown": -32.45,
+      "annualRows": 7,
+      "quarterlyRows": 24,
+      "talkPairs": 23,
+      "phases": 2,
+      "allowedNumbers": 1687,
+      "chainedGapPp": 0.04
+    },
+    "files": {
+      "dataset": {
+        "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\底稿_万家新利灵活配置混合_519191.json",
+        "rel": "_runs\\519191\\底稿_万家新利灵活配置混合_519191.json",
+        "bytes": 187345
+      },
+      "report": {
+        "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\复盘报告_万家新利灵活配置混合_519191.md",
+        "rel": "_runs\\519191\\复盘报告_万家新利灵活配置混合_519191.md",
+        "bytes": 22645
+      },
+      "check": {
+        "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\错误检查记录_万家新利灵活配置混合_519191.md",
+        "rel": "_runs\\519191\\错误检查记录_万家新利灵活配置混合_519191.md",
+        "bytes": 10059
+      },
+      "card": {
+        "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\结论卡_万家新利灵活配置混合_519191.json",
+        "rel": "_runs\\519191\\结论卡_万家新利灵活配置混合_519191.json",
+        "bytes": 9701
+      },
+      "deck": {
+        "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\演示稿_万家新利灵活配置混合_519191.html",
+        "rel": "_runs\\519191\\演示稿_万家新利灵活配置混合_519191.html",
+        "bytes": 53384
+      },
+      "sources": {
+        "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\来源清单_万家新利灵活配置混合_519191.md",
+        "rel": "_runs\\519191\\来源清单_万家新利灵活配置混合_519191.md",
+        "bytes": 49588
+      },
+      "deep": {
+        "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\黄海_万家新利灵活配置混合_2020Q4–2026Q3_复盘.md",
+        "rel": "_runs\\519191\\黄海_万家新利灵活配置混合_2020Q4–2026Q3_复盘.md",
+        "bytes": 27291
+      },
+      "reportClean": {
+        "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\复盘报告_万家新利灵活配置混合_519191_对外版.md",
+        "rel": "_runs\\519191\\复盘报告_万家新利灵活配置混合_519191_对外版.md",
+        "bytes": 20485
+      },
+      "deckT6": {
+        "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\演示稿_万家新利灵活配置混合_519191_深度版.html",
+        "rel": "_runs\\519191\\演示稿_万家新利灵活配置混合_519191_深度版.html",
+        "bytes": 133568
+      }
+    },
+    "pdf": {
+      "path": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\演示稿_万家新利灵活配置混合_519191_深度版.pdf",
+      "rel": "_runs\\519191\\演示稿_万家新利灵活配置混合_519191_深度版.pdf",
+      "bytes": 1920762
+    },
+    "steps": [
+      {
+        "name": "数据采集",
+        "detail": "按六类公开来源抓取(含全量官方报告原文)",
+        "at": "2026-11-01T06:36:12.883Z"
+      },
+      {
+        "name": "官方窗口校准",
+        "detail": "24 期可比, 最大偏差 0.01pp ✓ 一致",
+        "at": "2026-11-01T06:37:27.923Z"
+      },
+      {
+        "name": "采集完成",
+        "detail": "24 期 · 净值 3082 点 · 来源 30 类 · 75.0s",
+        "at": "2026-11-01T06:37:27.923Z"
+      },
+      {
+        "name": "规则引擎",
+        "detail": "指标 / 形态 / 结论卡 / 报告 / 质检",
+        "at": "2026-11-01T06:37:27.923Z"
+      },
+      {
+        "name": "AI 模块",
+        "detail": "T1 主题归类 / T2 判断起草 / T3 用词清洗(用户自带 API Key)",
+        "at": "2026-11-01T06:37:27.954Z"
+      },
+      {
+        "name": "T1 主题归类",
+        "detail": "已应用 24 期主题, 形态库的主题类规则现在可以参与判定",
+        "at": "2026-11-01T06:37:42.380Z"
+      },
+      {
+        "name": "T2 判断起草",
+        "detail": "输出通过校验(形态标签在库内 / 数字全部回查得到 / 无违禁词), 已并入结论卡",
+        "at": "2026-11-01T06:37:51.357Z"
+      },
+      {
+        "name": "持仓拟合",
+        "detail": "取周线行情，按季报前十权重拟合\"经理不动\"的理论净值",
+        "at": "2026-11-01T06:37:51.358Z"
+      },
+      {
+        "name": "持仓拟合",
+        "detail": "抓净值序列",
+        "at": "2026-11-01T06:37:51.360Z"
+      },
+      {
+        "name": "持仓拟合",
+        "detail": "抓沪深300周线（当周网格与市场代理）",
+        "at": "2026-11-01T06:37:51.526Z"
+      },
+      {
+        "name": "持仓拟合",
+        "detail": "完成：294 周 · 相关性 96.5% · R² 93.4%",
+        "at": "2026-11-01T06:37:55.812Z"
+      },
+      {
+        "name": "T3 用词清洗",
+        "detail": "输出通过校验(数字守恒 / 无违禁词 / 未删减), 已生成对外版报告",
+        "at": "2026-11-01T06:38:47.373Z"
+      },
+      {
+        "name": "生成交付物",
+        "detail": "报告 / 结论卡 / 演示稿 / 深度复盘报告",
+        "at": "2026-11-01T06:38:47.373Z"
+      },
+      {
+        "name": "深度复盘报告",
+        "detail": "整理证据包(官方逐季绩效/基准·规模申赎·轮动·经理原话×下期动作·成败案例)",
+        "at": "2026-11-01T06:38:47.383Z"
+      },
+      {
+        "name": "深度复盘报告",
+        "detail": "已通过校验(骨架 10 节 / 数字全部回查得到 / 无前瞻无违禁词)",
+        "at": "2026-11-01T06:41:17.885Z"
+      },
+      {
+        "name": "T6 演示稿",
+        "detail": "按 html-ppt 技能编排: 分镜 → 逐页成文 → 内联单文件",
+        "at": "2026-11-01T06:41:17.889Z"
+      },
+      {
+        "name": "T6 演示稿",
+        "detail": "8 页 · 主题 corporate-clean · 130 KB · 校验通过(警告 7)",
+        "at": "2026-11-01T06:43:59.008Z"
+      },
+      {
+        "name": "导出 PDF",
+        "detail": "演示稿_万家新利灵活配置混合_519191_深度版.pdf",
+        "at": "2026-11-01T06:44:02.060Z"
+      }
+    ],
+    "totalMs": 469178
   },
   "files": {
-   "dataset": {
-    "path": "_runs/519191/底稿_万家新利灵活配置混合_519191.json",
-    "rel": "_runs/519191/底稿_万家新利灵活配置混合_519191.json",
-    "bytes": 183980
-   },
-   "report": {
-    "path": "_runs/519191/复盘报告_万家新利灵活配置混合_519191.md",
-    "rel": "_runs/519191/复盘报告_万家新利灵活配置混合_519191.md",
-    "bytes": 23157
-   },
-   "check": {
-    "path": "_runs/519191/错误检查记录_万家新利灵活配置混合_519191.md",
-    "rel": "_runs/519191/错误检查记录_万家新利灵活配置混合_519191.md",
-    "bytes": 9731
-   },
-   "card": {
-    "path": "_runs/519191/结论卡_万家新利灵活配置混合_519191.json",
-    "rel": "_runs/519191/结论卡_万家新利灵活配置混合_519191.json",
-    "bytes": 9801
-   },
-   "deck": {
-    "path": "_runs/519191/演示稿_万家新利灵活配置混合_519191.html",
-    "rel": "_runs/519191/演示稿_万家新利灵活配置混合_519191.html",
-    "bytes": 53539
-   },
-   "sources": {
-    "path": "_runs/519191/来源清单_万家新利灵活配置混合_519191.md",
-    "rel": "_runs/519191/来源清单_万家新利灵活配置混合_519191.md",
-    "bytes": 47626
-   },
-   "reportClean": {
-    "path": "_runs/519191/复盘报告_万家新利灵活配置混合_519191_对外版.md",
-    "rel": "_runs/519191/复盘报告_万家新利灵活配置混合_519191_对外版.md",
-    "bytes": 20976
-   },
-   "deckT6": {
-    "path": "_runs/519191/演示稿_万家新利灵活配置混合_519191_深度版.html",
-    "rel": "_runs/519191/演示稿_万家新利灵活配置混合_519191_深度版.html",
-    "bytes": 131635
-   }
+    "dataset": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\底稿_万家新利灵活配置混合_519191.json",
+    "report": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\复盘报告_万家新利灵活配置混合_519191.md",
+    "check": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\错误检查记录_万家新利灵活配置混合_519191.md",
+    "card": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\结论卡_万家新利灵活配置混合_519191.json",
+    "deck": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\演示稿_万家新利灵活配置混合_519191.html",
+    "sources": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\来源清单_万家新利灵活配置混合_519191.md",
+    "deep": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\黄海_万家新利灵活配置混合_2020Q4–2026Q3_复盘.md",
+    "reportClean": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\复盘报告_万家新利灵活配置混合_519191_对外版.md",
+    "deckT6": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\演示稿_万家新利灵活配置混合_519191_深度版.html"
   },
-  "pdf": {
-   "path": "_runs/519191/演示稿_万家新利灵活配置混合_519191_深度版.pdf",
-   "rel": "_runs/519191/演示稿_万家新利灵活配置混合_519191_深度版.pdf",
-   "bytes": 3272560
-  },
-  "steps": [
-   {
-    "name": "数据采集",
-    "detail": "按六类公开来源抓取(含全量官方报告原文)",
-    "at": "2026-11-01T05:07:03.413Z"
-   },
-   {
-    "name": "官方窗口校准",
-    "detail": "23 期可比, 最大偏差 0.01pp ✓ 一致",
-    "at": "2026-11-01T05:07:12.983Z"
-   },
-   {
-    "name": "采集完成",
-    "detail": "24 期 · 净值 3082 点 · 来源 29 类 · 9.6s",
-    "at": "2026-11-01T05:07:12.983Z"
-   },
-   {
-    "name": "规则引擎",
-    "detail": "指标 / 形态 / 结论卡 / 报告 / 质检",
-    "at": "2026-11-01T05:07:12.983Z"
-   },
-   {
-    "name": "AI 模块",
-    "detail": "T1 主题归类 / T2 判断起草 / T3 用词清洗(用户自带 API Key)",
-    "at": "2026-11-01T05:07:13.001Z"
-   },
-   {
-    "name": "T1 主题归类",
-    "detail": "已应用 24 期主题, 形态库的主题类规则现在可以参与判定",
-    "at": "2026-11-01T05:07:33.732Z"
-   },
-   {
-    "name": "T2 判断起草",
-    "detail": "输出通过校验(形态标签在库内 / 数字全部回查得到 / 无违禁词), 已并入结论卡",
-    "at": "2026-11-01T05:07:44.498Z"
-   },
-   {
-    "name": "持仓拟合",
-    "detail": "取周线行情，按季报前十权重拟合\"经理不动\"的理论净值",
-    "at": "2026-11-01T05:07:44.499Z"
-   },
-   {
-    "name": "持仓拟合",
-    "detail": "抓净值序列",
-    "at": "2026-11-01T05:07:44.499Z"
-   },
-   {
-    "name": "持仓拟合",
-    "detail": "抓沪深300周线（当周网格与市场代理）",
-    "at": "2026-11-01T05:07:44.692Z"
-   },
-   {
-    "name": "持仓拟合",
-    "detail": "已抓 10/47 只成分股",
-    "at": "2026-11-01T05:07:45.566Z"
-   },
-   {
-    "name": "持仓拟合",
-    "detail": "已抓 20/47 只成分股",
-    "at": "2026-11-01T05:07:46.226Z"
-   },
-   {
-    "name": "持仓拟合",
-    "detail": "已抓 30/47 只成分股",
-    "at": "2026-11-01T05:07:46.884Z"
-   },
-   {
-    "name": "持仓拟合",
-    "detail": "已抓 40/47 只成分股",
-    "at": "2026-11-01T05:07:47.625Z"
-   },
-   {
-    "name": "持仓拟合",
-    "detail": "完成：294 周 · 相关性 96.5% · R² 93.4%",
-    "at": "2026-11-01T05:07:48.102Z"
-   },
-   {
-    "name": "T3 用词清洗",
-    "detail": "输出通过校验(数字守恒 / 无违禁词 / 未删减), 已生成对外版报告",
-    "at": "2026-11-01T05:08:29.306Z"
-   },
-   {
-    "name": "生成交付物",
-    "detail": "报告 / 结论卡 / 演示稿 / 深度复盘报告",
-    "at": "2026-11-01T05:08:29.306Z"
-   },
-   {
-    "name": "深度复盘报告",
-    "detail": "整理证据包(官方逐季绩效/基准·规模申赎·轮动·经理原话×下期动作·成败案例)",
-    "at": "2026-11-01T05:08:29.312Z"
-   },
-   {
-    "name": "深度复盘报告",
-    "detail": "未通过校验, 已拦截 —— 详见\"错误检查记录\"里的 T5 明细",
-    "at": "2026-11-01T05:10:56.210Z"
-   },
-   {
-    "name": "T6 演示稿",
-    "detail": "按 html-ppt 技能编排: 分镜 → 逐页成文 → 内联单文件",
-    "at": "2026-11-01T05:10:56.218Z"
-   },
-   {
-    "name": "T6 演示稿",
-    "detail": "8 页 · 主题 editorial-serif · 116 KB · 校验通过(警告 5)",
-    "at": "2026-11-01T05:13:08.959Z"
-   },
-   {
-    "name": "导出 PDF",
-    "detail": "演示稿_万家新利灵活配置混合_519191_深度版.pdf",
-    "at": "2026-11-01T05:13:11.647Z"
-   }
-  ],
-  "totalMs": 368236
- },
- "files": {
-  "dataset": "_runs/519191/底稿_万家新利灵活配置混合_519191.json",
-  "report": "_runs/519191/复盘报告_万家新利灵活配置混合_519191.md",
-  "check": "_runs/519191/错误检查记录_万家新利灵活配置混合_519191.md",
-  "card": "_runs/519191/结论卡_万家新利灵活配置混合_519191.json",
-  "deck": "_runs/519191/演示稿_万家新利灵活配置混合_519191.html",
-  "sources": "_runs/519191/来源清单_万家新利灵活配置混合_519191.md",
-  "reportClean": "_runs/519191/复盘报告_万家新利灵活配置混合_519191_对外版.md",
-  "deckT6": "_runs/519191/演示稿_万家新利灵活配置混合_519191_深度版.html"
- },
- "pdf": "_runs/519191/演示稿_万家新利灵活配置混合_519191_深度版.pdf",
- "at": "2026-11-01T05:13:11.654Z"
+  "pdf": "C:\\Users\\75719\\Desktop\\基金复盘_小组作业\\04_网页项目_基金复诊台\\_runs\\519191\\演示稿_万家新利灵活配置混合_519191_深度版.pdf",
+  "at": "2026-11-01T06:44:02.064Z",
+  "refreshedAt": "2026-11-10T11:14:07.059Z"
 }

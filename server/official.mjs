@@ -115,9 +115,16 @@ export function findPdftotext() {
 }
 
 /* ------------------------------------------------------ 定期报告清单 */
+/* 季报标题的季度数字**有阿拉伯也有中文**: 同一只基金的不同年份会混用
+ * (519191: 2021Q2/2021Q3 写作「第二/三季度报告」, 其余年份是「第2季度报告」)。
+ * 只认阿拉伯数字时, 这两期会被归成 other → 既进不了抽样也进不了全量,
+ * 复盘区间 24 期却只对到 23 期对账。必须两种都认。 */
+const CN_DIGIT = { 1: '1', 2: '2', 3: '3', 4: '4', 一: '1', 二: '2', 三: '3', 四: '4' };
+
 export function classifyReport(title) {
-  if (/第[1-4]季度报告/.test(title)) {
-    const q = /第([1-4])季度报告/.exec(title)[1];
+  const qm = /第?\s*([1-4一二三四])\s*季度报告/.exec(title);
+  if (qm) {
+    const q = CN_DIGIT[qm[1]];
     const y = /(\d{4})年/.exec(title);
     return { kind: 'quarterly', period: y ? `${y[1]}Q${q}` : null };
   }
@@ -201,6 +208,9 @@ export function parseBenchmark(text) {
     const m = /业绩比较基准\s*[:：]?\s*(.{4,160})$/.exec(lines[i]);
     if (!m) continue;
     let v = m[1].trim();
+    /* 「业绩比较基准**为：**沪深300…」这种写法(中期报告很常见)会把"为："一起抄进来,
+     * 与其它期的同一条款比较时被判成"基准调整过" —— 纯属解析噪声。先剥掉。 */
+    v = v.replace(/^(?:为|是)\s*[:：]\s*/, '');
     if (/^收益率/.test(v)) continue;                       // "业绩比较基准收益率为…" 不是基准条款
     if (!/指数|中债|国债|存款|活期|％|%|×|\*/.test(v)) continue;
     /* 基准条款以「。」收尾。PDF 转文本时同一行常紧跟相邻表格文字

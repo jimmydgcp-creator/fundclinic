@@ -169,7 +169,7 @@ def load_519191():
         },
         "quarters": quarters,
         "sources": [
-            "官方定期报告 PDF: 巨潮资讯 static.cninfo.com.cn / 证监会 eid.csrc.gov.cn / 东财镜像 pdf.dfcfw.com(23/23 期已取得)",
+            "官方定期报告 PDF: 巨潮资讯 static.cninfo.com.cn / 证监会 eid.csrc.gov.cn / 东财镜像 pdf.dfcfw.com(24/24 期已取得)",
             "天天基金 F10 历史前十大持仓 fundf10.eastmoney.com/ccmx_519191.html",
             "天天基金 规模变动 fundf10.eastmoney.com/gmbd_519191.html",
             "天天基金 净值序列 fund.eastmoney.com/pingzhongdata/519191.js",
