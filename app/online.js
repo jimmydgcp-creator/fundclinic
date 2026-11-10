@@ -316,11 +316,13 @@ window.FC = window.FC || {};
       FC.loadRun(code);
       return;
     }
-    var msg = '展台只做到探路: 六类来源采集 + 官方 PDF 逐行对账 + 五步模型这条流水线装不下(384MB 内存、30 分钟休眠)。' +
-      '要看 ' + code + ' 的完整报告, 请在本机运行 启动_基金复诊台.bat。';
-    if (st) st.innerHTML = '<span style="color:var(--warn)">没有预置报告</span> · ' + FC.esc(msg);
-    log('✗ ' + code + ' 没有预置报告 —— ' + msg, 'err');
-    FC.toast('展台没有 ' + code + ' 的完整报告（只做到探路）', 'err');
+    /* 展台只预置了两只, 其它代码要跑完整流水线: 指到云端那台(同一份代码, 带完整采集与五步模型)去,
+       不让用户自己去装本机环境。 */
+    var msg = '这个部署只预置了 519191 / 090007 的完整报告。要看 ' + code + ' 的完整复盘，请打开 ' +
+      '<a href="https://fundclinic.onrender.com/" target="_blank" rel="noopener">https://fundclinic.onrender.com/</a>';
+    if (st) st.innerHTML = '<span style="color:var(--warn)">没有预置报告</span> · ' + msg;
+    log('✗ ' + code + ' 没有预置报告 —— 要看完整复盘, 请打开 https://fundclinic.onrender.com/', 'err');
+    FC.toast('展台没有 ' + code + ' 的完整报告 —— 去 fundclinic.onrender.com', 'err');
   }
 
   /** 有后端但能力不全(展台的 Python 薄后端): 能用哪些就说哪些, 用哪些就留哪些。 */
