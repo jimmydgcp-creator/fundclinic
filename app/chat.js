@@ -29,6 +29,16 @@
   function lastCode() {
     try { return localStorage.getItem('fundclinic.lastCode') || ''; } catch (e) { return ''; }
   }
+  /* 当前页面上摆着的那份报告是哪只基金 —— 抽屉里的代码要跟着它走。
+     踩过的坑: 抽屉打开时停在上一只(比如页面显示 519191, 代码框还是 090007),
+     于是"问一句"答的是另一只的数字, 数字都对、但答非所问, 演示时最容易被问住。 */
+  function currentCode() {
+    try {
+      var a = FC.state && FC.state.analysis;
+      if (a && a.fund && a.fund.code) return String(a.fund.code);
+    } catch (e) {}
+    return lastCode();
+  }
 
   function buildDom() {
     var wrap = document.createElement('div');
@@ -60,8 +70,12 @@
     state.open = true;
     var input = $('#ask-input');
     if (input) setTimeout(function () { input.focus(); }, 120);
+    /* 每次打开都把代码框对齐到"当前这份报告", 而不是上次留下的那只 */
+    var cur = currentCode();
+    var codeEl = $('#ask-code');
+    if (codeEl && cur) codeEl.value = cur;
     var hint = $('#ask-hint');
-    if (hint) hint.textContent = lastCode() ? '默认用最近一次复盘：' + lastCode() : '没找到最近复盘的代码，请手动填';
+    if (hint) hint.textContent = cur ? '当前报告：' + cur + '（可改）' : '没找到最近复盘的代码，请手动填';
   }
   function close() {
     var d = $('#ask-drawer');
@@ -84,7 +98,7 @@
   async function ask(q) {
     if (state.busy || !q) return;
     var codeEl = $('#ask-code');
-    var code = (codeEl && codeEl.value.trim()) || lastCode();
+    var code = (codeEl && codeEl.value.trim()) || currentCode();
     if (!/^\d{6}$/.test(code)) { bubble('sys', '先填 6 位基金代码，或先跑一次复盘。'); return; }
     state.busy = true;
     bubble('me', esc(q));

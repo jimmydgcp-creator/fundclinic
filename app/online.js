@@ -31,20 +31,11 @@ window.FC = window.FC || {};
     var btn = $('#btn-online-probe');
     if (!btn) return;
     var code = ($('#online-code').value || '').trim();
-    /* 展台形态: 按钮是"载入预置复盘", 只要 6 位数字就该亮 —— 不看 Key, 也不提探路。 */
-    if (online.showcase) {
-      var okCode = /^\d{6}$/.test(code);
-      btn.disabled = !okCode || online.running;
-      var h0 = $('#probe-hint');
-      if (h0) h0.textContent = okCode
-        ? '按回车载入这份复盘（预置结果，不重新采集）'
-        : '展台预置件：' + (HISTORY || []).map(function (r) { return r.code; }).join(' / ');
-      return;
-    }
     var key = ($('#ai-key').value || '').trim();
     var base = ($('#ai-base').value || '').trim();
     var model = ($('#ai-model').value || '').trim();
-    var keyReady = online.serverKey ? true : (key.length > 8 && !!base && !!model);
+    /* 探路只抓元数据, 不问模型 —— 展台形态下不需要 Key */
+    var keyReady = (online.serverKey || online.showcase) ? true : (key.length > 8 && !!base && !!model);
     var ready = /^\d{6}$/.test(code) && keyReady;
     btn.disabled = !ready || online.running;
     var hint = $('#probe-hint');
@@ -311,21 +302,25 @@ window.FC = window.FC || {};
     }
   }
 
-  /** 展台上"输入代码"的真实能力: 只能把预置结果载进来, 不现场采集。
-   *  输不在预置清单里的代码时给一句人话, 而不是让它转圈或报一个 HTTP 404。 */
-  function showcaseLoad() {
+  /** 展台上「按此口径开跑」的真实能力: 有预置结果就载入那份, 没有就把为什么说清楚。
+   *  探路是真的(打 /api/probe 抓概况/经理/报告期), 但整条流水线(六类采集 + 官方 PDF 对账 +
+   *  五步模型)展台装不下 —— 这一步不能再假装能跑, 否则就是骗人。 */
+  function showcaseRun() {
     var code = ($('#online-code').value || '').trim();
-    if (!/^\d{6}$/.test(code)) { FC.toast('基金代码必须是 6 位数字', 'err'); return; }
+    if (!/^\d{6}$/.test(code)) code = (gate1 && gate1.code) || '';
     var known = (HISTORY || []).some(function (r) { return r.code === code; });
-    if (!known) {
-      var hint = $('#probe-hint');
-      var codes = (HISTORY || []).map(function (r) { return r.code; }).join(' / ') || '—';
-      if (hint) hint.innerHTML = '展台只预置了 ' + codes + ' 的复盘结果；任意代码的完整流水线要在本机跑（<code>启动_基金复诊台.bat</code>）。';
-      FC.toast('展台没有 ' + code + ' 的预置结果', 'err');
+    var st = $('#gate1-status');
+    if (known) {
+      if (st) st.textContent = '';
+      log('这个部署里 ' + code + ' 有预置报告, 直接载入(区间以预置那次为准, 不重新采集)', 'ok');
+      FC.loadRun(code);
       return;
     }
-    /* loadRun 内部会 log("已载入 … 的历史结果") + 画"复盘完成"卡 + 切到报告视图 */
-    FC.loadRun(code);
+    var msg = '展台只做到探路: 六类来源采集 + 官方 PDF 逐行对账 + 五步模型这条流水线装不下(384MB 内存、30 分钟休眠)。' +
+      '要看 ' + code + ' 的完整报告, 请在本机运行 启动_基金复诊台.bat。';
+    if (st) st.innerHTML = '<span style="color:var(--warn)">没有预置报告</span> · ' + FC.esc(msg);
+    log('✗ ' + code + ' 没有预置报告 —— ' + msg, 'err');
+    FC.toast('展台没有 ' + code + ' 的完整报告（只做到探路）', 'err');
   }
 
   /** 有后端但能力不全(展台的 Python 薄后端): 能用哪些就说哪些, 用哪些就留哪些。 */
@@ -335,31 +330,25 @@ window.FC = window.FC || {};
     if (!caps.compare) document.body.classList.add('demo-no-compare');
     var ri = $('#rail-input');
     var hasBackend = !!(caps.ask || caps.compare);
-    /* 有后端(展台薄后端)时, 左栏「输入」照常露出来 —— 只是它的按钮改成"载入预置复盘":
-       这里没有采集流水线, 但"输 6 位代码 → 看那份复盘"这件事是真能做的, 界面不必假装没有输入。
-       纯静态(双击 HTML)那条路没有 /api, 这一段保持收起。 */
+    /* 有后端时, 左栏「输入」照常露出来, 并且真的能用: 探路打的是 /api/probe, 抓
+       概况 / 历任经理 / 报告期网格, 约 1~2 秒, 和主服务同一个返回形状 —— 所以按钮和上面
+       那行小字都保持原样("探路，起草口径 →" / "探路约 1 秒, 只抓元数据…")。
+       纯静态(双击 HTML)那条路没有 /api, 输入这块保持收起。 */
     if (hasBackend) {
       if (ri) ri.classList.remove('hidden');
-      var goBtn = $('#btn-online-probe');
-      if (goBtn && !goBtn.dataset.rewired) {
-        /* 复制节点顶掉旧的: 连带卸掉 initOnline 绑在上面的 FC.probe(那条路要爬数据, 这里没有) */
-        var go2 = goBtn.cloneNode(true);
-        go2.dataset.rewired = '1';
-        goBtn.parentNode.replaceChild(go2, goBtn);
-        go2.textContent = '载入这份复盘 →';
-        go2.addEventListener('click', function () { if (!go2.disabled) showcaseLoad(); });
+      /* 「开跑」在展台上没有流水线: 预置的那两只直接载入报告, 其它代码说明为什么跑不了。
+         用捕获阶段拦下来, 免得 FC.runOnline 去打一个不存在的 /api/run 再报 404。 */
+      if (!document.__fcRunGuard) {
+        document.__fcRunGuard = 1;
+        document.addEventListener('click', function (e) {
+          if (!online.showcase) return;
+          var b = e.target && e.target.closest ? e.target.closest('#btn-online-run') : null;
+          if (!b) return;
+          e.preventDefault();
+          e.stopPropagation();
+          showcaseRun();
+        }, true);
       }
-      var codeIn = $('#online-code');
-      if (codeIn && !codeIn.dataset.rewired) {
-        codeIn.dataset.rewired = '1';
-        codeIn.addEventListener('keydown', function (e) {
-          var btn = $('#btn-online-probe');
-          if (e.key === 'Enter' && btn && !btn.disabled) { e.preventDefault(); showcaseLoad(); }
-        });
-      }
-      /* 年份是"跑"的参数, 展台跑不了 → 置灰并说明, 不留一个点了没反应的控件 */
-      var yrs = $('#online-years');
-      if (yrs) { yrs.disabled = true; yrs.title = '展台用预置区间；年份只在本机跑时生效'; }
     } else if (ri) {
       ri.classList.add('hidden');
     }
@@ -419,7 +408,8 @@ window.FC = window.FC || {};
     var code = ($('#online-code').value || '').trim();
     if (!/^\d{6}$/.test(code)) { FC.toast('基金代码必须是 6 位数字', 'err'); return; }
     var keyVal = ($('#ai-key').value || '').trim();
-    if (!keyVal) { FC.toast('AI 模块为必选: 请先填写 API Key', 'err'); return; }
+    /* 展台的探路不调模型(只抓概况/经理/报告期), 没有 Key 也不该拦 */
+    if (!keyVal && !online.showcase) { FC.toast('AI 模块为必选: 请先填写 API Key', 'err'); return; }
 
     online.running = true; syncRunButton();
     $('#gate1-table').classList.add('hidden');

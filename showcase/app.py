@@ -23,6 +23,7 @@ from flask import Flask, jsonify, request, send_from_directory
 
 import asksvc
 import comparesvc
+import probesvc
 
 BASE = Path(__file__).resolve().parent
 STATIC = BASE / "static"
@@ -118,6 +119,26 @@ def result():
         "datasetMeta": _read(d / "datasetMeta.json"),
         "summary": _read(d / "summary.json"),
     })
+
+
+# ---------------------------------------------------------------- 探路
+@app.route("/api/probe", methods=["POST"])
+def probe():
+    """探路: 只抓元数据(概况 / 经理履历 / 报告期网格 / 候选区间), 不碰持仓与 PDF。
+    与主服务同形 —— 前端的 FC.probe 一行没改, 打的就是这个接口。"""
+    body = request.get_json(silent=True) or {}
+    code = re.sub(r"\D", "", str(body.get("code", "")))[:6]
+    if not re.fullmatch(r"\d{6}", code):
+        return jsonify({"ok": False, "error": "基金代码必须是 6 位数字"}), 400
+    try:
+        years = int(body.get("years") or 10)
+    except Exception:
+        years = 10
+    try:
+        p = probesvc.probe_fund(code, years)
+    except Exception as e:
+        return jsonify({"ok": False, "error": "探路失败: %s" % e}), 502
+    return jsonify({"ok": True, "probe": p})
 
 
 # ---------------------------------------------------------------- 问一句

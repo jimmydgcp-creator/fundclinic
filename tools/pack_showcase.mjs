@@ -133,14 +133,14 @@ function copyTree(src, dst) {
     fs.copyFileSync(src, dst);
   }
 }
-for (const name of ['deploy.json', 'app.py', 'asksvc.py', 'comparesvc.py', 'requirements.txt', 'static', 'data']) {
+for (const name of ['deploy.json', 'app.py', 'asksvc.py', 'comparesvc.py', 'probesvc.py', 'requirements.txt', 'static', 'data']) {
   const s = path.join(SHOW, name);
   if (!fs.existsSync(s)) continue;
   copyTree(s, path.join(TMP, name));
 }
 fs.rmSync(OUT_ZIP, { force: true });
 /* 显式列文件而不是打 "." —— 打 "." 会让条目带上 "./" 前缀, 展台要求 deploy.json 在最外层 */
-const FILES = ['deploy.json', 'app.py', 'asksvc.py', 'comparesvc.py', 'requirements.txt', 'static', 'data']
+const FILES = ['deploy.json', 'app.py', 'asksvc.py', 'comparesvc.py', 'probesvc.py', 'requirements.txt', 'static', 'data']
   .filter(n => fs.existsSync(path.join(TMP, n)));
 execFileSync('tar', ['-a', '-c', '-f', OUT_ZIP, ...FILES], { cwd: TMP, stdio: ['ignore', 'inherit', 'inherit'] });
 fs.rmSync(TMP, { recursive: true, force: true });
